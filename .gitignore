@@ -24,3 +24,7 @@ config/Secrets.h
 
 # Working archives
 *.zip
+
+# Python bytecode
+__pycache__/
+*.pyc
