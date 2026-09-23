@@ -1,0 +1,209 @@
+#!/usr/bin/env python3
+"""Independent CRC reference model used to generate and audit the Crc unit tests.
+
+The C implementation in ``src/services/Crc`` must never be validated against
+itself.  This script is a from-scratch bit-at-a-time model of each CRC profile
+required by AUTOSAR SWS_CRCLibrary.  It first proves itself against the published
+``check`` value of each profile -- the CRC of the ASCII string ``"123456789"``,
+which is the catalogue constant every CRC catalogue (and the AUTOSAR SWS) agrees
+on -- and only then emits the vector table that the C tests assert against.
+
+Run with no arguments to self-check and print the generated C table::
+
+    python tools/crc_reference.py            # self-check + emit C table
+    python tools/crc_reference.py --check    # self-check only, exit non-zero on drift
+
+Copyright (c) 2024-2026 Abdullah Shabbir. All rights reserved.
+"""
+
+from __future__ import annotations
+
+import argparse
+import sys
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True)
+class Profile:
+    """A fully-parameterised CRC definition (Rocksoft/Williams model)."""
+
+    name: str        # AUTOSAR API suffix, e.g. "CRC16"
+    width: int       # register width in bits
+    poly: int        # generator polynomial, non-reflected (MSB-first) form
+    init: int        # initial register value
+    refin: bool      # reflect each input byte before processing
+    refout: bool     # reflect the final register
+    xorout: int      # value XORed into the final register
+    check: int       # published CRC of b"123456789"
+    c_type: str      # C return type used by the AUTOSAR API
+
+
+# The six profiles mandated by SWS_CRCLibrary, plus CRC16-ARC which the AUTOSAR
+# library also publishes.  `check` values are the catalogue constants and are the
+# only numbers in this file taken on trust; everything else is derived.
+PROFILES = [
+    Profile("CRC8",     8,  0x1D,       0xFF,       False, False, 0xFF,       0x4B,       "uint8"),
+    Profile("CRC8H2F",  8,  0x2F,       0xFF,       False, False, 0xFF,       0xDF,       "uint8"),
+    Profile("CRC16",    16, 0x1021,     0xFFFF,     False, False, 0x0000,     0x29B1,     "uint16"),
+    Profile("CRC16ARC", 16, 0x8005,     0x0000,     True,  True,  0x0000,     0xBB3D,     "uint16"),
+    Profile("CRC32",    32, 0x04C11DB7, 0xFFFFFFFF, True,  True,  0xFFFFFFFF, 0xCBF43926, "uint32"),
+    Profile("CRC32P4",  32, 0xF4ACFB13, 0xFFFFFFFF, True,  True,  0xFFFFFFFF, 0x1697D06A, "uint32"),
+]
+
+
+def _reflect(value: int, width: int) -> int:
+    """Reverse the bit order of the low ``width`` bits of ``value``."""
+    out = 0
+    for _ in range(width):
+        out = (out << 1) | (value & 1)
+        value >>= 1
+    return out
+
+
+def crc(profile: Profile, data: bytes) -> int:
+    """Compute ``profile``'s CRC over ``data`` one bit at a time.
+
+    Deliberately the slowest possible formulation: it mirrors the textbook
+    definition so that a disagreement with the C code points at the C code.
+    """
+    top_bit = 1 << (profile.width - 1)
+    mask = (1 << profile.width) - 1
+
+    reg = profile.init
+    for byte in data:
+        octet = _reflect(byte, 8) if profile.refin else byte
+        reg ^= (octet << (profile.width - 8)) & mask
+        for _ in range(8):
+            if reg & top_bit:
+                reg = ((reg << 1) ^ profile.poly) & mask
+            else:
+                reg = (reg << 1) & mask
+
+    if profile.refout:
+        reg = _reflect(reg, profile.width)
+    return (reg ^ profile.xorout) & mask
+
+
+# Test payloads.  The first seven are the sequences tabulated in SWS_CRCLibrary;
+# the remainder exercise boundaries that the AUTOSAR table does not cover.
+VECTORS: list[tuple[str, bytes]] = [
+    ("zeros4",     bytes([0x00, 0x00, 0x00, 0x00])),
+    ("f20183",     bytes([0xF2, 0x01, 0x83])),
+    ("0faa0055",   bytes([0x0F, 0xAA, 0x00, 0x55])),
+    ("00ff5511",   bytes([0x00, 0xFF, 0x55, 0x11])),
+    ("mixed9",     bytes([0x33, 0x22, 0x55, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF])),
+    ("926b55",     bytes([0x92, 0x6B, 0x55])),
+    ("ones4",      bytes([0xFF, 0xFF, 0xFF, 0xFF])),
+    ("ascii123456789", b"123456789"),
+    ("single00",   bytes([0x00])),
+    ("singleff",   bytes([0xFF])),
+    ("len255",     bytes(range(256))[:255]),
+]
+
+
+def self_check() -> bool:
+    """Verify every profile reproduces its published ``check`` constant."""
+    ok = True
+    for profile in PROFILES:
+        got = crc(profile, b"123456789")
+        status = "ok" if got == profile.check else "MISMATCH"
+        if got != profile.check:
+            ok = False
+        print(
+            f"  {profile.name:<9} check=0x{profile.check:0{profile.width // 4}X} "
+            f"computed=0x{got:0{profile.width // 4}X}  [{status}]"
+        )
+    return ok
+
+
+def emit_c_table() -> str:
+    """Render the generated vectors as a C array for test_crc/test_crc.c."""
+    lines = [
+        "/* GENERATED by tools/crc_reference.py -- do not edit by hand.",
+        " * Regenerate with:  python tools/crc_reference.py --emit > /dev/null",
+        " * Every expected value below was produced by an independent bit-at-a-time",
+        " * model that reproduces the published check constant of each profile. */",
+        "",
+        "typedef struct",
+        "{",
+        "    const char *name;",
+        "    const uint8 data[256];",
+        "    uint32 length;",
+        "    uint8 expCrc8;",
+        "    uint8 expCrc8H2F;",
+        "    uint16 expCrc16;",
+        "    uint16 expCrc16Arc;",
+        "    uint32 expCrc32;",
+        "    uint32 expCrc32P4;",
+        "} Crc_TestVectorType;",
+        "",
+        "static const Crc_TestVectorType Crc_TestVectors[] = {",
+    ]
+
+    by_name = {p.name: p for p in PROFILES}
+    for name, data in VECTORS:
+        payload = ", ".join(f"0x{b:02X}u" for b in data)
+        lines.append("    {")
+        lines.append(f'        "{name}",')
+        lines.append(f"        {{{payload}}},")
+        lines.append(f"        {len(data)}u,")
+        lines.append(f"        0x{crc(by_name['CRC8'], data):02X}u,")
+        lines.append(f"        0x{crc(by_name['CRC8H2F'], data):02X}u,")
+        lines.append(f"        0x{crc(by_name['CRC16'], data):04X}u,")
+        lines.append(f"        0x{crc(by_name['CRC16ARC'], data):04X}u,")
+        lines.append(f"        0x{crc(by_name['CRC32'], data):08X}u,")
+        lines.append(f"        0x{crc(by_name['CRC32P4'], data):08X}u,")
+        lines.append("    },")
+
+    lines.append("};")
+    lines.append("")
+    lines.append(
+        f"#define CRC_TEST_VECTOR_COUNT {len(VECTORS)}u"
+    )
+    return "\n".join(lines)
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="only run the self-check; exit 1 if any profile drifts",
+    )
+    parser.add_argument(
+        "--emit",
+        action="store_true",
+        help="write the generated C vector table to test/support/Crc_TestVectors.h",
+    )
+    args = parser.parse_args()
+
+    print("CRC reference self-check (payload = \"123456789\"):")
+    if not self_check():
+        print("\nFAIL: a profile does not reproduce its published check value.", file=sys.stderr)
+        return 1
+    print("All profiles reproduce their published check value.\n")
+
+    if args.check:
+        return 0
+
+    table = emit_c_table()
+    if args.emit:
+        header = (
+            "/**\n"
+            " * @file    Crc_TestVectors.h\n"
+            " * @brief   Generated CRC test vectors (see tools/crc_reference.py).\n"
+            " */\n"
+            "#ifndef CRC_TESTVECTORS_H\n"
+            "#define CRC_TESTVECTORS_H\n"
+            '#include "Std_Types.h"\n\n'
+        )
+        with open("test/support/Crc_TestVectors.h", "w", encoding="utf-8", newline="\n") as fh:
+            fh.write(header + table + "\n\n#endif /* CRC_TESTVECTORS_H */\n")
+        print("Wrote test/support/Crc_TestVectors.h")
+    else:
+        print(table)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
