@@ -34,9 +34,9 @@
 #ifndef NETIF_H
 #define NETIF_H
 
-#include "Autosar_ModuleIds.h"
-#include "NetIf_Cfg.h"
-#include "Std_Types.h"
+#include "base/Autosar_ModuleIds.h"
+#include "ecuabs/NetIf/NetIf_Cfg.h"
+#include "base/Std_Types.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -134,6 +134,22 @@ CHECK_RETURN Std_ReturnType NetIf_ReleaseBearer(void);
 
 /** TRUE if a broker session is established and a publish would be attempted. */
 boolean NetIf_IsSessionUp(void);
+
+/**
+ * @brief Whether @p bearer currently has a usable link, regardless of which bearer is in use.
+ *
+ * ComM needs this to decide whether returning to a preferred bearer is even possible, and it must be
+ * answerable about a bearer that is *not* the active one -- which ::NetIf_GetStatus cannot do, since it
+ * reports the active bearer only.
+ *
+ * Without it, arbitration has to guess. An earlier revision of ComM used the WiFi failure count as a
+ * proxy for "WiFi might be back", which made the fallback to cellular permanent for the life of the
+ * run: the count reaches its limit because WiFi failed, and nothing clears it while cellular works.
+ *
+ * @return TRUE if @p bearer is associated and addressable. FALSE for ::NETIF_BEARER_NONE, for a bearer
+ *         this build has switched off, and for one that is merely associated without an address.
+ */
+boolean NetIf_BearerAvailable(NetIf_BearerType bearer);
 
 /** The bearer currently carrying traffic, or ::NETIF_BEARER_NONE. */
 NetIf_BearerType NetIf_GetActiveBearer(void);

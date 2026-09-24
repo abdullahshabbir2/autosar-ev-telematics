@@ -7,15 +7,15 @@
  * SPDX-License-Identifier: Proprietary
  */
 
-#include "NetIf.h"
+#include "ecuabs/NetIf/NetIf.h"
 
 #include <string.h>
 
-#include "Dem.h"
-#include "Det.h"
-#include "Gpt.h"
-#include "NetIf_Platform.h"
-#include "NvM.h"
+#include "services/Dem/Dem.h"
+#include "services/Det/Det.h"
+#include "mcal/Gpt/Gpt.h"
+#include "ecuabs/NetIf/NetIf_Platform.h"
+#include "services/NvM/NvM.h"
 
 /*==================================================================================================
  *  Local data
@@ -330,6 +330,19 @@ Std_ReturnType NetIf_ReleaseBearer(void)
     NetIf_EnterState(NETIF_STATE_DOWN);
 
     return E_OK;
+}
+
+boolean NetIf_BearerAvailable(NetIf_BearerType bearer)
+{
+    if (NetIf_Initialised == FALSE)
+    {
+        return FALSE;
+    }
+
+    /* Deliberately the same predicate the state machine uses on the active bearer, so arbitration and
+     * operation cannot disagree about what "available" means -- the sort of divergence that makes a
+     * unit switch to a bearer it then cannot use. */
+    return NetIf_BearerIsUp(bearer);
 }
 
 boolean NetIf_IsSessionUp(void)

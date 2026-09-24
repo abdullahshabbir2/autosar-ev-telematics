@@ -10,8 +10,8 @@
 #ifndef COMM_CFG_H
 #define COMM_CFG_H
 
-#include "NetIf_Cfg.h"
-#include "Std_Types.h"
+#include "ecuabs/NetIf/NetIf_Cfg.h"
+#include "base/Std_Types.h"
 
 #define COMM_DEV_ERROR_DETECT STD_ON
 
@@ -24,15 +24,6 @@
  */
 #define COMM_FAILURE_LIMIT 3u
 
-/**
- * @brief Continuous WiFi availability required before switching back to it, in milliseconds.
- *
- * 30 s. This is the hysteresis that stops a vehicle parked at the edge of WiFi range from oscillating
- * between bearers. Each switch drops the broker session and costs tens of seconds of modem attach time,
- * so an oscillating unit never holds a session long enough to transfer anything -- it looks connected
- * and delivers nothing.
- */
-#define COMM_WIFI_STABLE_MS 30000uL
 
 /**
  * @brief Interval between arbitration decisions, in milliseconds.
@@ -49,6 +40,26 @@
  * at all, however, is when records start accumulating on the card faster than they leave.
  */
 #define COMM_NO_BEARER_REPORT_MS 600000uL
+
+/**
+ * @brief How long to stay on a fallback bearer before giving the preferred one another chance, in ms.
+ *
+ * 600 000 -- ten minutes. Without this the fallback is permanent for the life of the run: the failure
+ * count that triggered it is only cleared by Init, by both bearers being exhausted, or by the preferred
+ * bearer carrying traffic -- and the last of those cannot happen while the fallback holds. A vehicle
+ * that failed WiFi on the way out of its depot would pay for cellular data beside a healthy access
+ * point all day.
+ *
+ * Ten minutes is chosen against what it costs to be wrong in each direction. Too short and a vehicle
+ * genuinely out of WiFi range spends a slice of every interval attempting it, which on the acquisition
+ * side is only a few seconds of a bearer being brought up; too long and a vehicle that has returned to
+ * coverage keeps paying for cellular. Ten minutes is short against a working day and long against the
+ * few seconds an attempt costs.
+ *
+ * Note this restores the *allowance*, not the bearer: the ordinary attempt-and-fail cycle still applies,
+ * so a preferred bearer that is still absent simply falls back again.
+ */
+#define COMM_PREFERRED_RETRY_MS 600000uL
 
 /**
  * @brief Whether WiFi is preferred over GPRS when both are available.

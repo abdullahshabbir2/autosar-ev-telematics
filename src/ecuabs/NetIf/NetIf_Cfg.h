@@ -10,8 +10,8 @@
 #ifndef NETIF_CFG_H
 #define NETIF_CFG_H
 
-#include "Com_Cfg.h"
-#include "Std_Types.h"
+#include "services/Com/Com_Cfg.h"
+#include "base/Std_Types.h"
 
 #define NETIF_DEV_ERROR_DETECT STD_ON
 

@@ -7,13 +7,13 @@
  * SPDX-License-Identifier: Proprietary
  */
 
-#include "ComM.h"
+#include "services/ComM/ComM.h"
 
 #include <string.h>
 
-#include "Dem.h"
-#include "Det.h"
-#include "Gpt.h"
+#include "services/Dem/Dem.h"
+#include "services/Det/Det.h"
+#include "mcal/Gpt/Gpt.h"
 
 /*==================================================================================================
  *  Local data
@@ -25,9 +25,13 @@ STATIC ComM_StatusType ComM_Status;
 /** When the current bearer attempt began, for failure detection. */
 STATIC Gpt_TimestampType ComM_AttemptStartedMs;
 
-/** When WiFi was first seen continuously available, for the switch-back hysteresis. */
-STATIC Gpt_TimestampType ComM_WifiStableSinceMs;
-STATIC boolean ComM_WifiStableTimerRunning;
+/**
+ * @brief When the current stay on a fallback bearer began.
+ *
+ * Reset whenever the preferred bearer is the active one, so the retry interval measures time spent
+ * *away* from it rather than time since boot.
+ */
+STATIC Gpt_TimestampType ComM_FallbackSinceMs;
 
 /** When the ECU last had any bearer at all, for the no-backhaul event. */
 STATIC Gpt_TimestampType ComM_LastBearerUpMs;
@@ -104,8 +108,6 @@ Std_ReturnType ComM_Init(void)
     ComM_Status.activeBearer = NETIF_BEARER_NONE;
     ComM_AttemptStartedMs = Gpt_GetMonotonicMs();
     ComM_LastBearerUpMs = Gpt_GetMonotonicMs();
-    ComM_WifiStableSinceMs = 0u;
-    ComM_WifiStableTimerRunning = FALSE;
     ComM_Initialised = TRUE;
 
     return E_OK;
@@ -137,6 +139,7 @@ Std_ReturnType ComM_RequestMode(ComM_ModeType mode)
     ComM_Status.gsmFailures = 0u;
     ComM_Status.preferredBearer = ComM_ChooseBearer();
     ComM_AttemptStartedMs = Gpt_GetMonotonicMs();
+    ComM_FallbackSinceMs = ComM_AttemptStartedMs;
 
     return NetIf_RequestBearer(ComM_Status.preferredBearer);
 }
@@ -193,35 +196,48 @@ void ComM_MainFunction(void)
                                        DEM_EVENT_STATUS_PASSED));
 
 #if (COMM_PREFER_WIFI == STD_ON)
-        /* Running on GPRS while WiFi has become available: switch back, but only after WiFi has been
-         * continuously available for the hysteresis interval. Switching on the first sight of an access
-         * point is what makes a vehicle at the edge of range oscillate. */
-        if (ComM_Status.preferredBearer == NETIF_BEARER_GSM)
+        if (ComM_Status.preferredBearer != NETIF_BEARER_WIFI)
         {
-            if (ComM_Status.wifiFailures < (uint16)COMM_FAILURE_LIMIT)
+            /* Running on the fallback bearer. After COMM_PREFERRED_RETRY_MS the preferred bearer's
+             * allowance is restored, so it is selected again and tried in the ordinary way.
+             *
+             * This is what stops the fallback being permanent. The failure count that caused it is
+             * cleared only by Init, by both bearers being exhausted inside ComM_ChooseBearer -- which is
+             * not reached while a session is up -- or by the preferred bearer carrying traffic, which
+             * cannot happen while it is not being attempted. Without a decay, a vehicle that failed WiFi
+             * on the way out of its depot pays for cellular beside a healthy access point all day, every
+             * day, until someone power-cycles it.
+             *
+             * Deliberately a timed retry rather than an availability query. An 802.11 station has no
+             * usable link until it has been told to associate, so "is WiFi back" is unanswerable about a
+             * radio that is not in use -- the honest form of that question is an attempt. A NetIf query
+             * that reported FALSE for every unused bearer would have looked like a fix and changed
+             * nothing.
+             *
+             * What is restored is the allowance, not the bearer: ComM_ChooseBearer then picks WiFi, the
+             * ordinary attempt-and-fail cycle applies, and a WiFi that is still absent falls back again.
+             * The cost of being wrong is therefore bounded at one attempt window per retry interval,
+             * which is also what makes a separate switch-back hysteresis unnecessary: a marginal link
+             * cannot oscillate faster than once per COMM_PREFERRED_RETRY_MS however it behaves. */
+            if (Gpt_HasElapsed(ComM_FallbackSinceMs, COMM_PREFERRED_RETRY_MS) != FALSE)
             {
-                if (ComM_WifiStableTimerRunning == FALSE)
+                ComM_Status.wifiFailures = 0u;
+                ComM_FallbackSinceMs = Gpt_GetMonotonicMs();
+                ComM_Status.preferredBearer = ComM_ChooseBearer();
+
+                if (ComM_Status.preferredBearer != netStatus.activeBearer)
                 {
-                    ComM_WifiStableSinceMs = Gpt_GetMonotonicMs();
-                    ComM_WifiStableTimerRunning = TRUE;
-                }
-                else if (Gpt_HasElapsed(ComM_WifiStableSinceMs, COMM_WIFI_STABLE_MS) != FALSE)
-                {
-                    ComM_Status.preferredBearer = NETIF_BEARER_WIFI;
                     ComM_Status.bearerSwitchCount++;
-                    ComM_WifiStableTimerRunning = FALSE;
                     ComM_AttemptStartedMs = Gpt_GetMonotonicMs();
-                    STD_DISCARD(NetIf_RequestBearer(NETIF_BEARER_WIFI));
-                }
-                else
-                {
-                    /* Still waiting out the hysteresis. */
+                    STD_DISCARD(NetIf_RequestBearer(ComM_Status.preferredBearer));
                 }
             }
-            else
-            {
-                ComM_WifiStableTimerRunning = FALSE;
-            }
+        }
+        else
+        {
+            /* On the preferred bearer, so the retry interval -- which measures time spent away from it --
+             * restarts from here. */
+            ComM_FallbackSinceMs = Gpt_GetMonotonicMs();
         }
 #endif
         return;
@@ -246,7 +262,10 @@ void ComM_MainFunction(void)
         {
             ComM_Status.preferredBearer = next;
             ComM_Status.bearerSwitchCount++;
-            ComM_WifiStableTimerRunning = FALSE;
+            /* A switch away from the preferred bearer starts the clock on the retry that will bring it
+             * back, so the ten minutes are measured from the moment of the fallback rather than from
+             * whenever the next session happens to come up. */
+            ComM_FallbackSinceMs = Gpt_GetMonotonicMs();
             STD_DISCARD(NetIf_RequestBearer(next));
         }
         /* If the choice is unchanged, NetIf's own backoff is already retrying it; requesting the same

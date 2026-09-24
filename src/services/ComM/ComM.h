@@ -36,10 +36,10 @@
 #ifndef COMM_H
 #define COMM_H
 
-#include "Autosar_ModuleIds.h"
-#include "ComM_Cfg.h"
-#include "NetIf.h"
-#include "Std_Types.h"
+#include "base/Autosar_ModuleIds.h"
+#include "services/ComM/ComM_Cfg.h"
+#include "ecuabs/NetIf/NetIf.h"
+#include "base/Std_Types.h"
 
 #ifdef __cplusplus
 extern "C" {
