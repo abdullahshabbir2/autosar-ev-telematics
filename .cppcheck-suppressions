@@ -1,0 +1,31 @@
+# cppcheck suppressions.
+#
+# Copyright (c) 2024-2026 Abdullah Shabbir. All rights reserved.
+#
+# Each entry says why the finding is not a defect here. A suppression without a reason is
+# indistinguishable from one added to make the build pass, so none are added without one.
+
+# Modules expose more API than any single build uses -- Crc implements all six AUTOSAR profiles
+# because a partial implementation of a standard interface invites a second, untested one beside it.
+# cppcheck cannot see that the unused half is deliberate.
+unusedFunction
+
+# Every module has _Cfg.h values that are configuration rather than code: a future build variant,
+# or a bound documented for the reader. Removing one because this variant does not reference it
+# loses the documentation with it.
+unusedStructMember
+
+# The MCAL converts integers to pointers for register access. Unavoidable at the hardware boundary
+# and confined to the platform leaves, which this analysis does not cover anyway.
+*:src/mcal/*_Esp32.cpp
+
+# cppcheck cannot resolve the Arduino and ESP-IDF headers without the whole framework include tree,
+# so every platform leaf reports a cascade of syntax errors that say nothing about this code.
+*:src/*/*_Esp32.cpp
+
+# Test support deliberately does things production code must not: abort() on a harness misuse,
+# module-static state that persists between calls, fault injection that writes behind a driver.
+*:test/support/*
+
+# Unity's own macros expand to constructs cppcheck flags. Not our code.
+*:*unity*

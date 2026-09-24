@@ -1,0 +1,288 @@
+# Continuous integration.
+#
+# Copyright (c) 2024-2026 Abdullah Shabbir. All rights reserved.
+#
+# Six jobs. The first two are the ones that would actually have caught defects in this project's
+# history, so they run first and the rest depend on nothing.
+#
+#   host-tests      150 tests, -Werror, on Linux -- where the filesystem is case-sensitive
+#   firmware-build  the target image, and its size against the partition budget
+#   generators      the CRC and RS485 reference models still agree with the committed vectors
+#   static-analysis cppcheck with a MISRA-informed rule set
+#   format          clang-format, checked not applied
+#   docs            Doxygen with warnings as errors, plus link and secret checks
+#
+# Why Linux matters for the first two: the development machine is Windows, whose filesystem is
+# case-insensitive. v1 contained `#include "webServer.h"` where the actual file is `WebServer.h` --
+# it built on Windows for the life of the product and would have failed immediately here. The same
+# class of hazard is why this project's includes are layer-qualified; see platformio.ini.
+
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  # One run per ref. A force-push supersedes the run it replaced rather than queueing behind it.
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ================================================================================================
+  host-tests:
+    name: Host tests (150 tests, -Werror)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Cache Unity
+        uses: actions/cache@v4
+        with:
+          path: ~/.platformio/lib
+          key: unity-${{ runner.os }}-v1
+
+      - name: Fetch Unity
+        run: |
+          set -euo pipefail
+          DEST="$HOME/.platformio/lib/Unity"
+          if [ ! -d "$DEST/src" ]; then
+            mkdir -p "$(dirname "$DEST")"
+            git clone --depth 1 --branch v2.6.1 https://github.com/ThrowTheSwitch/Unity.git "$DEST"
+          fi
+          test -f "$DEST/src/unity.c"
+
+      - name: Regenerate test vectors and fail on any drift
+        run: |
+          set -euo pipefail
+          # The generators self-check against published CRC check values before emitting anything, so
+          # this also verifies the reference models. A diff here means either a generator changed or a
+          # committed vector was hand-edited -- both need a human to look.
+          python tools/crc_reference.py
+          python tools/rs485_reference.py
+          git diff --exit-code -- test/support/Crc_TestVectors.h test/support/Rs485_TestVectors.h
+
+      - name: Run every suite
+        run: python tools/run_native_tests.py
+
+      - name: Confirm no platform dependency leaked above the MCAL
+        run: |
+          set -euo pipefail
+          # The test runner links every src/**/*.c into every suite, so a leak is already a link
+          # error and the step above would have failed. This is the belt-and-braces check: no
+          # platform-independent source may name an Arduino or ESP-IDF symbol at all.
+          if grep -rn --include='*.c' -E '\b(Arduino|esp_[a-z_]+|xTask|vTask|digitalWrite|analogRead|millis)\b' src/; then
+            echo "::error::A platform symbol appears in a platform-independent source."
+            exit 1
+          fi
+          echo "No platform symbols in any .c file."
+
+  # ================================================================================================
+  firmware-build:
+    name: Firmware build and size budget
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # build_version.py runs `git describe`, which needs tags and history.
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Cache PlatformIO
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.platformio/.cache
+            ~/.platformio/packages
+            ~/.platformio/platforms
+          key: pio-${{ runner.os }}-${{ hashFiles('platformio.ini') }}
+
+      - name: Install PlatformIO
+        run: pip install --upgrade platformio
+
+      - name: Provide placeholder credentials
+        run: |
+          set -euo pipefail
+          # The template, unmodified. CI builds the image to prove it compiles and links; it never
+          # needs a working credential, and putting a real one in a CI secret would put it in the
+          # build log's environment for no benefit.
+          cp config/Secrets.h.template config/Secrets.h
+
+      - name: Build
+        run: pio run -e esp32doit-devkit-v1
+
+      - name: Check the image against its partition budget
+        run: |
+          set -euo pipefail
+          IMG=.pio/build/esp32doit-devkit-v1/firmware.bin
+          SIZE=$(stat -c%s "$IMG")
+          # 0x1E0000 = 1966080, the app0/app1 slot size in partitions/odo_partitions.csv. Both slots
+          # must hold the image or A/B OTA cannot roll back, which is the whole point of the layout.
+          BUDGET=1966080
+          PCT=$(( SIZE * 100 / BUDGET ))
+          echo "firmware.bin: $SIZE bytes, ${PCT}% of the ${BUDGET}-byte OTA slot"
+          if [ "$SIZE" -gt "$BUDGET" ]; then
+            echo "::error::Image exceeds the OTA slot. A/B update is impossible at this size."
+            exit 1
+          fi
+          # A warning well before the hard limit, because the slot filling up is discovered at the
+          # worst possible moment otherwise -- when an update is needed and will not fit.
+          if [ "$PCT" -gt 85 ]; then
+            echo "::warning::Image is at ${PCT}% of the OTA slot. Review before it reaches 100%."
+          fi
+          echo "## Firmware size" >> "$GITHUB_STEP_SUMMARY"
+          echo "\`$SIZE\` bytes — ${PCT}% of the ${BUDGET}-byte OTA slot." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Validate the partition table arithmetic
+        run: python tools/check_partitions.py
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: firmware
+          path: |
+            .pio/build/esp32doit-devkit-v1/firmware.bin
+            .pio/build/esp32doit-devkit-v1/firmware.elf
+          retention-days: 14
+
+  # ================================================================================================
+  static-analysis:
+    name: Static analysis (cppcheck)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install cppcheck
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y cppcheck
+
+      - name: Analyse the platform-independent sources
+        run: |
+          set -euo pipefail
+          # Only the .c files. The platform leaves pull in the Arduino core, which cppcheck cannot
+          # parse usefully without the whole framework include tree -- and the result would be pages
+          # of findings in code this project does not own, which is how a static analysis gate stops
+          # being read.
+          cppcheck \
+            --enable=warning,style,performance,portability \
+            --inline-suppr \
+            --std=c11 \
+            --platform=unix32 \
+            --error-exitcode=1 \
+            --suppressions-list=.cppcheck-suppressions \
+            -I src -I config \
+            $(find src -name '*.c') \
+            2>&1 | tee cppcheck.log
+      - name: Report
+        if: always()
+        run: |
+          if [ -s cppcheck.log ]; then
+            { echo "## cppcheck"; echo '```'; cat cppcheck.log; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+  # ================================================================================================
+  format:
+    name: Formatting (clang-format)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install clang-format
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y clang-format
+
+      - name: Check, do not apply
+        run: |
+          set -euo pipefail
+          # --dry-run --Werror rather than rewriting the tree: a formatting job that commits back to
+          # the branch makes every review diff include changes nobody wrote, and makes it impossible
+          # to tell a formatting commit from a real one.
+          find src config test -name '*.c' -o -name '*.h' -o -name '*.cpp' \
+            | xargs clang-format --dry-run --Werror --style=file
+
+  # ================================================================================================
+  docs:
+    name: Documentation and hygiene
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install doxygen
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y doxygen graphviz
+
+      - name: Build the API documentation, warnings as errors
+        run: |
+          set -euo pipefail
+          # WARN_AS_ERROR catches an @param naming an argument that no longer exists, a @ref to a
+          # renamed symbol, and an undocumented public function. All three are the ways documentation
+          # rots without anyone noticing it has.
+          doxygen Doxyfile 2>&1 | tee doxygen.log
+          if grep -qE '^.*(warning|error):' doxygen.log; then
+            echo "::error::Doxygen reported warnings. See the log above."
+            exit 1
+          fi
+
+      - name: Check every internal documentation link resolves
+        run: python tools/check_doc_links.py
+
+      - name: Check no credential is committed
+        run: |
+          set -euo pipefail
+          # A narrow check on purpose. A broad secret scanner on a repository that documents v1's
+          # leaked credentials as a case study produces findings on the documentation itself, and a
+          # gate that always fires is a gate that gets bypassed.
+          if git ls-files | grep -qx 'config/Secrets.h'; then
+            echo "::error::config/Secrets.h is tracked. It must stay git-ignored."
+            exit 1
+          fi
+          # Assignment of a non-placeholder literal to a credential macro, in committed source only.
+          if git grep -nE '#define\s+SECRETS_[A-Z_]*(PASSWORD|AUTH|TOKEN|KEY|SECRET)\s+"' \
+               -- 'config/*' 'src/*' \
+             | grep -vE 'REPLACE_ME|""|\.template'; then
+            echo "::error::A credential literal appears in committed source."
+            exit 1
+          fi
+          echo "No committed credentials."
+
+  # ================================================================================================
+  summary:
+    name: CI summary
+    runs-on: ubuntu-latest
+    needs: [host-tests, firmware-build, static-analysis, format, docs]
+    if: always()
+    steps:
+      - name: Fail if any required job did not succeed
+        run: |
+          set -euo pipefail
+          # `needs.*.result` is checked explicitly because a skipped or cancelled job is not a pass,
+          # and a summary job that only checks for 'failure' treats it as one.
+          for r in "${{ needs.host-tests.result }}" \
+                   "${{ needs.firmware-build.result }}" \
+                   "${{ needs.static-analysis.result }}" \
+                   "${{ needs.format.result }}" \
+                   "${{ needs.docs.result }}"; do
+            if [ "$r" != "success" ]; then
+              echo "::error::A required job reported '$r'."
+              exit 1
+            fi
+          done
+          echo "All required jobs passed."
