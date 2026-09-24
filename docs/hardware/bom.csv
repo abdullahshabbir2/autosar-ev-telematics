@@ -1,0 +1,38 @@
+# Bill of materials - Odometer ECU
+# Copyright (c) 2024-2026 Abdullah Shabbir. All rights reserved.
+#
+# One row per distinct part. The Notes column carries the constraint that matters when substituting;
+# where a row says "do not substitute", the reason is in docs/07-hardware.md.
+#
+RefDes,Qty,Description,Value/Part,Package,Notes
+U1,1,MCU module,ESP32-WROOM-32 (4 MiB flash),SMD module,"GPIO6-11 unusable (internal flash). GPIO12 must stay unconnected - see conflict 4."
+U2,1,RS485 transceiver,MAX3485ESA,SO-8,"3.3 V part. MAX485 is 5 V only and will not work on this rail."
+U3,1,GSM/GPRS modem,SIM800L,Module,"Needs 5 V at 2 A peak and >=1000 uF local bulk. See note 3."
+U4,1,GNSS receiver,NEO-6M,Module,"Must stay in default NMEA 9600 mode. Firmware reads it on a software UART and cannot reconfigure it."
+U5,1,Real-time clock,DS3231SN,SO-16,"Requires backup cell. Module charging circuit differs for CR2032 vs LIR2032 - check before substituting."
+U6,1,CAN controller,MCP2515-I/SO,SO-18,"8 MHz crystal. SPI at 10 MHz max on a short trace; drop to 4 MHz on a flying lead."
+U7,1,CAN transceiver,TJA1050T,SO-8,"5 V part; logic side is 3.3 V tolerant."
+U8,1,Buck converter,MP1584EN or equivalent,Module,"5 V output, 2 A continuous - not 2 A peak. The modem is the constraint."
+U9,2,Level shifter,BSS138 + 10k,SOT-23,"GSM_TX 3.3 V -> 2.8 V. SIM800L RXD is not 3.3 V tolerant."
+J1,1,microSD socket,Push-pull,SMD,—
+J2,1,Vehicle connector,4-way sealed,—,"12 V, GND, CANH, CANL"
+J3,1,Battery bus connector,2-way sealed,—,"RS485 A/B"
+Y1,1,Crystal,8.000 MHz,HC-49S,"MCP2515 reference. 8 MHz is assumed by the bit-timing registers in Can_Cfg.h."
+R1,1,Divider upper,100k 1%,0805,"VBATT sense. 1% because per-unit calibration corrects the rest."
+R2,1,Divider lower,10k 1%,0805,VBATT sense
+R3,2,RS485 termination,120R 1%,0805,"One at each end of the pair, not one per node."
+R4,2,CAN termination,120R 1%,0805,"One at each end of the bus."
+R5,2,I2C pull-up,4k7,0805,"DS3231 SDA/SCL. External - GPIO21/22 have no usable internal pull-up at this speed."
+R6,1,CAN_INT pull-up,10k,0805,"External because GPIO35 has no internal pull-up. MCP2515 /INT is open drain."
+R7,5,LED series,1k,0805,Indicators
+C1,1,Modem bulk,1000uF 10V low-ESR,Radial,"Do not substitute a standard electrolytic. ESR is the specification that matters here."
+C2,1,Modem local,100nF,0805,At the SIM800L supply pins
+C3,6,Decoupling,100nF,0805,One per IC
+C4,2,Bulk,10uF,0805,5 V and 3V3 rails
+D1,1,LED green,—,0805,ACQ - record acquired
+D2,1,LED yellow,—,0805,STORAGE - record written
+D3,1,LED blue,—,0805,LINK - IP bearer up
+D4,1,LED red,—,0805,CLOUD - broker session
+D5,1,LED white,—,0805,HEARTBEAT - scheduler alive
+D6,1,Reverse protection,SS34,SMA,12 V input
+BT1,1,RTC backup cell,CR2032 + holder,—,"See U5 note."

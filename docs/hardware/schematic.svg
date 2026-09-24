@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Odometer ECU - interconnect schematic
+  Copyright (c) 2024-2026 Abdullah Shabbir. All rights reserved.
+
+  An interconnect diagram, not a fabrication drawing: it shows which signal goes where and which
+  pins are shared, because that is what the firmware's correctness depends on. Component values
+  are in bom.csv and net names match config/Ecu_PinMap.h exactly, so a signal can be traced from
+  this drawing into the code without a translation step.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 860" width="1180" height="860"
+     font-family="DejaVu Sans, Helvetica, Arial, sans-serif">
+
+  <style>
+    .box       { fill:#fbfbfd; stroke:#2b2b33; stroke-width:1.6; }
+    .mcu       { fill:#eef2fa; stroke:#1e3a6e; stroke-width:2.2; }
+    .pwr       { fill:#fdf3ec; stroke:#8a4b1e; stroke-width:1.6; }
+    .title     { font-size:19px; font-weight:bold; fill:#12121a; }
+    .sub       { font-size:11.5px; fill:#4a4a58; }
+    .refdes    { font-size:12.5px; font-weight:bold; fill:#12121a; }
+    .part      { font-size:10.5px; fill:#4a4a58; }
+    .net       { font-size:9.8px; fill:#1f1f28; }
+    .pin       { font-size:9.5px; fill:#33333d; }
+    .wire      { stroke:#2b2b33; stroke-width:1.3; fill:none; }
+    .shared    { stroke:#b3261e; stroke-width:2; fill:none; }
+    .power     { stroke:#8a4b1e; stroke-width:2; fill:none; }
+    .note      { font-size:10.5px; fill:#6a1b14; }
+    .notebox   { fill:#fff6f5; stroke:#b3261e; stroke-width:1.2; }
+    .legendbox { fill:#f7f7fa; stroke:#8a8a96; stroke-width:1; }
+    .grp       { fill:none; stroke:#a8a8b4; stroke-width:1; stroke-dasharray:5 4; }
+    .grplabel  { font-size:10.5px; fill:#6a6a78; font-style:italic; }
+  </style>
+
+  <rect x="0" y="0" width="1180" height="860" fill="#ffffff"/>
+
+  <text x="24" y="30" class="title">Odometer ECU — interconnect</text>
+  <text x="24" y="47" class="sub">ESP32-WROOM-32. Net names match config/Ecu_PinMap.h. Red = shared SPI bus (see note 1).</text>
+
+  <!-- ===================== MCU ===================== -->
+  <rect x="404" y="120" width="230" height="470" rx="5" class="mcu"/>
+  <text x="519" y="146" class="refdes" text-anchor="middle">U1</text>
+  <text x="519" y="162" class="part" text-anchor="middle">ESP32-WROOM-32</text>
+  <text x="519" y="176" class="part" text-anchor="middle">GPIO6–11 = internal flash (unusable)</text>
+
+  <!-- left-side pins -->
+  <text x="414" y="205" class="pin">1  CONSOLE_TX</text>
+  <text x="414" y="222" class="pin">3  CONSOLE_RX</text>
+  <text x="414" y="245" class="pin">16 RS485_RX</text>
+  <text x="414" y="262" class="pin">17 RS485_TX</text>
+  <text x="414" y="279" class="pin">13 RS485_DE</text>
+  <text x="414" y="302" class="pin">26 GSM_RX</text>
+  <text x="414" y="319" class="pin">27 GSM_TX</text>
+  <text x="414" y="336" class="pin">14 GSM_PWRKEY</text>
+  <text x="414" y="353" class="pin">39 GSM_STATUS  (in only)</text>
+  <text x="414" y="376" class="pin">34 GNSS_RX     (in only)</text>
+  <text x="414" y="399" class="pin">36 VBATT_SENSE (ADC1)</text>
+  <text x="414" y="422" class="pin">21 I2C_SDA</text>
+  <text x="414" y="439" class="pin">22 I2C_SCL</text>
+  <text x="414" y="462" class="pin">12 MTDI — DO NOT CONNECT</text>
+
+  <!-- right-side pins -->
+  <text x="624" y="205" class="pin" text-anchor="end">SPI_SCK  18</text>
+  <text x="624" y="222" class="pin" text-anchor="end">SPI_MISO 19</text>
+  <text x="624" y="239" class="pin" text-anchor="end">SPI_MOSI 23</text>
+  <text x="624" y="262" class="pin" text-anchor="end">CAN_CS    4</text>
+  <text x="624" y="279" class="pin" text-anchor="end">CAN_INT  35</text>
+  <text x="624" y="302" class="pin" text-anchor="end">SD_CS     5</text>
+  <text x="624" y="336" class="pin" text-anchor="end">LED_ACQ  32</text>
+  <text x="624" y="353" class="pin" text-anchor="end">LED_STOR 33</text>
+  <text x="624" y="370" class="pin" text-anchor="end">LED_LINK 25</text>
+  <text x="624" y="387" class="pin" text-anchor="end">LED_CLOUD 2</text>
+  <text x="624" y="404" class="pin" text-anchor="end">LED_HB   15</text>
+
+  <!-- ===================== RS485 ===================== -->
+  <rect x="138" y="232" width="150" height="72" rx="4" class="box"/>
+  <text x="213" y="252" class="refdes" text-anchor="middle">U2  MAX3485</text>
+  <text x="213" y="267" class="part" text-anchor="middle">RS485, half duplex</text>
+  <text x="213" y="281" class="part" text-anchor="middle">DE tied to /RE</text>
+  <text x="213" y="295" class="part" text-anchor="middle">120 Ω termination</text>
+
+  <path class="wire" d="M404 242 H 288"/>
+  <path class="wire" d="M404 259 H 288"/>
+  <path class="wire" d="M404 276 H 288"/>
+  <text x="296" y="239" class="net">RO</text>
+  <text x="296" y="256" class="net">DI</text>
+  <text x="296" y="273" class="net">DE + /RE</text>
+
+  <path class="wire" d="M138 258 H 60"/>
+  <path class="wire" d="M138 278 H 60"/>
+  <text x="56" y="255" class="net" text-anchor="end">A</text>
+  <text x="56" y="275" class="net" text-anchor="end">B</text>
+  <text x="26" y="300" class="part">Packs 1–4</text>
+  <text x="26" y="313" class="part">4800 8E1</text>
+
+  <!-- ===================== GSM ===================== -->
+  <rect x="138" y="322" width="150" height="72" rx="4" class="box"/>
+  <text x="213" y="342" class="refdes" text-anchor="middle">U3  SIM800L</text>
+  <text x="213" y="357" class="part" text-anchor="middle">GSM/GPRS, 9600 8N1</text>
+  <text x="213" y="371" class="part" text-anchor="middle">5 V, 2 A peak (note 3)</text>
+  <text x="213" y="385" class="part" text-anchor="middle">RXD level shifted to 2.8 V</text>
+
+  <path class="wire" d="M404 299 H 340 V 340 H 288"/>
+  <path class="wire" d="M404 316 H 328 V 356 H 288"/>
+  <path class="wire" d="M404 333 H 316 V 372 H 288"/>
+  <path class="wire" d="M404 350 H 304 V 388 H 288"/>
+
+  <!-- ===================== GNSS ===================== -->
+  <rect x="138" y="412" width="150" height="58" rx="4" class="box"/>
+  <text x="213" y="432" class="refdes" text-anchor="middle">U4  NEO-6M</text>
+  <text x="213" y="447" class="part" text-anchor="middle">NMEA out, 9600 8N1</text>
+  <text x="213" y="461" class="part" text-anchor="middle">TX only — note 2</text>
+
+  <path class="wire" d="M404 373 H 350 V 440 H 288"/>
+  <text x="300" y="436" class="net">TXD</text>
+
+  <!-- ===================== DS3231 ===================== -->
+  <rect x="138" y="490" width="150" height="58" rx="4" class="box"/>
+  <text x="213" y="510" class="refdes" text-anchor="middle">U5  DS3231</text>
+  <text x="213" y="525" class="part" text-anchor="middle">RTC, I²C 0x68</text>
+  <text x="213" y="539" class="part" text-anchor="middle">CR2032 backup (note 4)</text>
+
+  <path class="wire" d="M404 419 H 360 V 512 H 288"/>
+  <path class="wire" d="M404 436 H 372 V 530 H 288"/>
+  <text x="300" y="508" class="net">SDA</text>
+  <text x="300" y="526" class="net">SCL</text>
+  <text x="300" y="556" class="part">4k7 pull-ups to 3V3</text>
+
+  <!-- ===================== VBATT divider ===================== -->
+  <rect x="138" y="566" width="150" height="52" rx="4" class="box"/>
+  <text x="213" y="586" class="refdes" text-anchor="middle">R1/R2 divider</text>
+  <text x="213" y="601" class="part" text-anchor="middle">Pack+ → ADC1_CH0</text>
+  <text x="213" y="613" class="part" text-anchor="middle">1 % parts, per-unit cal</text>
+  <path class="wire" d="M404 396 H 384 V 592 H 288"/>
+
+  <!-- ===================== shared SPI group ===================== -->
+  <rect x="700" y="168" width="330" height="200" rx="6" class="grp"/>
+  <text x="712" y="186" class="grplabel">Shared VSPI — one bus, two devices, arbitrated in software</text>
+
+  <!-- MCP2515 -->
+  <rect x="716" y="196" width="146" height="76" rx="4" class="box"/>
+  <text x="789" y="216" class="refdes" text-anchor="middle">U6  MCP2515</text>
+  <text x="789" y="231" class="part" text-anchor="middle">CAN controller</text>
+  <text x="789" y="245" class="part" text-anchor="middle">10 MHz, SPI mode 0</text>
+  <text x="789" y="259" class="part" text-anchor="middle">/INT open drain, 10k ext.</text>
+
+  <!-- microSD -->
+  <rect x="716" y="288" width="146" height="66" rx="4" class="box"/>
+  <text x="789" y="308" class="refdes" text-anchor="middle">J2  microSD</text>
+  <text x="789" y="323" class="part" text-anchor="middle">20 MHz, SPI mode 0</text>
+  <text x="789" y="337" class="part" text-anchor="middle">Blocks up to 2 s</text>
+
+  <!-- shared bus wires -->
+  <path class="shared" d="M634 202 H 680 V 210 H 716"/>
+  <path class="shared" d="M634 219 H 668 V 226 H 716"/>
+  <path class="shared" d="M634 236 H 656 V 242 H 716"/>
+  <path class="shared" d="M680 210 V 300 H 716"/>
+  <path class="shared" d="M668 226 V 316 H 716"/>
+  <path class="shared" d="M656 242 V 332 H 716"/>
+  <text x="640" y="196" class="net">SCK / MISO / MOSI</text>
+
+  <!-- chip selects -->
+  <path class="wire" d="M634 259 H 700 V 266 H 716"/>
+  <path class="wire" d="M634 299 H 706 V 348 H 716"/>
+  <text x="640" y="256" class="net">CAN_CS</text>
+  <text x="640" y="296" class="net">SD_CS</text>
+  <path class="wire" d="M634 276 H 694 V 204 H 716"/>
+  <text x="640" y="286" class="net">CAN_INT</text>
+
+  <!-- TJA1050 -->
+  <rect x="898" y="196" width="118" height="66" rx="4" class="box"/>
+  <text x="957" y="216" class="refdes" text-anchor="middle">U7  TJA1050</text>
+  <text x="957" y="231" class="part" text-anchor="middle">CAN transceiver</text>
+  <text x="957" y="245" class="part" text-anchor="middle">120 Ω term.</text>
+  <path class="wire" d="M862 216 H 898"/>
+  <path class="wire" d="M862 236 H 898"/>
+  <path class="wire" d="M1016 216 H 1078"/>
+  <path class="wire" d="M1016 236 H 1078"/>
+  <text x="1082" y="213" class="net">CANH</text>
+  <text x="1082" y="233" class="net">CANL</text>
+  <text x="1082" y="256" class="part">Motor ctrl</text>
+  <text x="1082" y="269" class="part">500 kbit/s</text>
+
+  <!-- ===================== LEDs ===================== -->
+  <rect x="716" y="390" width="230" height="122" rx="4" class="box"/>
+  <text x="831" y="410" class="refdes" text-anchor="middle">D1–D5  indicators</text>
+  <text x="726" y="428" class="part">green   ACQ      — record acquired</text>
+  <text x="726" y="444" class="part">yellow  STORAGE  — record written</text>
+  <text x="726" y="460" class="part">blue    LINK     — IP bearer up</text>
+  <text x="726" y="476" class="part">red     CLOUD    — broker session</text>
+  <text x="726" y="492" class="part">white   HEARTBEAT— scheduler alive</text>
+  <path class="wire" d="M634 333 H 676 V 420 H 716"/>
+  <path class="wire" d="M634 350 H 668 V 440 H 716"/>
+  <path class="wire" d="M634 367 H 660 V 460 H 716"/>
+  <path class="wire" d="M634 384 H 652 V 480 H 716"/>
+  <path class="wire" d="M634 401 H 644 V 500 H 716"/>
+  <text x="726" y="508" class="part">each via 1k to 3V3 logic</text>
+
+  <!-- ===================== power ===================== -->
+  <rect x="404" y="630" width="230" height="86" rx="4" class="pwr"/>
+  <text x="519" y="650" class="refdes" text-anchor="middle">Power</text>
+  <text x="414" y="668" class="part">12 V vehicle aux  →  buck  →  5 V @ 2 A cont.</text>
+  <text x="414" y="684" class="part">5 V  : SIM800L, microSD, MAX3485, TJA1050</text>
+  <text x="414" y="700" class="part">3V3  : ESP32, MCP2515, DS3231, shifters</text>
+  <path class="power" d="M519 590 V 630"/>
+  <path class="power" d="M404 660 H 288 V 394"/>
+  <path class="power" d="M404 676 H 340 V 470"/>
+
+  <!-- ===================== notes ===================== -->
+  <rect x="24" y="646" width="356" height="188" rx="5" class="notebox"/>
+  <text x="34" y="666" class="refdes">Notes — each was a v1 defect</text>
+  <text x="34" y="686" class="note">1. Shared VSPI. The two devices disagree on clock rate</text>
+  <text x="34" y="700" class="note">   (10/20 MHz) and transaction length (µs vs seconds).</text>
+  <text x="34" y="714" class="note">   Software arbitration is mandatory: Spi_Lock/Unlock.</text>
+  <text x="34" y="731" class="note">2. GNSS on GPIO34, receive only, software UART. v1 used</text>
+  <text x="34" y="745" class="note">   HardwareSerial(1) with no pins → GPIO9/10 = int. flash.</text>
+  <text x="34" y="762" class="note">3. SIM800L draws 2 A in 577 µs bursts. Needs ≥1000 µF</text>
+  <text x="34" y="776" class="note">   low-ESR local bulk or the ESP32 browns out.</text>
+  <text x="34" y="793" class="note">4. DS3231 without a backup cell resets on every power</text>
+  <text x="34" y="807" class="note">   cycle; firmware reports OSF rather than a wrong time.</text>
+  <text x="34" y="824" class="note">5. GPIO12 (MTDI) high at reset selects 1.8 V flash → dead.</text>
+
+  <!-- ===================== legend ===================== -->
+  <rect x="700" y="540" width="330" height="96" rx="5" class="legendbox"/>
+  <text x="712" y="560" class="refdes">Legend</text>
+  <path class="wire" d="M712 576 H 756"/>
+  <text x="764" y="580" class="part">point-to-point signal</text>
+  <path class="shared" d="M712 596 H 756"/>
+  <text x="764" y="600" class="part">shared bus — needs arbitration</text>
+  <path class="power" d="M712 616 H 756"/>
+  <text x="764" y="620" class="part">supply rail</text>
+
+</svg>
