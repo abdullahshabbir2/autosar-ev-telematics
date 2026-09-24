@@ -7,13 +7,13 @@
  * SPDX-License-Identifier: Proprietary
  */
 
-#include "NvM.h"
+#include "services/NvM/NvM.h"
 
 #include <string.h>
 
-#include "Crc.h"
-#include "Det.h"
-#include "Fee.h"
+#include "services/Crc/Crc.h"
+#include "services/Det/Det.h"
+#include "services/Fee/Fee.h"
 
 /*==================================================================================================
  *  Block descriptor table
@@ -160,6 +160,10 @@ STATIC void NvM_ApplyDefaults(uint8 index)
 }
 
 /** Commit block @p index to Fee, appending NvM's own CRC. */
+/* Forward declaration: NvM_Commit publishes the dirty count on both of its exit paths, and the
+ * counter itself is defined below with the other bookkeeping helpers. */
+STATIC uint8 NvM_CountDirty(void);
+
 STATIC Std_ReturnType NvM_Commit(uint8 index)
 {
     const uint16 length = NvM_Blocks[index].length;
@@ -173,8 +177,27 @@ STATIC Std_ReturnType NvM_Commit(uint8 index)
      * interpret, so only the meaningful prefix needs filling. */
     if (Fee_WriteBlock(NvM_Blocks[index].feeBlock, NvM_Staging) != E_OK)
     {
+        /* The block stays dirty, and that is the whole point of setting it here rather than leaving it
+         * as it was found.
+         *
+         * An immediate block -- the odometer, restart info -- never passes through the dirty state at
+         * all: NvM_WriteBlock goes straight to this function. So on a failure the mirror holds a value
+         * that reached no media and nothing is marked as owing a write. The consequences, all three of
+         * which are silent:
+         *
+         *   - NvM_WriteImmediate returns E_OK for a block it considers clean, so a caller retrying is
+         *     told it succeeded while nothing was written. That is precisely the class of defect
+         *     SWREQ-SAF-0001 exists to forbid.
+         *   - NvM_WriteAll on the shutdown path skips it, so the last chance to persist is lost.
+         *   - NvM_MainFunction never picks it up either.
+         *
+         * For the odometer that means one transient flash failure discards up to the persist threshold
+         * of real distance with no indication and no way to recover it. Marking the block dirty makes
+         * every one of those paths retry instead. */
+        NvM_Dirty[index] = TRUE;
         NvM_Result[index] = NVM_REQ_NOT_OK;
         NvM_Stats.writeFailures++;
+        NvM_Stats.dirtyBlockCount = NvM_CountDirty();
         (void)Det_ReportRuntimeError(MODULE_ID_NVM, index, NVM_API_ID_WRITE_BLOCK,
                                      NVM_E_WRITE_FAILED);
         return E_NOT_OK;
@@ -185,6 +208,12 @@ STATIC Std_ReturnType NvM_Commit(uint8 index)
     NvM_Dirty[index] = FALSE;
     NvM_Result[index] = NVM_REQ_OK;
     NvM_Stats.writeCount++;
+    /* Recomputed here as well as on the failure path, so the published count always matches the flags
+     * whichever entry point reached this function. Leaving it to the callers meant a commit through
+     * NvM_WriteImmediate cleared the flag and left the statistic reporting a block still owing a
+     * write -- harmless to operation, but the health record is what a field fault is diagnosed from,
+     * and a counter that disagrees with reality costs more than the cycles it saves. */
+    NvM_Stats.dirtyBlockCount = NvM_CountDirty();
 
     return E_OK;
 }

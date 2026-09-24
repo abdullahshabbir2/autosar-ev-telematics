@@ -57,9 +57,9 @@
 #ifndef FEE_H
 #define FEE_H
 
-#include "Autosar_ModuleIds.h"
-#include "Fee_Cfg.h"
-#include "Std_Types.h"
+#include "base/Autosar_ModuleIds.h"
+#include "services/Fee/Fee_Cfg.h"
+#include "base/Std_Types.h"
 
 #ifdef __cplusplus
 extern "C" {

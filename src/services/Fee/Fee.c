@@ -7,11 +7,11 @@
  * SPDX-License-Identifier: Proprietary
  */
 
-#include "Fee.h"
+#include "services/Fee/Fee.h"
 
-#include "Crc.h"
-#include "Det.h"
-#include "Fls.h"
+#include "services/Crc/Crc.h"
+#include "services/Det/Det.h"
+#include "mcal/Fls/Fls.h"
 
 /*==================================================================================================
  *  On-media layout
@@ -94,6 +94,30 @@ STATIC uint8 Fee_ActiveSector;     /* 0 or 1                                    
 STATIC uint16 Fee_ActiveSequence;  /* sequence number of the active sector       */
 STATIC uint32 Fee_WriteCursor;     /* offset within the active sector, aligned   */
 STATIC Fee_StatusType Fee_Status;
+
+/**
+ * @brief Set when a failed append may have left bits programmed at the write cursor.
+ *
+ * A failing Fls_Write does not mean nothing reached the media. A supply collapse part way through a
+ * programming pulse leaves some cells cleared, and flash cells cannot be un-cleared without an erase --
+ * so the slot at the cursor can never be trusted or reused again.
+ *
+ * Two consequences follow, and both are why this flag exists rather than simply retrying:
+ *
+ *  1. The cursor is deliberately not advanced on failure, so a retry would program the *same* slot.
+ *     Writing a second header over a partially programmed one ANDs the two together, producing a
+ *     header whose CRC cannot match, so the retry can never succeed however many times it is made.
+ *  2. Every scan -- Fee_FindNewestRecord, Fee_HighestCounter -- stops at an unparseable header,
+ *     because the length needed to step over it is exactly what was lost. So the damaged slot hides
+ *     every record written after it, and a retry that did somehow land beyond it would be invisible.
+ *
+ * The recovery is a garbage collection, which is safe at this moment for a specific reason: the
+ * damaged slot sits at the cursor, past every valid record, so a scan from the start of the sector
+ * reaches all of them before it stops. Collecting copies those into the other sector and leaves the
+ * damage behind. ::Fee_WriteBlock acts on the flag before its next append rather than collecting from
+ * inside ::Fee_AppendRecord, because collection itself appends and the recursion would be a trap.
+ */
+STATIC boolean Fee_SlotPoisoned = FALSE;
 
 /**
  * @brief Staging buffer for a record's payload during garbage collection.
@@ -542,6 +566,7 @@ STATIC Std_ReturnType Fee_AppendRecord(Fee_BlockIdType blockId, const uint8 *pay
     if (Fls_Write(base, header, (Fls_LengthType)sizeof(header)) != E_OK)
     {
         Fee_Status.mediaErrorCount++;
+        Fee_SlotPoisoned = TRUE;
         return E_NOT_OK;
     }
 
@@ -560,6 +585,7 @@ STATIC Std_ReturnType Fee_AppendRecord(Fee_BlockIdType blockId, const uint8 *pay
         if (Fls_Write(base + FEE_RECORD_HEADER_SIZE, padded, (Fls_LengthType)paddedLength) != E_OK)
         {
             Fee_Status.mediaErrorCount++;
+            Fee_SlotPoisoned = TRUE;
             return E_NOT_OK;
         }
     }
@@ -575,6 +601,7 @@ STATIC Std_ReturnType Fee_AppendRecord(Fee_BlockIdType blockId, const uint8 *pay
     if (Fls_Write(base + FEE_RH_OFF_STATE, commit, (Fls_LengthType)FEE_ALIGNMENT) != E_OK)
     {
         Fee_Status.mediaErrorCount++;
+        Fee_SlotPoisoned = TRUE;
         return E_NOT_OK;
     }
 
@@ -742,6 +769,9 @@ Std_ReturnType Fee_Format(void)
     Fee_WriteCursor = FEE_SECTOR_HEADER_SIZE;
     Fee_Status.activeSector = 0u;
     Fee_Status.activeSequence = 1u;
+    /* A fresh scan has just established the cursor from the media, so any poisoning from a previous
+     * session has already been accounted for by Fee_FindWriteCursor. */
+    Fee_SlotPoisoned = FALSE;
     Fee_Initialised = TRUE;
 
     return E_OK;
@@ -798,6 +828,9 @@ Std_ReturnType Fee_Init(void)
         Fee_ActiveSequence = sequence[Fee_ActiveSector];
     }
 
+    /* A fresh scan has just established the cursor from the media, so any poisoning from a previous
+     * session has already been accounted for by Fee_FindWriteCursor. */
+    Fee_SlotPoisoned = FALSE;
     Fee_Initialised = TRUE;
     Fee_WriteCursor = Fee_FindWriteCursor();
     Fee_Status.activeSector = Fee_ActiveSector;
@@ -859,6 +892,18 @@ Std_ReturnType Fee_WriteBlock(Fee_BlockIdType blockId, const uint8 *buffer)
                      FEE_E_PARAM_POINTER, E_NOT_OK);
     DET_CHECK_RETURN(Fee_LookupBlock(blockId, &length) != FALSE, MODULE_ID_FEE, INSTANCE_ID_SINGLE,
                      FEE_API_ID_WRITE, FEE_E_INVALID_BLOCK_NO, E_NOT_OK);
+
+    /* A previous append left the cursor pointing at media that may be partially programmed. Nothing
+     * can be written or read past it, so it is reclaimed before anything else is attempted. See
+     * ::Fee_SlotPoisoned. */
+    if (Fee_SlotPoisoned != FALSE)
+    {
+        if (Fee_GarbageCollect() != E_OK)
+        {
+            return E_NOT_OK;
+        }
+        Fee_SlotPoisoned = FALSE;
+    }
 
     /* Collect early rather than at the moment the sector actually fills, so that a write of
      * the largest block never discovers there is nowhere to put it. */

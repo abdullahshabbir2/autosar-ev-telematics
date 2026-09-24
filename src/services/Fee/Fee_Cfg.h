@@ -14,8 +14,8 @@
 #ifndef FEE_CFG_H
 #define FEE_CFG_H
 
-#include "Fls_Cfg.h"
-#include "Std_Types.h"
+#include "mcal/Fls/Fls_Cfg.h"
+#include "base/Std_Types.h"
 
 #define FEE_DEV_ERROR_DETECT STD_ON
 
@@ -61,13 +61,18 @@
  *  Sizes include each structure's own CRC where NvM adds one.
  *================================================================================================*/
 
-#define FEE_LENGTH_ODOMETER 32u
+/* Each length must hold its NvM structure plus NvM's 4-byte end-to-end CRC, with the
+ * structure's natural alignment padding included. The uint64 members in the odometer and
+ * energy blocks force 8-byte alignment, which is why those two are larger than a naive sum of
+ * their fields suggests. The static assertions in NvM.c enforce the relationship, so an
+ * under-sized block here is a build failure rather than a silent truncation. */
+#define FEE_LENGTH_ODOMETER 48u
 #define FEE_LENGTH_DEVICE_CONFIG 64u
 #define FEE_LENGTH_CALIBRATION 32u
-#define FEE_LENGTH_RESTART_INFO 16u
+#define FEE_LENGTH_RESTART_INFO 24u
 #define FEE_LENGTH_DTC_STORE 256u
 #define FEE_LENGTH_TELEMETRY_CURSOR 32u
-#define FEE_LENGTH_ENERGY_COUNTERS 32u
+#define FEE_LENGTH_ENERGY_COUNTERS 48u
 
 /** Longest configured block; sizes Fee's internal staging buffer. */
 #define FEE_MAX_BLOCK_LENGTH FEE_LENGTH_DTC_STORE

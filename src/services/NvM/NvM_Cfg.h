@@ -14,8 +14,8 @@
 #ifndef NVM_CFG_H
 #define NVM_CFG_H
 
-#include "Fee_Cfg.h"
-#include "Std_Types.h"
+#include "services/Fee/Fee_Cfg.h"
+#include "base/Std_Types.h"
 
 #define NVM_DEV_ERROR_DETECT STD_ON
 
