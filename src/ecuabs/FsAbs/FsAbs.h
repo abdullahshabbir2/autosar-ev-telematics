@@ -33,9 +33,9 @@
 #ifndef FSABS_H
 #define FSABS_H
 
-#include "Autosar_ModuleIds.h"
-#include "FsAbs_Cfg.h"
-#include "Std_Types.h"
+#include "base/Autosar_ModuleIds.h"
+#include "ecuabs/FsAbs/FsAbs_Cfg.h"
+#include "base/Std_Types.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -120,9 +120,17 @@ CHECK_RETURN Std_ReturnType FsAbs_AppendRecord(const char *dateStamp, const char
  * @param[out] buffer  Destination for the record text, NUL-terminated.
  * @param[in]  size    Capacity of @p buffer.
  * @param[out] length  Characters written.
- * @return E_OK if a complete, CRC-valid record was read; E_NOT_FOUND if the cursor has reached the
- *         end of the available data; ::FSABS_E_RECORD_CORRUPT as E_CRC_FAIL if the record at the
- *         cursor failed its checksum, in which case ::FsAbs_SkipCorruptRecord moves past it.
+ * @return E_OK if a complete, CRC-valid record was read; E_PENDING if this file was drained and the
+ *         cursor has moved to a later one, so the caller should call again; E_NOT_FOUND if the cursor
+ *         has reached the end of all available data; ::FSABS_E_RECORD_CORRUPT as E_CRC_FAIL if the
+ *         record at the cursor failed its checksum, in which case ::FsAbs_SkipCorruptRecord moves
+ *         past it.
+ *
+ * @note E_PENDING rather than transparently reading on into the next file. A caller draining a backlog
+ *       runs on a budgeted cyclic task, and crossing a file boundary costs a directory walk plus an
+ *       open -- so it is made one unit of work rather than something that can happen in the middle of
+ *       what looked like a single record read. The CSV header of each file is skipped silently and is
+ *       never reported as a corrupt record.
  */
 CHECK_RETURN Std_ReturnType FsAbs_ReadRecordAtCursor(char *buffer, uint16 size, uint16 *length);
 

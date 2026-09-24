@@ -351,6 +351,88 @@ extern "C" Std_ReturnType FsAbs_PlatformRemove(const char *path)
     return FsAbs_ReleaseBus(status);
 }
 
+/**
+ * @brief Smallest log name strictly greater than @p after.
+ *
+ * Same directory walk as FsAbs_PlatformFindOldestLog, with one extra comparison. Kept as a separate
+ * function rather than a parameter on that one because the two have different failure meanings: no
+ * oldest log means the card holds no records at all, whereas no next log means the transfer has caught
+ * up -- which is the normal state and must not read as an empty card.
+ */
+extern "C" Std_ReturnType FsAbs_PlatformFindNextLog(const char *after, char *buffer, uint16 size)
+{
+    Std_ReturnType status;
+
+    if ((after == NULL_PTR) || (buffer == NULL_PTR) || (size == 0u))
+    {
+        return E_NOT_OK;
+    }
+    if (FsAbs_Mounted == FALSE)
+    {
+        return E_NOT_OK;
+    }
+
+    status = FsAbs_AcquireBus();
+    if (status != E_OK)
+    {
+        return status;
+    }
+
+    {
+        File root = SD.open("/", FILE_READ);
+        char best[FSABS_FILENAME_SIZE];
+        boolean found = FALSE;
+
+        best[0] = '\0';
+
+        if (!root)
+        {
+            status = E_NOT_OK;
+        }
+        else
+        {
+            File entry = root.openNextFile();
+
+            while (entry)
+            {
+                const char *const name = entry.name();
+
+                if ((entry.isDirectory() == false) && (name != NULL_PTR) && (strlen(name) >= 12u) &&
+                    (strstr(name, ".csv") != NULL_PTR) && (strcmp(name, after) > 0))
+                {
+                    if ((found == FALSE) || (strcmp(name, best) < 0))
+                    {
+                        (void)strncpy(best, name, sizeof(best) - 1u);
+                        best[sizeof(best) - 1u] = '\0';
+                        found = TRUE;
+                    }
+                }
+
+                entry.close();
+                entry = root.openNextFile();
+            }
+
+            root.close();
+
+            if (found == FALSE)
+            {
+                status = E_NOT_FOUND;
+            }
+            else if (strlen(best) >= (size_t)size)
+            {
+                status = E_NO_SPACE;
+            }
+            else
+            {
+                (void)strcpy(buffer, best);
+                status = E_OK;
+            }
+        }
+    }
+
+    return FsAbs_ReleaseBus(status);
+}
+
 extern "C" Std_ReturnType FsAbs_PlatformFindOldestLog(char *buffer, uint16 size)
 {
     Std_ReturnType status;

@@ -16,7 +16,7 @@
 #ifndef FSABS_PLATFORM_H
 #define FSABS_PLATFORM_H
 
-#include "Std_Types.h"
+#include "base/Std_Types.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -69,6 +69,24 @@ CHECK_RETURN Std_ReturnType FsAbs_PlatformRemove(const char *path);
  * @return E_OK if a log file was found; E_NOT_FOUND if the card holds none.
  */
 CHECK_RETURN Std_ReturnType FsAbs_PlatformFindOldestLog(char *buffer, uint16 size);
+
+/**
+ * @brief Find the smallest log file name strictly greater than @p after.
+ *
+ * Because log files are named "/YYYYMMDD.csv", the lexicographically next name is the chronologically
+ * next day -- so this answers "which file does the transfer move to when the current one is drained"
+ * without reading a single timestamp.
+ *
+ * Strictly greater, so a cursor sitting on a drained file cannot select that same file again and
+ * livelock. A gap in the sequence is normal: a vehicle parked for a week produces no file for those
+ * days, and the next name found simply skips them.
+ *
+ * @param[in]  after  The current file name. An empty string finds the oldest.
+ * @param[out] buffer Destination for the name.
+ * @param[in]  size   Capacity of @p buffer.
+ * @return E_OK if a later log exists; E_NOT_FOUND if @p after is already the newest.
+ */
+CHECK_RETURN Std_ReturnType FsAbs_PlatformFindNextLog(const char *after, char *buffer, uint16 size);
 
 #ifdef __cplusplus
 }

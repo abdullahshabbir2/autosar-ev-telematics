@@ -7,17 +7,17 @@
  * SPDX-License-Identifier: Proprietary
  */
 
-#include "FsAbs.h"
+#include "ecuabs/FsAbs/FsAbs.h"
 
 #include <string.h>
 
-#include "Com.h"
-#include "Crc.h"
-#include "Dem.h"
-#include "Det.h"
-#include "Fee.h"
-#include "FsAbs_Platform.h"
-#include "NvM.h"
+#include "services/Com/Com.h"
+#include "services/Crc/Crc.h"
+#include "services/Dem/Dem.h"
+#include "services/Det/Det.h"
+#include "services/Fee/Fee.h"
+#include "ecuabs/FsAbs/FsAbs_Platform.h"
+#include "services/NvM/NvM.h"
 
 /*==================================================================================================
  *  Local data
@@ -38,6 +38,15 @@ STATIC uint32 FsAbs_PendingRecordSpan;
 
 /** Scratch buffer for one record plus its CRC field. */
 STATIC char FsAbs_LineBuffer[FSABS_MAX_RECORD_SIZE + FSABS_CRC_FIELD_CHARS + 4u];
+
+/**
+ * @brief Peek buffer for the header check, separate from the line buffer.
+ *
+ * FsAbs_ReadRecordAtCursor calls the header check before filling FsAbs_LineBuffer, so sharing the
+ * buffer would work today and break the moment the call order changed -- the kind of coupling that is
+ * invisible in a diff. Sized for a header line only; a longer first line is left to the read path.
+ */
+STATIC char FsAbs_HeaderPeek[COM_HEADER_BUFFER_SIZE];
 
 /*==================================================================================================
  *  Cursor persistence
@@ -128,6 +137,58 @@ STATIC void FsAbs_WriteCrcField(char *out, uint32 crc)
     {
         const uint8 shift = (uint8)(28u - (i * 4u));
         out[i] = FsAbs_HexDigit((uint8)((crc >> shift) & 0x0FuL));
+    }
+}
+
+/**
+ * @brief Advance the cursor past a file's CSV header line, if it is sitting on one.
+ *
+ * The header is identified by position and shape together: it is the first line of a file, and it has
+ * no CRC field. Both conditions are required. Position alone would skip a genuinely damaged first
+ * record, and shape alone would skip a corrupt record anywhere in the file -- and a corrupt record must
+ * be *reported*, because that is the signal a card is failing.
+ *
+ * Silent, and does not touch the corruption counter. A header is expected content, not damage.
+ */
+STATIC void FsAbs_SkipCsvHeader(void)
+{
+    uint32 read = 0u;
+    uint32 i;
+    boolean hasSeparator = FALSE;
+    uint32 lineEnd = 0u;
+    boolean foundTerminator = FALSE;
+
+    if (FsAbs_Cursor.offset != 0u)
+    {
+        return; /* not at the start of a file, so not on a header */
+    }
+
+    if (FsAbs_PlatformRead(FsAbs_Cursor.fileName, 0u, (uint8 *)FsAbs_HeaderPeek,
+                           (uint32)sizeof(FsAbs_HeaderPeek) - 1u, &read) != E_OK)
+    {
+        return;
+    }
+
+    for (i = 0u; i < read; i++)
+    {
+        if (FsAbs_HeaderPeek[i] == '\n')
+        {
+            lineEnd = i;
+            foundTerminator = TRUE;
+            break;
+        }
+        if (FsAbs_HeaderPeek[i] == (char)FSABS_CRC_SEPARATOR)
+        {
+            hasSeparator = TRUE;
+        }
+    }
+
+    /* A first line that terminated and carried no separator is the header. A line that did not
+     * terminate within the peek is left alone: it is either a record longer than the peek buffer or an
+     * interrupted append, and the read path reports both as corruption, which is correct. */
+    if ((foundTerminator != FALSE) && (hasSeparator == FALSE))
+    {
+        FsAbs_Cursor.offset = lineEnd + 1u;
     }
 }
 
@@ -300,6 +361,39 @@ Std_ReturnType FsAbs_AppendRecord(const char *dateStamp, const char *record)
     return E_OK;
 }
 
+/**
+ * @brief Move the cursor to the next log file, if one exists.
+ *
+ * Called when the current file is drained. The new cursor is stored immediately, for the same reason
+ * ::FsAbs_AdvanceCursor stores its advance: a crossing held only in RAM would be lost on a reset and the
+ * transfer would resume on a file it had already finished, re-sending a whole day.
+ *
+ * @return E_OK if the cursor moved; E_NOT_FOUND if this was the newest file.
+ */
+STATIC Std_ReturnType FsAbs_AdvanceToNextFile(void)
+{
+    char next[FSABS_FILENAME_SIZE];
+
+    if (FsAbs_Cursor.valid == FALSE)
+    {
+        return E_NOT_FOUND;
+    }
+
+    if (FsAbs_PlatformFindNextLog(FsAbs_Cursor.fileName, next, (uint16)sizeof(next)) != E_OK)
+    {
+        return E_NOT_FOUND;
+    }
+
+    (void)memcpy(FsAbs_Cursor.fileName, next, sizeof(FsAbs_Cursor.fileName));
+    FsAbs_Cursor.fileName[sizeof(FsAbs_Cursor.fileName) - 1u] = '\0';
+    FsAbs_Cursor.offset = 0u;
+    FsAbs_PendingRecordSpan = 0u;
+
+    STD_DISCARD(FsAbs_StoreCursor());
+
+    return E_OK;
+}
+
 Std_ReturnType FsAbs_ReadRecordAtCursor(char *buffer, uint16 size, uint16 *length)
 {
     uint32 read = 0u;
@@ -320,6 +414,8 @@ Std_ReturnType FsAbs_ReadRecordAtCursor(char *buffer, uint16 size, uint16 *lengt
         return E_NOT_FOUND;
     }
 
+    FsAbs_SkipCsvHeader();
+
     if (FsAbs_PlatformRead(FsAbs_Cursor.fileName, FsAbs_Cursor.offset,
                            (uint8 *)FsAbs_LineBuffer,
                            (uint32)sizeof(FsAbs_LineBuffer) - 1u, &read) != E_OK)
@@ -328,8 +424,21 @@ Std_ReturnType FsAbs_ReadRecordAtCursor(char *buffer, uint16 size, uint16 *lengt
     }
     if (read == 0u)
     {
-        /* End of this file. Whether a later file exists is the housekeeping function's concern, not
-         * this one's. */
+        /* End of this file. If a later one exists the cursor moves to it and the caller retries on its
+         * next pass; if not, the transfer has genuinely caught up.
+         *
+         * This is done here rather than left to housekeeping, which is where a comment in an earlier
+         * revision said it belonged and where it was never implemented. The consequence of the gap was
+         * severe and entirely silent: the cursor is established on the first record ever written and
+         * nothing else moved it, so a vehicle running past midnight drained that first day's file and
+         * then stopped transmitting for the life of the unit. Housekeeping then declined to reclaim the
+         * file -- correctly, since the cursor had not passed it -- so the card filled to capacity and
+         * appends began failing. The visible symptom was a storage fault, which points at the card. */
+        if (FsAbs_AdvanceToNextFile() == E_OK)
+        {
+            return E_PENDING;
+        }
+
         return E_NOT_FOUND;
     }
 
@@ -494,6 +603,29 @@ void FsAbs_MainFunction(void)
     FsAbs_Status.freeMiB = (FsAbs_Status.capacityMiB > FsAbs_Status.usedMiB)
                                ? (FsAbs_Status.capacityMiB - FsAbs_Status.usedMiB)
                                : 0u;
+
+    /* The backlog behind the cursor, in bytes. Published in the health record, and the field was
+     * previously declared and documented but never assigned -- so it read zero always, which is worse
+     * than omitting it: it reports an empty buffer on a unit that may be holding a week of records.
+     *
+     * Only the current file is measured, not every later one. Walking the whole directory to add up the
+     * files ahead would make a cyclic function's cost depend on how long the vehicle has been out of
+     * coverage, which is exactly when the connectivity task is least able to afford it. The figure is
+     * for judging whether the backlog is growing or shrinking, and the current file answers that. */
+    {
+        uint32 size = 0u;
+
+        if ((FsAbs_Cursor.valid != FALSE) &&
+            (FsAbs_PlatformSize(FsAbs_Cursor.fileName, &size) == E_OK))
+        {
+            FsAbs_Status.unsentBytes =
+                (size > FsAbs_Cursor.offset) ? (size - FsAbs_Cursor.offset) : 0u;
+        }
+        else
+        {
+            FsAbs_Status.unsentBytes = 0u;
+        }
+    }
 
     if (FsAbs_Status.freeMiB < (uint32)FSABS_CRITICAL_SPACE_MIB)
     {
