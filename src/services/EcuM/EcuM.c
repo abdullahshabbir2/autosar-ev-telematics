@@ -408,17 +408,35 @@ Std_ReturnType EcuM_Init(void)
         LOG_WARN(MODULE_ID_ECUM, "network skipped: crash-loop degraded mode");
     }
 
+    /* The one genuinely fatal class of startup failure: an ECU missing a task silently stops doing part
+     * of its job, and nothing downstream can tell that apart from a vehicle that is not moving.
+     *
+     * Reported and returned rather than panicked. Three reasons, in order of weight:
+     *
+     *  1. The caller decides what to do. main() resets, and its comment explains why a plain reset rather
+     *     than the flush path -- that path runs through modules whose tasks do not exist. Panicking here
+     *     would make that reasoning dead code, and a reader would take the dead branch for the behaviour.
+     *  2. A returned status is testable; a NORETURN panic is not. The condition that most needs a test is
+     *     the one fatal outcome.
+     *  3. Det_Panic resets immediately, so anything the logging path has buffered is lost -- and this is
+     *     precisely the failure whose log line a reader would want.
+     *
+     * The restart count is already persisted by this point, by the crash-loop bookkeeping near the top of
+     * this function, so the next boot still sees the reset however the caller responds. */
     if (SchM_Init() != E_OK)
     {
-        Det_Panic(MODULE_ID_ECUM, ECUM_API_ID_INIT, ECUM_E_STARTUP_FAILED);
+        LOG_ERROR(MODULE_ID_ECUM, "scheduler could not be initialised");
+        (void)Det_ReportError(MODULE_ID_ECUM, INSTANCE_ID_SINGLE, ECUM_API_ID_INIT,
+                              ECUM_E_STARTUP_FAILED);
+        return E_NOT_OK;
     }
 
     if (SchM_StartTasks() != E_OK)
     {
-        /* The one genuinely fatal startup failure. An ECU missing a task silently stops doing part of its
-         * job, and nothing downstream can tell that apart from a vehicle that is not moving. */
         LOG_ERROR(MODULE_ID_ECUM, "tasks could not be created");
-        Det_Panic(MODULE_ID_ECUM, ECUM_API_ID_INIT, ECUM_E_STARTUP_FAILED);
+        (void)Det_ReportError(MODULE_ID_ECUM, INSTANCE_ID_SINGLE, ECUM_API_ID_INIT,
+                              ECUM_E_STARTUP_FAILED);
+        return E_NOT_OK;
     }
 
     /* Supervision last, now that the tasks genuinely exist. Entities start deactivated, so activating them
