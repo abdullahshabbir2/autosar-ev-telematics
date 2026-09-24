@@ -1,0 +1,31 @@
+# Partition table for the odometer ECU (4 MiB flash).
+#
+# Copyright (c) 2024-2026 Abdullah Shabbir. All rights reserved.
+#
+# Two changes from the v1 table, both required by the layered design:
+#
+#  1. An 8 KiB "nvdata" partition of custom subtype 0x40, which Fls owns outright. Fee builds crash-safe
+#     EEPROM emulation on it and NvM builds CRC-protected, redundant blocks on that. It MUST NOT be shared
+#     with nvs or spiffs: both relocate and rewrite entries as they see fit, which breaks Fee's assumption
+#     that a written record stays where it was put. Two 4 KiB sectors is the minimum that lets Fee
+#     ping-pong, so that a garbage collection never has a moment with no valid copy of a block.
+#
+#  2. spiffs shrinks from 0x30000 to 0x2E000 -- by exactly the 8 KiB nvdata takes -- and still runs to the
+#     end of the device. Nothing in v2 uses SPIFFS -- all bulk data goes to the SD card -- but the partition
+#     is kept, because the OTA rollback path can land on a v1 image, and a v1 image that cannot mount SPIFFS
+#     fails in a way nobody would connect to a partition table change made two releases earlier.
+#
+# The two app slots are unchanged and each hold 1.875 MiB, which is what makes A/B OTA possible: a failed
+# update leaves the previous image bootable in the other slot.
+#
+# Offsets must stay sector-aligned (4 KiB) and the table must not exceed the 4 MiB device. Fls_Init verifies
+# at runtime that the flashed table actually contains nvdata at the expected size, because the table is a
+# separate artefact from the firmware and the two can disagree.
+#
+# Name,     Type, SubType,  Offset,   Size,     Flags
+nvs,        data, nvs,      0x9000,   0x5000,
+otadata,    data, ota,      0xE000,   0x2000,
+app0,       app,  ota_0,    0x10000,  0x1E0000,
+app1,       app,  ota_1,    0x1F0000, 0x1E0000,
+nvdata,     data, 0x40,     0x3D0000, 0x2000,
+spiffs,     data, spiffs,   0x3D2000, 0x2E000,
