@@ -10,8 +10,8 @@
 #ifndef CANIF_CFG_H
 #define CANIF_CFG_H
 
-#include "Can_Cfg.h"
-#include "Std_Types.h"
+#include "mcal/Can/Can_Cfg.h"
+#include "base/Std_Types.h"
 
 #define CANIF_DEV_ERROR_DETECT STD_ON
 

@@ -18,7 +18,7 @@
 #define DIO_CFG_H
 
 #include "Ecu_PinMap.h"
-#include "Std_Types.h"
+#include "base/Std_Types.h"
 
 /** Report an invalid channel ID to Det rather than writing an unmapped pin. */
 #define DIO_DEV_ERROR_DETECT STD_ON

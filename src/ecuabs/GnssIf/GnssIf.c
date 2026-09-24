@@ -7,14 +7,14 @@
  * SPDX-License-Identifier: Proprietary
  */
 
-#include "GnssIf.h"
+#include "ecuabs/GnssIf/GnssIf.h"
 
 #include <string.h>
 
-#include "Dem.h"
-#include "Det.h"
-#include "Gpt.h"
-#include "Uart.h"
+#include "services/Dem/Dem.h"
+#include "services/Det/Det.h"
+#include "mcal/Gpt/Gpt.h"
+#include "mcal/Uart/Uart.h"
 
 /*==================================================================================================
  *  Local data
@@ -559,14 +559,12 @@ Std_ReturnType GnssIf_ParseSentence(const char *sentence, GnssIf_PositionType *p
 
         {
             uint32 date = 0u;
-            uint32 timeOfDay = 0u;
-            sint32 timeScaled;
+            sint32 timeScaled = 0;
 
             if ((GnssIf_FieldToU32(&fields[9], &date) == E_OK) &&
                 (GnssIf_FieldToScaled(&fields[1], 0u, &timeScaled) == E_OK))
             {
-                timeOfDay = (uint32)timeScaled;
-                position->fixUnixTime = GnssIf_ToUnixTime(date, timeOfDay);
+                position->fixUnixTime = GnssIf_ToUnixTime(date, (uint32)timeScaled);
             }
         }
 

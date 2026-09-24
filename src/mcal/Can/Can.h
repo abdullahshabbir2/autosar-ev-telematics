@@ -33,9 +33,9 @@
 #ifndef CAN_H
 #define CAN_H
 
-#include "Autosar_ModuleIds.h"
-#include "Can_Cfg.h"
-#include "Std_Types.h"
+#include "base/Autosar_ModuleIds.h"
+#include "mcal/Can/Can_Cfg.h"
+#include "base/Std_Types.h"
 
 #ifdef __cplusplus
 extern "C" {

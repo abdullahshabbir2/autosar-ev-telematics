@@ -46,11 +46,11 @@
 #ifndef COM_H
 #define COM_H
 
-#include "Autosar_ModuleIds.h"
-#include "Com_Cfg.h"
-#include "GnssIf.h"
-#include "Rs485If.h"
-#include "Std_Types.h"
+#include "base/Autosar_ModuleIds.h"
+#include "services/Com/Com_Cfg.h"
+#include "ecuabs/GnssIf/GnssIf.h"
+#include "ecuabs/Rs485If/Rs485If.h"
+#include "base/Std_Types.h"
 
 #ifdef __cplusplus
 extern "C" {

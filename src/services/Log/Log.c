@@ -10,13 +10,13 @@
  * SPDX-License-Identifier: Proprietary
  */
 
-#include "Log.h"
+#include "services/Log/Log.h"
 
 #include <stdarg.h>
 #include <stdio.h>
 
-#include "Gpt.h"
-#include "Log_Platform.h"
+#include "mcal/Gpt/Gpt.h"
+#include "services/Log/Log_Platform.h"
 
 /*==================================================================================================
  *  Local data

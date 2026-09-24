@@ -478,7 +478,7 @@ omission is recorded rather than left for a reader to wonder about.
 
 An honest assessment of what is well covered and what is not.
 
-**Well covered — 150 host tests, including fault injection:**
+**Well covered — 333 host tests, including fault injection:**
 CRC (all six profiles, exhaustive single-bit detection), the MCP2515 register protocol and
 identifier codec, the RS485 frame codec and transport, flash EEPROM emulation including power-fail
 at the commit byte / mid-payload / mid-garbage-collection, the odometer's integration and

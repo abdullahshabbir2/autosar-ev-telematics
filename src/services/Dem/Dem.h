@@ -42,9 +42,9 @@
 #ifndef DEM_H
 #define DEM_H
 
-#include "Autosar_ModuleIds.h"
-#include "Dem_Cfg.h"
-#include "Std_Types.h"
+#include "base/Autosar_ModuleIds.h"
+#include "services/Dem/Dem_Cfg.h"
+#include "base/Std_Types.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -181,6 +181,7 @@ CHECK_RETURN Std_ReturnType Dem_SetEventStatus(Dem_EventIdType eventId, uint8 in
 
 /**
  * @brief Read @p eventId's UDS status byte.
+ * @param[in]  eventId   Configured event.
  * @param[out] udsStatus Destination.
  * @return E_OK on success; E_NOT_OK for an unknown event or a NULL pointer.
  */
@@ -188,7 +189,8 @@ CHECK_RETURN Std_ReturnType Dem_GetEventStatus(Dem_EventIdType eventId, uint8 *u
 
 /**
  * @brief Read everything Dem holds about @p eventId.
- * @param[out] record Destination.
+ * @param[in]  eventId Configured event.
+ * @param[out] record  Destination.
  */
 CHECK_RETURN Std_ReturnType Dem_GetEventRecord(Dem_EventIdType eventId,
                                                Dem_EventRecordType *record);

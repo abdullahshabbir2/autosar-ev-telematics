@@ -7,10 +7,10 @@
  * SPDX-License-Identifier: Proprietary
  */
 
-#include "OdoSwc.h"
+#include "app/OdoSwc/OdoSwc.h"
 
-#include "Det.h"
-#include "NvM.h"
+#include "services/Det/Det.h"
+#include "services/NvM/NvM.h"
 
 /*==================================================================================================
  *  Local data
@@ -190,7 +190,6 @@ Std_ReturnType OdoSwc_ProcessSpeedSample(uint16 motorRpm, Gpt_TimestampType samp
                                          OdoSwc_SampleResultType *result)
 {
     OdoSwc_SampleResultType outcome = ODO_SAMPLE_ACCEPTED;
-    uint32 deltaMs;
 
     DET_CHECK_RETURN(OdoSwc_Initialised != FALSE, MODULE_ID_ODOSWC, INSTANCE_ID_SINGLE,
                      ODOSWC_API_ID_PROCESS_SAMPLE, ODOSWC_E_UNINIT, E_NOT_OK);
@@ -225,7 +224,10 @@ Std_ReturnType OdoSwc_ProcessSpeedSample(uint16 motorRpm, Gpt_TimestampType samp
     }
     else
     {
-        deltaMs = (uint32)(sampleTime - OdoSwc_LastSampleTime);
+        /* Declared here rather than at the top of the function: it has no meaning outside this branch,
+         * and the narrower scope is what stops a later edit reading it on the first-sample path where it
+         * would hold nothing. Wrap-safe subtraction, per CS-TIME-01. */
+        const uint32 deltaMs = (uint32)(sampleTime - OdoSwc_LastSampleTime);
 
         if (deltaMs == 0u)
         {

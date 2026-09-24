@@ -39,8 +39,11 @@ REQUIREMENTS = DOCS_ROOT / "01-requirements.md"
 # [text](target) -- the target group stops at whitespace or a closing paren.
 LINK_RE = re.compile(r"\[(?P<text>[^\]]*)\]\((?P<target>[^)\s]+)(?:\s+\"[^\"]*\")?\)")
 HEADING_RE = re.compile(r"^(?P<hashes>#{1,6})\s+(?P<title>.+?)\s*#*$", re.MULTILINE)
-# Area prefixes are three or four letters (SYS, ODO, DIAG, ...).
-REQ_RE = re.compile(r"\bSWREQ-[A-Z]{3,4}-\d{4}\b")
+# Area prefixes are two to four letters. Two matters: config/Ecu_PinMap.h once cited
+# `SWREQ-HW-0001 .. SWREQ-HW-0006`, an area with no requirements defined anywhere, and a
+# three-letter minimum silently ignored it -- so the checker reported everything resolving
+# while a whole undefined area sat in a header.
+REQ_RE = re.compile(r"\bSWREQ-[A-Z]{2,4}-\d{4}\b")
 
 # Fenced code blocks, so a link inside an example is not treated as a real one.
 FENCE_RE = re.compile(r"^```.*?^```", re.MULTILINE | re.DOTALL)

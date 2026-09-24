@@ -12,7 +12,7 @@
  * Strict request/response, master-initiated, no unsolicited traffic. Every frame is
  * @c 0xFF, a direction byte, a 16-bit length, a type byte, a 32-bit pack serial number,
  * a command, a payload, and a CRC-16/CCITT-FALSE transmitted most-significant byte first.
- * The full byte-level specification is in @ref docs/08-protocols.md.
+ * The full byte-level specification is in [08-protocols.md.](docs/08-protocols.md.)
  *
  * @par Four defects in the v1 implementation that this interface prevents
  *
@@ -55,9 +55,9 @@
 #ifndef RS485IF_H
 #define RS485IF_H
 
-#include "Autosar_ModuleIds.h"
-#include "Rs485If_Cfg.h"
-#include "Std_Types.h"
+#include "base/Autosar_ModuleIds.h"
+#include "ecuabs/Rs485If/Rs485If_Cfg.h"
+#include "base/Std_Types.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -166,7 +166,7 @@ typedef uint8 Rs485If_SlotType;
  *          4300 -> 43.00 A, temperature 3500 -> 35.00 degC) but which prove nothing about
  *          the real device. Scaling is applied in exactly one place -- BattSwc's
  *          conversion table -- and is flagged as an open item in
- *          @ref docs/08-protocols.md. It must be confirmed against the BMS datasheet or a
+ *          [08-protocols.md.](docs/08-protocols.md.) It must be confirmed against the BMS datasheet or a
  *          bus capture before any engineering-unit value is relied upon. Until then the
  *          raw integers are the authoritative record, which is why they are what gets
  *          logged.

@@ -33,9 +33,9 @@
 #ifndef TIMEABS_H
 #define TIMEABS_H
 
-#include "Autosar_ModuleIds.h"
-#include "Std_Types.h"
-#include "TimeAbs_Cfg.h"
+#include "base/Autosar_ModuleIds.h"
+#include "base/Std_Types.h"
+#include "ecuabs/TimeAbs/TimeAbs_Cfg.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -58,10 +58,10 @@
 #ifndef ODOSWC_H
 #define ODOSWC_H
 
-#include "Autosar_ModuleIds.h"
-#include "Gpt.h"
-#include "OdoSwc_Cfg.h"
-#include "Std_Types.h"
+#include "base/Autosar_ModuleIds.h"
+#include "mcal/Gpt/Gpt.h"
+#include "app/OdoSwc/OdoSwc_Cfg.h"
+#include "base/Std_Types.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -15,11 +15,11 @@
  * SPDX-License-Identifier: Proprietary
  */
 
-#include "Can.h"
+#include "mcal/Can/Can.h"
 
-#include "Det.h"
-#include "Gpt.h"
-#include "Spi.h"
+#include "services/Det/Det.h"
+#include "mcal/Gpt/Gpt.h"
+#include "mcal/Spi/Spi.h"
 
 /*==================================================================================================
  *  MCP2515 SPI instruction set (datasheet table 12-1)

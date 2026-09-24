@@ -10,7 +10,7 @@
 #ifndef WDG_CFG_H
 #define WDG_CFG_H
 
-#include "Std_Types.h"
+#include "base/Std_Types.h"
 
 #define WDG_DEV_ERROR_DETECT STD_ON
 

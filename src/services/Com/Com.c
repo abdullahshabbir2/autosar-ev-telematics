@@ -7,11 +7,11 @@
  * SPDX-License-Identifier: Proprietary
  */
 
-#include "Com.h"
+#include "services/Com/Com.h"
 
 #include <string.h>
 
-#include "Det.h"
+#include "services/Det/Det.h"
 
 /*==================================================================================================
  *  Local data

@@ -35,9 +35,9 @@
 #ifndef UART_H
 #define UART_H
 
-#include "Autosar_ModuleIds.h"
-#include "Std_Types.h"
-#include "Uart_Cfg.h"
+#include "base/Autosar_ModuleIds.h"
+#include "base/Std_Types.h"
+#include "mcal/Uart/Uart_Cfg.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -158,6 +158,10 @@ CHECK_RETURN Std_ReturnType Uart_Read(Uart_InstanceType instance, uint8 *buffer,
  * pack, four packs, which is 12 s of the 3 s acquisition budget spent waiting for data
  * that had already arrived.
  *
+ * @param[in]  instance     Instance to read.
+ * @param[out] buffer       Destination.
+ * @param[in]  length       Exact number of bytes wanted.
+ * @param[in]  timeoutMs    Deadline for the whole read.
  * @param[out] actualLength Bytes received, valid on both E_OK and E_TIMEOUT so that a
  *                          caller can log how much of a truncated frame arrived.
  * @return E_OK if @p length bytes arrived; E_TIMEOUT if the deadline passed first;
@@ -191,7 +195,8 @@ CHECK_RETURN Std_ReturnType Uart_DrainTx(Uart_InstanceType instance, uint32 time
 
 /**
  * @brief Read the per-instance counters.
- * @param[out] stats Destination. E_NOT_OK if NULL_PTR or the instance is unknown.
+ * @param[in]  instance Instance to report on.
+ * @param[out] stats    Destination. E_NOT_OK if NULL_PTR or the instance is unknown.
  */
 CHECK_RETURN Std_ReturnType Uart_GetStatistics(Uart_InstanceType instance,
                                                Uart_StatisticsType *stats);

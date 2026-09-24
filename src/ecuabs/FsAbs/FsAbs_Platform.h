@@ -46,7 +46,11 @@ CHECK_RETURN Std_ReturnType FsAbs_PlatformAppend(const char *path, const uint8 *
 
 /**
  * @brief Read up to @p size bytes from @p path at @p offset.
- * @param[out] read Bytes actually read; 0 at end of file.
+ * @param[in]  path   File to read.
+ * @param[in]  offset Byte offset to read from.
+ * @param[out] buffer Destination.
+ * @param[in]  size   Capacity of @p buffer.
+ * @param[out] read   Bytes actually read; 0 at end of file.
  */
 CHECK_RETURN Std_ReturnType FsAbs_PlatformRead(const char *path, uint32 offset, uint8 *buffer,
                                                uint32 size, uint32 *read);

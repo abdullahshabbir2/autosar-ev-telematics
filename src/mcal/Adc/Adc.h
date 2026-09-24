@@ -32,9 +32,9 @@
 #ifndef ADC_H
 #define ADC_H
 
-#include "Adc_Cfg.h"
-#include "Autosar_ModuleIds.h"
-#include "Std_Types.h"
+#include "mcal/Adc/Adc_Cfg.h"
+#include "base/Autosar_ModuleIds.h"
+#include "base/Std_Types.h"
 
 #ifdef __cplusplus
 extern "C" {

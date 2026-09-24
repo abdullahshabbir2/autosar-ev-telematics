@@ -10,9 +10,9 @@
 #ifndef IOHWAB_CFG_H
 #define IOHWAB_CFG_H
 
-#include "Adc_Cfg.h"
-#include "Dio_Cfg.h"
-#include "Std_Types.h"
+#include "mcal/Adc/Adc_Cfg.h"
+#include "mcal/Dio/Dio_Cfg.h"
+#include "base/Std_Types.h"
 
 #define IOHWAB_DEV_ERROR_DETECT STD_ON
 

@@ -7,12 +7,12 @@
  * SPDX-License-Identifier: Proprietary
  */
 
-#include "Dem.h"
+#include "services/Dem/Dem.h"
 
 #include <string.h>
 
-#include "Det.h"
-#include "Gpt.h"
+#include "services/Det/Det.h"
+#include "mcal/Gpt/Gpt.h"
 
 /*==================================================================================================
  *  Event descriptor table

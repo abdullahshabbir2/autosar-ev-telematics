@@ -75,7 +75,7 @@ Five reasons, in the order they actually influenced the decision:
   oversampling testable, but on the happy path it is two extra calls.
 - Terminology that has to be learned. `Fee` is not an obvious name for flash EEPROM emulation.
 
-**What it bought.** 183 host tests across 10 suites, all compiled with `-Werror` and eleven warning
+**What it bought.** 333 host tests across 16 suites, all compiled with `-Werror` and eleven warning
 flags, exercising the real implementation rather than a reimplementation of it. Four hardware conflicts
 turned into build errors. A diagnostic record that survives a power cycle. And, measurably, defects
 found: the test suites written against this structure found a silent-failure bug in `NvM` and a

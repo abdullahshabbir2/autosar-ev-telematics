@@ -30,8 +30,8 @@
 #ifndef GPT_H
 #define GPT_H
 
-#include "Autosar_ModuleIds.h"
-#include "Std_Types.h"
+#include "base/Autosar_ModuleIds.h"
+#include "base/Std_Types.h"
 
 #ifdef __cplusplus
 extern "C" {

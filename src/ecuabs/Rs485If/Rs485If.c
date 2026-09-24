@@ -7,13 +7,13 @@
  * SPDX-License-Identifier: Proprietary
  */
 
-#include "Rs485If.h"
+#include "ecuabs/Rs485If/Rs485If.h"
 
-#include "Crc.h"
-#include "Det.h"
-#include "Dio.h"
-#include "Gpt.h"
-#include "Uart.h"
+#include "services/Crc/Crc.h"
+#include "services/Det/Det.h"
+#include "mcal/Dio/Dio.h"
+#include "mcal/Gpt/Gpt.h"
+#include "mcal/Uart/Uart.h"
 
 /*==================================================================================================
  *  Frame field offsets
@@ -102,7 +102,7 @@ STATIC sint16 Rs485If_ToS16(uint16 raw)
     return (raw <= 0x7FFFu) ? (sint16)raw : (sint16)((sint32)raw - 65536L);
 }
 
-/** @copydoc Rs485If_ToS16 */
+/** As ::Rs485If_ToS16, for a 32-bit field: reinterpret the raw value as two's complement. */
 STATIC sint32 Rs485If_ToS32(uint32 raw)
 {
     return (raw <= 0x7FFFFFFFuL) ? (sint32)raw : (sint32)(-(sint32)(0xFFFFFFFFuL - raw) - 1L);

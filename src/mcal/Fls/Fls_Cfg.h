@@ -10,7 +10,7 @@
 #ifndef FLS_CFG_H
 #define FLS_CFG_H
 
-#include "Std_Types.h"
+#include "base/Std_Types.h"
 
 #define FLS_DEV_ERROR_DETECT STD_ON
 

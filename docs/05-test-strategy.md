@@ -7,8 +7,8 @@ behaviour is actually verified. Assumes you have read [02-architecture.md](02-ar
 
 ## 1. The claim, and what backs it
 
-150 tests across 8 suites, all passing, compiled with `-Werror` and eleven warning flags. That
-number on its own is worth very little — it is possible to write 150 tests that verify nothing. What
+333 tests across 16 suites, all passing, compiled with `-Werror` and eleven warning flags. That
+number on its own is worth very little — it is possible to write 333 tests that verify nothing. What
 matters is three properties of *how* they are built:
 
 1. **They test the real implementation, not a reimplementation of it.** Every suite links the actual
@@ -24,6 +24,20 @@ matters is three properties of *how* they are built:
    deterministic.
 
 That third point is the one most often skipped, so it gets its own section below.
+
+**Requirement coverage.** Every requirement that a module claims to implement now has at least one test
+citing it: [06-traceability.md](06-traceability.md) reports 125 of 129 implemented and tested, with zero
+implemented-but-untested. The remaining four are the `SWREQ-SEC` requirements, which are verified by CI
+and by process rather than by any module — no `@req` tag claims them, and the matrix says so rather than
+quietly counting them as covered.
+
+That figure is worth reading carefully. It means no module asserts a requirement that nothing checks; it
+does **not** mean every line is exercised, and it says nothing about the platform leaves. §7 is the honest
+account of what is not covered.
+
+**Four production defects were found by writing these tests**, not by inspection: two needed fault
+injection and two needed only ordinary operation over a longer span than any earlier test had spent. §4
+has all four.
 
 ---
 
@@ -57,6 +71,27 @@ conversion are all on the tested side.
 
 | Suite | Tests | What it establishes |
 |---|---|---|
+| `test_crc` | 12 | All six AUTOSAR CRC profiles against their published check values |
+| `test_can` | 15 | MCP2515 identifier encoding, register sequences, frame decode |
+| `test_rs485` | 28 | Battery frame build and parse, CRC, timeouts, malformed input |
+| `test_fee` | 18 | Crash-safe commit and garbage collection under fault injection |
+| `test_nvm` | 19 | RAM mirrors, defaults, write-on-change, integrity, immediate vs deferred |
+| `test_odo` | 18 | Integer distance accumulation, plausibility gates, persistence |
+| `test_diag` | 21 | Dem debouncing, healing, freeze frames; WdgM supervision |
+| `test_batt` | 14 | Pack aggregation over responders only, cell imbalance, absent-pack handling |
+| `test_sensors` | 21 | CAN signal decode and freshness, NMEA parsing |
+| `test_hmi` | 22 | Indicator independence and patterns; ADC conditioning and scaling |
+| `test_time` | 22 | Calendar arithmetic including 2100, plausibility, sync policy |
+| `test_com` | 17 | Record serialisation, chunk planning, backfill parsing |
+| `test_telem` | 22 | Record framing and CRC, store-then-send, backlog drain across files, housekeeping |
+| `test_core` | 26 | Wrap-safe elapsed time, Det deduplication and bounds, Uart discard vs drain |
+| `test_net` | 24 | One session machine over both bearers, backoff, bearer arbitration and retry |
+| `test_system` | 34 | Startup and degraded modes, crash-loop detection, dispatch and budgets, SPI ownership, reduced UDS |
+
+Four of these — `test_nvm`, `test_fee`, `test_telem` and `test_net` — found production defects rather
+than confirming behaviour. §4 has all four.
+
+---|---|---|
 | `test_crc` | 12 | All six AUTOSAR CRC profiles against their published check values |
 | `test_can` | 15 | MCP2515 identifier encoding, register sequences, frame decode |
 | `test_rs485` | 28 | Battery frame build and parse, CRC, timeouts, malformed input |
@@ -166,6 +201,75 @@ The consequence: every brand-new unit whose first odometer write was interrupted
 storage fault and refuse to use its configured default. The fix moves `sawBlock = TRUE` into the
 valid and invalid branches only, so an uncommitted record leaves the block looking as unwritten as it
 actually is.
+
+### A second real bug: the backlog stopped draining after midnight
+
+`test_telem` found the most consequential of the three, and it needed no fault injection at all — only
+two days of records instead of one.
+
+`FsAbs_AppendRecord` establishes the transfer cursor on the first record ever written. Nothing ever
+moved it to another file. `FsAbs_ReadRecordAtCursor` returned "nothing available" at end of file, with
+a comment saying a later file was the housekeeping function's concern — and housekeeping did not do it.
+
+The consequences compound:
+
+1. A vehicle running past midnight drained the first day's file and then stopped transmitting. Every
+   record in every later file was unreachable for the life of the unit.
+2. Housekeeping then declined to reclaim that file — correctly, because the cursor had not passed it
+   and deleting unsent data to make room for new data loses what cannot be recovered.
+3. So the card filled to capacity and appends began failing. The visible symptom is a storage fault,
+   which points at the card rather than at a cursor that never moved.
+
+SWREQ-TEL-0040 requires the backlog to drain. It was met within one file and nowhere beyond it. The fix
+adds `FsAbs_PlatformFindNextLog` and a crossing step reported as `E_PENDING`, so the caller treats it as
+one unit of work on a budgeted task rather than having a directory walk happen invisibly inside what
+looked like a single record read.
+
+Two smaller findings came with it. The CSV header that opens each file was being read as a corrupt
+record, inflating `corruptRecords` by one per file per day on every healthy unit — which makes the one
+counter capable of warning that a card is failing useless, because its baseline is nonzero and always
+growing. And `unsentBytes` was declared, documented and published in the health record while nothing
+ever assigned it, so it read zero always: worse than omitting it, because it reports an empty buffer on
+a unit that may be holding a week of records.
+
+None of the three is reachable by inspection. All three are obvious the moment something writes records
+on two different days and then tries to read them back.
+
+### A third real bug: the fallback to cellular was permanent
+
+`test_net` found it, and like the backlog defect it needed no fault injection — only more virtual time
+than any earlier test had spent.
+
+ComM falls back from WiFi to cellular after `COMM_FAILURE_LIMIT` failed attempts. Returning to WiFi was
+gated on `wifiFailures < COMM_FAILURE_LIMIT` — and that count reaches the limit *precisely because* WiFi
+failed. Nothing cleared it while cellular was working: the only resets were `ComM_Init`, both bearers
+being exhausted inside `ComM_ChooseBearer` (not reached while a session is up), and "the bearer carrying
+traffic is WiFi", which cannot happen while the return is blocked.
+
+So the fallback was permanent for the life of the run. A vehicle that failed WiFi leaving its depot, ran
+on GPRS all day and parked back at the depot sat beside a healthy access point paying for cellular data
+until someone power-cycled it. Every day, on every vehicle — a recurring cost, not a one-off fault.
+
+**The first fix attempt was wrong, and the stub is what showed it.** The obvious repair is to ask whether
+WiFi is available again. But `NetIf_PlatformWifiIsUp` in the double returns TRUE only if a connect was
+*requested* and the network is present — which is faithful to the hardware: an 802.11 station has no
+usable link until it has been told to associate. So "is WiFi back" is unanswerable about a radio that is
+not in use, and a `NetIf_BearerAvailable` that reported FALSE for every unused bearer would have looked
+like a fix and changed nothing. A stub that had simply returned a flag would have let that through.
+
+The fix is a timed decay: after `COMM_PREFERRED_RETRY_MS` on the fallback bearer, the preferred bearer's
+allowance is restored so it is selected and tried in the ordinary way. What is restored is the
+*allowance*, not the bearer — a WiFi that is still absent fails its allowance again and falls back,
+bounding the cost at one attempt window per retry interval.
+
+That also made the separate 30-second switch-back hysteresis redundant: a marginal link cannot oscillate
+faster than once per retry interval whatever it does. `COMM_WIFI_STABLE_MS` was removed rather than left
+in the configuration carrying a derivation for behaviour that no longer existed.
+
+The test that covers the absent case asserts the switching *rate* stays bounded, and deliberately does
+not assert which bearer the unit ends on — with WiFi permanently out of range the unit legitimately
+alternates, and pinning the end state would make the test depend on how the loop's arithmetic happened to
+land rather than on the property being claimed.
 
 ### Malformed external input
 

@@ -15,7 +15,7 @@
 #ifndef COMPILER_H
 #define COMPILER_H
 
-#include "Compiler_Cfg.h"
+#include "base/Compiler_Cfg.h"
 
 /*==================================================================================================
  *  Published information
@@ -60,9 +60,22 @@
 #define INLINE
 #endif
 
-/** Abstraction of the @c NULL pointer constant (SWS_COMPILER_00051). */
+/**
+ * @brief Abstraction of the @c NULL pointer constant (SWS_COMPILER_00051).
+ *
+ * `(void *)0` in C, `nullptr` in C++. The distinction is not cosmetic: C++ refuses to convert `void *` to a
+ * function pointer, so the C form cannot initialise a callback member -- which every platform leaf that
+ * registers a callback has. `nullptr` converts to any pointer type, including a function pointer, and is also
+ * what lets a comparison against an overloaded type (an Arduino `File`, say) resolve unambiguously.
+ *
+ * Both forms compare equal to a null pointer of any type, so no call site has to know which it got.
+ */
 #ifndef NULL_PTR
+#ifdef __cplusplus
+#define NULL_PTR nullptr
+#else
 #define NULL_PTR ((void *)0)
+#endif
 #endif
 
 /**

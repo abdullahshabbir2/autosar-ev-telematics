@@ -5,7 +5,7 @@
 # Six jobs. The first two are the ones that would actually have caught defects in this project's
 # history, so they run first and the rest depend on nothing.
 #
-#   host-tests      150 tests, -Werror, on Linux -- where the filesystem is case-sensitive
+#   host-tests      every suite, -Werror, on Linux -- where the filesystem is case-sensitive
 #   firmware-build  the target image, and its size against the partition budget
 #   generators      the CRC and RS485 reference models still agree with the committed vectors
 #   static-analysis cppcheck with a MISRA-informed rule set
@@ -36,7 +36,7 @@ concurrency:
 jobs:
   # ================================================================================================
   host-tests:
-    name: Host tests (150 tests, -Werror)
+    name: Host tests (-Werror, 11 warning flags)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -175,8 +175,13 @@ jobs:
           # parse usefully without the whole framework include tree -- and the result would be pages
           # of findings in code this project does not own, which is how a static analysis gate stops
           # being read.
+          # --check-level=exhaustive because the default stops analysing branches part way through a
+          # function and says so in an informational message. The full analysis takes under a minute
+          # on this codebase; running the tool and ignoring what it asked for would be worse than not
+          # running it at all.
           cppcheck \
             --enable=warning,style,performance,portability \
+            --check-level=exhaustive \
             --inline-suppr \
             --std=c11 \
             --platform=unix32 \
@@ -232,9 +237,18 @@ jobs:
       - name: Build the API documentation, warnings as errors
         run: |
           set -euo pipefail
-          # WARN_AS_ERROR catches an @param naming an argument that no longer exists, a @ref to a
-          # renamed symbol, and an undocumented public function. All three are the ways documentation
-          # rots without anyone noticing it has.
+          # WARN_AS_ERROR is set to FAIL_ON_WARNINGS in the Doxyfile, and what it gates is the class of
+          # problem that cannot be a matter of taste: an @param naming an argument that does not exist, a
+          # reference to a file or symbol that is not there, a partially documented parameter list. Each
+          # of those is simply wrong, and each is how documentation rots without anyone noticing.
+          #
+          # WARN_IF_UNDOCUMENTED is deliberately off. With it on, doxygen wanted a prose comment on every
+          # #define -- the MCP2515 register names, the per-module API identifiers, the error codes -- which
+          # is roughly 880 warnings for a bar this project does not hold, since those names come from a
+          # datasheet and are their own documentation. A gate that fires 880 times is a gate nobody reads.
+          #
+          # Setting this up found a stale @param naming an argument that had been renamed, two references
+          # to files that do not exist, and a @req citing a requirement area with nothing defined in it.
           doxygen Doxyfile 2>&1 | tee doxygen.log
           if grep -qE '^.*(warning|error):' doxygen.log; then
             echo "::error::Doxygen reported warnings. See the log above."

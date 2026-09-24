@@ -10,7 +10,7 @@
  * SPDX-License-Identifier: Proprietary
  */
 
-#include "Mcu.h"
+#include "mcal/Mcu/Mcu.h"
 
 const char *Mcu_GetResetReasonName(Mcu_ResetReasonType reason)
 {

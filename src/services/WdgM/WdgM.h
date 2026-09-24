@@ -45,9 +45,9 @@
 #ifndef WDGM_H
 #define WDGM_H
 
-#include "Autosar_ModuleIds.h"
-#include "Std_Types.h"
-#include "WdgM_Cfg.h"
+#include "base/Autosar_ModuleIds.h"
+#include "base/Std_Types.h"
+#include "services/WdgM/WdgM_Cfg.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -188,7 +188,8 @@ void WdgM_MainFunction(void);
 
 /**
  * @brief Read @p entityId's status.
- * @param[out] status Destination.
+ * @param[in]  entityId Supervised entity to report on.
+ * @param[out] status   Destination.
  */
 CHECK_RETURN Std_ReturnType WdgM_GetLocalStatus(WdgM_SupervisedEntityIdType entityId,
                                                 WdgM_EntityStatusType *status);

@@ -10,8 +10,8 @@
 #ifndef HMISWC_CFG_H
 #define HMISWC_CFG_H
 
-#include "IoHwAb_Cfg.h"
-#include "Std_Types.h"
+#include "ecuabs/IoHwAb/IoHwAb_Cfg.h"
+#include "base/Std_Types.h"
 
 #define HMISWC_DEV_ERROR_DETECT STD_ON
 

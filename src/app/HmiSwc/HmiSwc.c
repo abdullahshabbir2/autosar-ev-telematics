@@ -7,10 +7,10 @@
  * SPDX-License-Identifier: Proprietary
  */
 
-#include "HmiSwc.h"
+#include "app/HmiSwc/HmiSwc.h"
 
-#include "Det.h"
-#include "Gpt.h"
+#include "services/Det/Det.h"
+#include "mcal/Gpt/Gpt.h"
 
 /*==================================================================================================
  *  Local data

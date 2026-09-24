@@ -11,10 +11,10 @@
  * SPDX-License-Identifier: Proprietary
  */
 
-#include "Uart.h"
+#include "mcal/Uart/Uart.h"
 
-#include "Det.h"
-#include "Gpt.h"
+#include "services/Det/Det.h"
+#include "mcal/Gpt/Gpt.h"
 
 /**
  * @brief Poll interval while waiting for bytes, in milliseconds.

@@ -21,7 +21,7 @@
  *
  * @par Why development-error detection stays enabled in production here
  * AUTOSAR expects @c DetEnableDevErrorDetect to be switched off for series
- * production. This ECU keeps it on (see @ref docs/adr/0004-keep-det-in-production.md):
+ * production. This ECU keeps it on (see [ADR-0004](docs/adr/0004-keep-det-enabled-in-production.md)):
  * the units are field-deployed on vehicles with no debug access, the checks cost
  * ~1.4 KiB of flash and a handful of cycles on paths that are not
  * throughput-critical, and a report reaching the cloud is the only realistic way a
@@ -40,9 +40,9 @@
 #ifndef DET_H
 #define DET_H
 
-#include "Autosar_ModuleIds.h"
-#include "Det_Cfg.h"
-#include "Std_Types.h"
+#include "base/Autosar_ModuleIds.h"
+#include "services/Det/Det_Cfg.h"
+#include "base/Std_Types.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -148,7 +148,19 @@ Std_ReturnType Det_ReportRuntimeError(uint16 moduleId, uint8 instanceId, uint8 a
 
 /**
  * @brief Report a fault from which the caller has already recovered.
- * @copydetails Det_ReportError
+ *
+ * Recorded for statistics only: by the time this is called the condition is over, so there is nothing for
+ * a caller to act on. The value is in the count -- a bus that recovers from a fault fifty times an hour is
+ * failing even though every individual exchange succeeded.
+ *
+ * Documented in full rather than copied from ::Det_ReportError. The copy named a parameter `errorId` where
+ * this function's is `faultId`, so the documentation told a reader to pass something that does not exist.
+ *
+ * @param moduleId   Reporting module, see Autosar_ModuleIds.h.
+ * @param instanceId Which instance of that module.
+ * @param apiId      Which API of that module.
+ * @param faultId    Module-specific fault code.
+ * @return E_OK if the report was recorded.
  */
 Std_ReturnType Det_ReportTransientFault(uint16 moduleId, uint8 instanceId, uint8 apiId,
                                         uint8 faultId);

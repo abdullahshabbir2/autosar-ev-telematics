@@ -7,14 +7,14 @@
  * SPDX-License-Identifier: Proprietary
  */
 
-#include "WdgM.h"
+#include "services/WdgM/WdgM.h"
 
 #include <string.h>
 
-#include "Dem.h"
-#include "Det.h"
-#include "Gpt.h"
-#include "Wdg.h"
+#include "services/Dem/Dem.h"
+#include "services/Det/Det.h"
+#include "mcal/Gpt/Gpt.h"
+#include "mcal/Wdg/Wdg.h"
 
 /*==================================================================================================
  *  Entity configuration table

@@ -15,8 +15,8 @@
 #ifndef WDGM_CFG_H
 #define WDGM_CFG_H
 
-#include "Std_Types.h"
-#include "Wdg_Cfg.h"
+#include "base/Std_Types.h"
+#include "mcal/Wdg/Wdg_Cfg.h"
 
 #define WDGM_DEV_ERROR_DETECT STD_ON
 

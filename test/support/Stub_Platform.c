@@ -285,6 +285,53 @@ Std_ReturnType FsAbs_PlatformRemove(const char *path)
     return E_OK;
 }
 
+Std_ReturnType FsAbs_PlatformFindNextLog(const char *after, char *buffer, uint16 size)
+{
+    const Stub_FsFileType *best = NULL_PTR;
+    uint8 i;
+
+    if ((after == NULL_PTR) || (buffer == NULL_PTR) || (size == 0u))
+    {
+        return E_NOT_OK;
+    }
+
+    /* Smallest name strictly greater than `after`. Strictly, so a cursor on a drained file cannot pick
+     * that same file again and livelock. */
+    for (i = 0u; i < STUB_FS_MAX_FILES; i++)
+    {
+        if (Stub_FsFiles[i].used == FALSE)
+        {
+            continue;
+        }
+        if (strstr(Stub_FsFiles[i].path, ".csv") == NULL_PTR)
+        {
+            continue;
+        }
+        if (strcmp(Stub_FsFiles[i].path, after) <= 0)
+        {
+            continue;
+        }
+        if ((best == NULL_PTR) || (strcmp(Stub_FsFiles[i].path, best->path) < 0))
+        {
+            best = &Stub_FsFiles[i];
+        }
+    }
+
+    if (best == NULL_PTR)
+    {
+        return E_NOT_FOUND;
+    }
+    if (strlen(best->path) >= size)
+    {
+        return E_NOT_OK;
+    }
+
+    (void)memset(buffer, 0, size);
+    (void)strcpy(buffer, best->path);
+
+    return E_OK;
+}
+
 Std_ReturnType FsAbs_PlatformFindOldestLog(char *buffer, uint16 size)
 {
     const Stub_FsFileType *oldest = NULL_PTR;

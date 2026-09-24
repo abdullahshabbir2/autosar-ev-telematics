@@ -45,10 +45,10 @@
 #ifndef HMISWC_H
 #define HMISWC_H
 
-#include "Autosar_ModuleIds.h"
-#include "HmiSwc_Cfg.h"
-#include "IoHwAb.h"
-#include "Std_Types.h"
+#include "base/Autosar_ModuleIds.h"
+#include "app/HmiSwc/HmiSwc_Cfg.h"
+#include "ecuabs/IoHwAb/IoHwAb.h"
+#include "base/Std_Types.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -128,7 +128,8 @@ void HmiSwc_MainFunction(void);
 
 /**
  * @brief Read @p indicator's state.
- * @param[out] state Destination.
+ * @param[in]  indicator Which indicator to read.
+ * @param[out] state     Destination.
  */
 CHECK_RETURN Std_ReturnType HmiSwc_GetState(IoHwAb_IndicatorType indicator,
                                             HmiSwc_IndicatorStateType *state);

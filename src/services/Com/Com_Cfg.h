@@ -10,8 +10,8 @@
 #ifndef COM_CFG_H
 #define COM_CFG_H
 
-#include "Rs485If_Cfg.h"
-#include "Std_Types.h"
+#include "ecuabs/Rs485If/Rs485If_Cfg.h"
+#include "base/Std_Types.h"
 
 #define COM_DEV_ERROR_DETECT STD_ON
 

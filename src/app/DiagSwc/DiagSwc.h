@@ -11,7 +11,7 @@
  * the ECU already has, and there is no tester on the vehicle. What is kept is the part that carries the
  * meaning -- the service identifiers, the DTC format and the negative-response codes -- so anyone who
  * has worked with UDS reads this without a translation table, and so a later migration to real UDS is a
- * transport change rather than a redesign. The subset is specified in @ref docs/08-protocols.md.
+ * transport change rather than a redesign. The subset is specified in [08-protocols.md.](docs/08-protocols.md.)
  *
  * @par Why the record must survive a power cycle
  * v1's diagnostic state was a `byte flags[15]` array, overwritten every cycle and gone on reset. A unit

@@ -7,13 +7,13 @@
  * SPDX-License-Identifier: Proprietary
  */
 
-#include "CanIf.h"
+#include "ecuabs/CanIf/CanIf.h"
 
 #include <string.h>
 
-#include "Dem.h"
-#include "Det.h"
-#include "Gpt.h"
+#include "services/Dem/Dem.h"
+#include "services/Det/Det.h"
+#include "mcal/Gpt/Gpt.h"
 
 /*==================================================================================================
  *  Local data

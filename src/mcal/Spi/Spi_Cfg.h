@@ -11,7 +11,7 @@
 #define SPI_CFG_H
 
 #include "Ecu_PinMap.h"
-#include "Std_Types.h"
+#include "base/Std_Types.h"
 
 #define SPI_DEV_ERROR_DETECT STD_ON
 

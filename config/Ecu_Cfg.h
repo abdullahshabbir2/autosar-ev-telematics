@@ -10,7 +10,7 @@
  * `include/config.h`. Both are in the repository's history permanently, and anyone with read access to the
  * source had write access to the fleet's database. Credentials now come from `config/Secrets.h`, which is
  * git-ignored and generated from `Secrets.h.template`; the build fails with an explanatory message if it
- * is missing. See @ref docs/09-operations.md for the provisioning procedure.
+ * is missing. See [09-operations.md](docs/09-operations.md) for the provisioning procedure.
  *
  * @copyright
  * Copyright (c) 2024-2026 Abdullah Shabbir. All rights reserved.

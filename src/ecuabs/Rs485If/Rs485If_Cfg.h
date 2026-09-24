@@ -10,8 +10,8 @@
 #ifndef RS485IF_CFG_H
 #define RS485IF_CFG_H
 
-#include "Std_Types.h"
-#include "Uart_Cfg.h"
+#include "base/Std_Types.h"
+#include "mcal/Uart/Uart_Cfg.h"
 
 #define RS485IF_DEV_ERROR_DETECT STD_ON
 

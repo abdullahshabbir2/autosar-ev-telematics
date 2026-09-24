@@ -10,7 +10,7 @@
 #ifndef TIMEABS_CFG_H
 #define TIMEABS_CFG_H
 
-#include "Std_Types.h"
+#include "base/Std_Types.h"
 
 #define TIMEABS_DEV_ERROR_DETECT STD_ON
 

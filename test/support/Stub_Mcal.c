@@ -338,8 +338,22 @@ void Stub_Dio_SetInputLevel(uint8 channel, uint8 level)
 static uint16 Stub_AdcRaw[STUB_DIO_CHANNEL_COUNT];
 static uint32 Stub_AdcFailReads;
 
+/* The real leaf refuses a read before Adc_Init and reports ADC_E_UNINIT. Modelled here because
+ * the check lives in the platform leaf, so without it the host build could not observe the
+ * contract at all -- and a contract the target enforces but the host cannot see is one that a
+ * future leaf can quietly drop. */
+static boolean Stub_AdcInitialised = FALSE;
+static uint32 Stub_AdcReadCount;
+
+/* Scripted per-call samples, so a test can drive the oversampling with a value that differs
+ * between samples -- the only way to distinguish averaging from returning the first sample. */
+static uint16 Stub_AdcSequence[STUB_ADC_SEQUENCE_MAX];
+static uint8 Stub_AdcSequenceLen;
+static uint8 Stub_AdcSequenceNext;
+
 Std_ReturnType Adc_Init(void)
 {
+    Stub_AdcInitialised = TRUE;
     return E_OK;
 }
 
@@ -349,13 +363,58 @@ Std_ReturnType Adc_ReadChannelRaw(Adc_ChannelType channel, Adc_ValueType *value)
     {
         return E_NOT_OK;
     }
+    if (Stub_AdcInitialised == FALSE)
+    {
+        return E_NOT_OK;
+    }
     if (Stub_AdcFailReads > 0u)
     {
         Stub_AdcFailReads--;
         return E_NOT_OK;
     }
+
+    Stub_AdcReadCount++;
+
+    /* A scripted sequence wins over the steady value, and the last entry repeats once exhausted so a
+     * caller taking more samples than the script provides still gets a defined answer rather than
+     * silently reading whatever the steady value happened to be. */
+    if (Stub_AdcSequenceLen > 0u)
+    {
+        const uint8 index = (Stub_AdcSequenceNext < Stub_AdcSequenceLen)
+                                ? Stub_AdcSequenceNext
+                                : (uint8)(Stub_AdcSequenceLen - 1u);
+
+        *value = Stub_AdcSequence[index];
+        if (Stub_AdcSequenceNext < Stub_AdcSequenceLen)
+        {
+            Stub_AdcSequenceNext++;
+        }
+        return E_OK;
+    }
+
     *value = Stub_AdcRaw[channel];
     return E_OK;
+}
+
+uint32 Stub_Adc_GetReadCount(void)
+{
+    return Stub_AdcReadCount;
+}
+
+void Stub_Adc_SetRawSequence(uint8 channel, const uint16 *samples, uint8 count)
+{
+    COMPILER_UNUSED(channel);
+
+    if ((samples == NULL_PTR) || (count == 0u) || (count > (uint8)STUB_ADC_SEQUENCE_MAX))
+    {
+        Stub_AdcSequenceLen = 0u;
+        Stub_AdcSequenceNext = 0u;
+        return;
+    }
+
+    (void)memcpy(Stub_AdcSequence, samples, (size_t)count * sizeof(samples[0]));
+    Stub_AdcSequenceLen = count;
+    Stub_AdcSequenceNext = 0u;
 }
 
 void Stub_Adc_SetRaw(uint8 channel, uint16 raw)
@@ -416,6 +475,14 @@ Std_ReturnType Uart_Init(void)
 Std_ReturnType Uart_Open(Uart_InstanceType instance, const Uart_ConfigType *config)
 {
     if ((Stub_UartValid(instance) == FALSE) || (config == NULL_PTR))
+    {
+        return E_NOT_OK;
+    }
+    /* The same configuration validation the platform leaf performs. A zero baud rate would divide by
+     * zero in a real peripheral's divisor calculation. Modelled here so the host build can observe the
+     * contract -- one the target enforces and the host cannot see is one a future leaf can quietly
+     * drop. */
+    if ((config->baudRate == 0uL) || (config->baudRate > 921600uL))
     {
         return E_NOT_OK;
     }
@@ -1299,6 +1366,10 @@ void Stub_Mcal_ResetAll(void)
     (void)memset(Stub_DioToggles, 0, sizeof(Stub_DioToggles));
 
     (void)memset(Stub_AdcRaw, 0, sizeof(Stub_AdcRaw));
+    Stub_AdcInitialised = FALSE;
+    Stub_AdcReadCount = 0u;
+    Stub_AdcSequenceLen = 0u;
+    Stub_AdcSequenceNext = 0u;
     Stub_AdcFailReads = 0u;
 
     (void)memset(Stub_Uarts, 0, sizeof(Stub_Uarts));

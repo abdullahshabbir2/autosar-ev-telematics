@@ -94,15 +94,15 @@
 /*==================================================================================================
  *  Common API service IDs
  *
- *  AUTOSAR reserves 0x00 for <Mip>_Init and 0x01 for <Mip>_DeInit in most modules,
- *  and 0x0F is conventionally <Mip>_GetVersionInfo. Module-specific service IDs are
+ *  AUTOSAR reserves 0x00 for `<Mip>`_Init and 0x01 for `<Mip>`_DeInit in most modules,
+ *  and 0x0F is conventionally `<Mip>`_GetVersionInfo. Module-specific service IDs are
  *  declared in the module's own header next to the functions they identify.
  *================================================================================================*/
 
-#define API_ID_INIT 0x00u            /**< <Mip>_Init()            */
-#define API_ID_DEINIT 0x01u          /**< <Mip>_DeInit()          */
-#define API_ID_MAIN_FUNCTION 0x0Eu   /**< <Mip>_MainFunction()    */
-#define API_ID_GET_VERSION_INFO 0x0Fu/**< <Mip>_GetVersionInfo()  */
+#define API_ID_INIT 0x00u            /**< `<Mip>`_Init()            */
+#define API_ID_DEINIT 0x01u          /**< `<Mip>`_DeInit()          */
+#define API_ID_MAIN_FUNCTION 0x0Eu   /**< `<Mip>`_MainFunction()    */
+#define API_ID_GET_VERSION_INFO 0x0Fu/**< `<Mip>`_GetVersionInfo()  */
 
 /*==================================================================================================
  *  Common development error codes
@@ -112,8 +112,8 @@
  *  values and reused. Module-specific codes start at 0x20 in the module header.
  *================================================================================================*/
 
-#define E_UNINIT 0x0Du          /**< API called before <Mip>_Init().          */
-#define E_ALREADY_INITIALIZED 0x0Eu /**< <Mip>_Init() called twice.           */
+#define E_UNINIT 0x0Du          /**< API called before `<Mip>`_Init().          */
+#define E_ALREADY_INITIALIZED 0x0Eu /**< `<Mip>`_Init() called twice.           */
 #define E_PARAM_POINTER 0x10u   /**< A NULL_PTR was passed for an out param.  */
 #define E_PARAM_VALUE 0x11u     /**< A numeric argument was out of range.     */
 #define E_PARAM_CONFIG 0x12u    /**< The configuration set is inconsistent.   */

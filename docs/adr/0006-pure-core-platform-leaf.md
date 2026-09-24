@@ -89,7 +89,7 @@ enforcement depends on the framework being absent.
 
 **What it buys.**
 
-- 183 host tests across 10 suites, running in about 5 seconds each, exercising the real implementation
+- 333 host tests across 16 suites, running in about 5 seconds each, exercising the real implementation
   rather than a reimplementation of it. No mock of `Fee`, no simplified `Crc`, no double standing in for
   `OdoSwc` — doubles exist only at the platform boundary, below the code under test.
 - Fault injection that is otherwise unreachable: a flash write that fails at an exact address, a

@@ -24,9 +24,9 @@
 #ifndef WDG_H
 #define WDG_H
 
-#include "Autosar_ModuleIds.h"
-#include "Std_Types.h"
-#include "Wdg_Cfg.h"
+#include "base/Autosar_ModuleIds.h"
+#include "base/Std_Types.h"
+#include "mcal/Wdg/Wdg_Cfg.h"
 
 #ifdef __cplusplus
 extern "C" {

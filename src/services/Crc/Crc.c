@@ -7,7 +7,7 @@
  * SPDX-License-Identifier: Proprietary
  */
 
-#include "Crc.h"
+#include "services/Crc/Crc.h"
 
 /*==================================================================================================
  *  Local constants
@@ -78,8 +78,10 @@ STATIC void Crc_BuildTable32(uint32 *table, uint32 reflectedPoly)
 /**
  * @brief Shared MSB-first CRC-8 kernel.
  *
- * @param polynomial Generator polynomial in non-reflected form.
+ * @param dataPtr    Bytes to fold in. May be NULL_PTR only when @p length is zero.
+ * @param length     Number of bytes at @p dataPtr.
  * @param register8  Register state on entry, already un-XORed by the caller.
+ * @param polynomial Generator polynomial in non-reflected form.
  */
 STATIC uint8 Crc_Kernel8(const uint8 *dataPtr, uint32 length, uint8 register8, uint8 polynomial)
 {

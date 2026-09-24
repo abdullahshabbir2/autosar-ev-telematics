@@ -14,8 +14,8 @@
 #ifndef STD_TYPES_H
 #define STD_TYPES_H
 
-#include "Compiler.h"
-#include "Platform_Types.h"
+#include "base/Compiler.h"
+#include "base/Platform_Types.h"
 
 /*==================================================================================================
  *  Published information (SWS_Std_00014)
@@ -65,7 +65,7 @@ typedef uint8 Std_ReturnType;
  *  Std_VersionInfoType (SWS_Std_00015)
  *================================================================================================*/
 
-/** Version information returned by every module's @c <Mip>_GetVersionInfo(). */
+/** Version information returned by every module's `<Mip>_GetVersionInfo()`. */
 typedef struct
 {
     uint16 vendorID;         /**< Vendor identifier.               */

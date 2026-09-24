@@ -44,9 +44,9 @@
 #ifndef FLS_H
 #define FLS_H
 
-#include "Autosar_ModuleIds.h"
-#include "Fls_Cfg.h"
-#include "Std_Types.h"
+#include "base/Autosar_ModuleIds.h"
+#include "mcal/Fls/Fls_Cfg.h"
+#include "base/Std_Types.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -126,6 +126,7 @@ CHECK_RETURN Std_ReturnType Fls_Read(Fls_AddressType address, uint8 *buffer,
  * @brief Program @p length bytes from @p buffer at @p address.
  *
  * @param address Must be a multiple of ::FLS_WRITE_ALIGNMENT.
+ * @param buffer  Source bytes. Must hold at least @p length of them.
  * @param length  Must be a multiple of ::FLS_WRITE_ALIGNMENT.
  *
  * The target range must already be erased. This driver does not erase implicitly:

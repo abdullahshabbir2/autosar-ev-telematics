@@ -16,7 +16,7 @@
  * and the code cannot both be right. The code is adopted here, for two reasons: it is what was
  * actually running against real hardware, and the CAN matrix it implies -- Intel byte order, which
  * is what the great majority of motor controllers in this class use -- is the more likely of the
- * two. The decision is recorded in @ref docs/08-protocols.md as an open item to confirm against a
+ * two. The decision is recorded in [08-protocols.md](docs/08-protocols.md) as an open item to confirm against a
  * bus capture, and ::CANIF_MCU_BYTE_ORDER_LITTLE_ENDIAN makes reversing it a one-line change
  * rather than an edit to four expressions.
  *
@@ -37,10 +37,10 @@
 #ifndef CANIF_H
 #define CANIF_H
 
-#include "Autosar_ModuleIds.h"
-#include "Can.h"
-#include "CanIf_Cfg.h"
-#include "Std_Types.h"
+#include "base/Autosar_ModuleIds.h"
+#include "mcal/Can/Can.h"
+#include "ecuabs/CanIf/CanIf_Cfg.h"
+#include "base/Std_Types.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -7,13 +7,13 @@
  * SPDX-License-Identifier: Proprietary
  */
 
-#include "IoHwAb.h"
+#include "ecuabs/IoHwAb/IoHwAb.h"
 
-#include "Adc.h"
-#include "Dem.h"
-#include "Det.h"
-#include "Dio.h"
-#include "NvM.h"
+#include "mcal/Adc/Adc.h"
+#include "services/Dem/Dem.h"
+#include "services/Det/Det.h"
+#include "mcal/Dio/Dio.h"
+#include "services/NvM/NvM.h"
 
 /*==================================================================================================
  *  Indicator channel table

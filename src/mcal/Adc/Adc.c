@@ -11,10 +11,10 @@
  * SPDX-License-Identifier: Proprietary
  */
 
-#include "Adc.h"
+#include "mcal/Adc/Adc.h"
 
-#include "Det.h"
-#include "Gpt.h"
+#include "services/Det/Det.h"
+#include "mcal/Gpt/Gpt.h"
 
 /** Samples remaining after the extremes are discarded. */
 #define ADC_KEPT_SAMPLE_COUNT (ADC_OVERSAMPLE_COUNT - (2u * ADC_TRIM_COUNT))

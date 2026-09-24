@@ -192,10 +192,14 @@ def main() -> int:
             "/**\n"
             " * @file    Crc_TestVectors.h\n"
             " * @brief   Generated CRC test vectors (see tools/crc_reference.py).\n"
+            " *\n"
+            " * @copyright\n"
+            " * Copyright (c) 2024-2026 Abdullah Shabbir. All rights reserved.\n"
+            " * SPDX-License-Identifier: Proprietary\n"
             " */\n"
             "#ifndef CRC_TESTVECTORS_H\n"
             "#define CRC_TESTVECTORS_H\n"
-            '#include "Std_Types.h"\n\n'
+            '#include "base/Std_Types.h"\n\n'
         )
         with open("test/support/Crc_TestVectors.h", "w", encoding="utf-8", newline="\n") as fh:
             fh.write(header + table + "\n\n#endif /* CRC_TESTVECTORS_H */\n")

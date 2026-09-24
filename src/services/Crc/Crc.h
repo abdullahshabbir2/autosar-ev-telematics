@@ -6,7 +6,7 @@
  * responsibility in this ECU:
  *
  *  - ::Crc_CalculateCRC16 is the frame check of the RS485 battery protocol
- *    (CRC-16/CCITT-FALSE). See @ref docs/08-protocols.md.
+ *    (CRC-16/CCITT-FALSE). See [08-protocols.md.](docs/08-protocols.md.)
  *  - ::Crc_CalculateCRC32 protects every record written to the SD card and every
  *    NvM block, so that a supply brown-out mid-write is detected on the next boot
  *    instead of being read back as plausible garbage.
@@ -37,8 +37,8 @@
 #ifndef CRC_H
 #define CRC_H
 
-#include "Autosar_ModuleIds.h"
-#include "Std_Types.h"
+#include "base/Autosar_ModuleIds.h"
+#include "base/Std_Types.h"
 
 #ifdef __cplusplus
 extern "C" {

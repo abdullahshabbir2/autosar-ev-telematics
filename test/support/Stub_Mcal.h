@@ -143,6 +143,26 @@ void Stub_Adc_SetRaw(uint8 channel, uint16 raw);
 /** Make the next @p count Adc_ReadChannel() calls fail. */
 void Stub_Adc_FailNextReads(uint32 count);
 
+/** Longest scripted sample sequence the stub holds. */
+#define STUB_ADC_SEQUENCE_MAX 16u
+
+/**
+ * @brief Script the next @p count raw samples, one per conversion, in order.
+ *
+ * Adc.c oversamples and discards the extremes, and a stub returning one steady value cannot exercise
+ * that: an implementation taking a single sample would give the same answer, so the averaging would
+ * look correct while doing nothing. A sequence is what makes the outlier rejection observable.
+ *
+ * The last entry repeats once the sequence is exhausted, so a caller taking more samples than were
+ * scripted gets a defined value rather than falling back to the steady one mid-reading.
+ *
+ * Pass NULL_PTR or a count of 0 to return to the steady value set by ::Stub_Adc_SetRaw.
+ */
+void Stub_Adc_SetRawSequence(uint8 channel, const uint16 *samples, uint8 count);
+
+/** Conversions performed since the last reset -- how the configured sample count is checked. */
+uint32 Stub_Adc_GetReadCount(void);
+
 /*==================================================================================================
  *  Uart -- scripted serial bus
  *

@@ -11,7 +11,7 @@
 #define CAN_CFG_H
 
 #include "Ecu_PinMap.h"
-#include "Std_Types.h"
+#include "base/Std_Types.h"
 
 #define CAN_DEV_ERROR_DETECT STD_ON
 
@@ -81,7 +81,7 @@
  * @brief Motor controller frame: direction, speed mode, RPM, fault code, power mode.
  *
  * 29-bit extended identifier. Layout is documented in the CAN matrix,
- * @ref docs/08-protocols.md, and decoded by ::CanIf_DecodeMcuDriveState.
+ * [08-protocols.md](docs/08-protocols.md), and decoded by ::CanIf_DecodeMcuDriveState.
  */
 #define CAN_ID_MCU_DRIVE_STATE 0x10F8109AuL
 

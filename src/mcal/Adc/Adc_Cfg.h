@@ -11,7 +11,7 @@
 #define ADC_CFG_H
 
 #include "Ecu_PinMap.h"
-#include "Std_Types.h"
+#include "base/Std_Types.h"
 
 #define ADC_DEV_ERROR_DETECT STD_ON
 
@@ -53,7 +53,7 @@
  * 0.15 .. 2.45 V before the transfer function bends, which is why the external
  * divider is sized to land the full battery range inside that window rather than at
  * the nominal 3.3 V full scale. The divider calculation is tabulated in
- * @ref docs/hardware/pinmap.md.
+ * [pinmap.md.](docs/hardware/pinmap.md.)
  */
 #define ADC_ATTENUATION_SETTING 3u
 

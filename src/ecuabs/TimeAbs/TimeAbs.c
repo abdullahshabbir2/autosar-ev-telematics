@@ -11,12 +11,12 @@
  * SPDX-License-Identifier: Proprietary
  */
 
-#include "TimeAbs.h"
+#include "ecuabs/TimeAbs/TimeAbs.h"
 
-#include "Dem.h"
-#include "Det.h"
-#include "Gpt.h"
-#include "TimeAbs_Platform.h"
+#include "services/Dem/Dem.h"
+#include "services/Det/Det.h"
+#include "mcal/Gpt/Gpt.h"
+#include "ecuabs/TimeAbs/TimeAbs_Platform.h"
 
 /*==================================================================================================
  *  Local data

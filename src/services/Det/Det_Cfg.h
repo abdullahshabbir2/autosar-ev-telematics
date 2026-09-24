@@ -10,13 +10,13 @@
 #ifndef DET_CFG_H
 #define DET_CFG_H
 
-#include "Std_Types.h"
+#include "base/Std_Types.h"
 
 /**
  * @brief Master switch for parameter checking in every module.
  *
  * Kept STD_ON for production on this ECU; see the rationale in Det.h and
- * @ref docs/adr/0004-keep-det-in-production.md. Overridable from the build system
+ * [0004-keep-det-in-production.md.](docs/adr/0004-keep-det-in-production.md.) Overridable from the build system
  * (the unit-test build defines it on the command line).
  */
 #ifndef DET_ENABLE_DEV_ERROR_DETECT

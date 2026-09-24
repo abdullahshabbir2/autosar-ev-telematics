@@ -3,7 +3,7 @@
  * @brief   Single authoritative GPIO allocation for the telematics ECU.
  *
  * This file is the contract between the firmware and the hardware. The schematic in
- * @ref docs/hardware/schematic.svg, the netlist, the BOM and every MCAL
+ * [schematic.svg](docs/hardware/schematic.svg), the netlist, the BOM and every MCAL
  * configuration are generated from or checked against it, and no other file in the
  * project may name a raw GPIO number.
  *
@@ -38,9 +38,10 @@
  * high then. An LED wired anode-to-pin, cathode-to-ground through a resistor
  * presents a path to ground at reset and reads low, which is the required state for
  * both. The LEDs are therefore active-high and must not be re-wired to a pull-up
- * arrangement. See @ref docs/hardware/pinmap.md for the tabulated constraint.
+ * arrangement. [07-hardware.md](docs/07-hardware.md) tabulates the full allocation with the four
+ * inherited conflicts and how each was resolved.
  *
- * @req SWREQ-HW-0001 .. SWREQ-HW-0006
+ * @req SWREQ-SYS-0020, SWREQ-SYS-0021, SWREQ-SAF-0010
  *
  * @copyright
  * Copyright (c) 2024-2026 Abdullah Shabbir. All rights reserved.

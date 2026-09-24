@@ -13,7 +13,7 @@
  * SPDX-License-Identifier: Proprietary
  */
 
-#include "Gpt.h"
+#include "mcal/Gpt/Gpt.h"
 
 uint32 Gpt_ElapsedSince(Gpt_TimestampType since)
 {

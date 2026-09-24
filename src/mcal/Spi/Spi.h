@@ -32,9 +32,9 @@
 #ifndef SPI_H
 #define SPI_H
 
-#include "Autosar_ModuleIds.h"
-#include "Spi_Cfg.h"
-#include "Std_Types.h"
+#include "base/Autosar_ModuleIds.h"
+#include "mcal/Spi/Spi_Cfg.h"
+#include "base/Std_Types.h"
 
 #ifdef __cplusplus
 extern "C" {

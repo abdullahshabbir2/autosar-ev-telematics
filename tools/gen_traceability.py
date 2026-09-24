@@ -40,8 +40,8 @@ OUTPUT = DOCS / "06-traceability.md"
 SRC = REPO_ROOT / "src"
 TEST = REPO_ROOT / "test"
 
-REQ_RE = re.compile(r"\bSWREQ-([A-Z]{3,4})-(\d{4})\b")
-RANGE_RE = re.compile(r"\b(SWREQ-[A-Z]{3,4}-\d{4})\s*\.\.\s*(SWREQ-[A-Z]{3,4}-\d{4})\b")
+REQ_RE = re.compile(r"\bSWREQ-([A-Z]{2,4})-(\d{4})\b")
+RANGE_RE = re.compile(r"\b(SWREQ-[A-Z]{2,4}-\d{4})\s*\.\.\s*(SWREQ-[A-Z]{2,4}-\d{4})\b")
 HEADING_RE = re.compile(r"^#{1,6}\s+(.+?)\s*#*$", re.MULTILINE)
 REQ_TAG_RE = re.compile(r"@req\s+(?P<body>[^\n*]*(?:\n\s*\*\s+[^\n@*][^\n]*)*)", re.MULTILINE)
 
@@ -71,7 +71,7 @@ def read_requirements() -> dict[str, str]:
         if len(ids) == 1:
             req = f"SWREQ-{ids[0][0]}-{ids[0][1]}"
             # Headings read "SWREQ-SYS-0001 — Reset cause is recorded".
-            summary = re.sub(r"^\s*SWREQ-[A-Z]{3,4}-\d{4}\s*[—–-]\s*", "", title).strip()
+            summary = re.sub(r"^\s*SWREQ-[A-Z]{2,4}-\d{4}\s*[—–-]\s*", "", title).strip()
             found[req] = summary
     return found
 

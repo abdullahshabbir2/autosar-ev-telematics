@@ -22,8 +22,8 @@ python tools/gen_traceability.py
 | | Count |
 |---|---|
 | Requirements defined | 129 |
-| Implemented and tested | 65 |
-| Implemented, not directly tested | 60 |
+| Implemented and tested | 125 |
+| Implemented, not directly tested | 0 |
 | Not implemented | 4 |
 
 ### Not implemented
@@ -38,76 +38,6 @@ meets it has not said so — both are worth resolving, and neither is visible wi
 | `SWREQ-SEC-0005` | Externally-supplied data is bounded at the boundary |
 | `SWREQ-SEC-0010` | Verified updates |
 
-### Implemented but not directly tested
-
-Claimed by a module with no test citing it. Some of these are legitimately outside host
-testing — anything whose verification needs the silicon — and
-[05-test-strategy.md](05-test-strategy.md) §7 lists those with what covers them instead.
-The rest are gaps.
-
-| Requirement | Statement | Implemented by |
-|---|---|---|
-| `SWREQ-SYS-0001` | Reset cause is recorded | `Mcu` |
-| `SWREQ-SYS-0002` | Stable device identity | `Mcu` |
-| `SWREQ-SYS-0010` | Single monotonic time source | `Gpt` |
-| `SWREQ-SYS-0011` | Wrap-safe interval comparison | `Gpt` |
-| `SWREQ-SYS-0020` | Single point of pin configuration | `Dio`, `Port` |
-| `SWREQ-SYS-0021` | Safe initial pin states | `Port` |
-| `SWREQ-SYS-0030` | Wall-clock time from a redundant source | `TimeAbs` |
-| `SWREQ-SYS-0031` | A stopped clock is reported, not guessed | `TimeAbs` |
-| `SWREQ-SYS-0032` | Plausibility window on absolute time | `TimeAbs` |
-| `SWREQ-SYS-0035` | Timestamps are UTC | `TimeAbs` |
-| `SWREQ-SYS-0038` | Calendar arithmetic is self-contained | `TimeAbs` |
-| `SWREQ-SYS-0040` | Acquisition period | `SchM` |
-| `SWREQ-SYS-0041` | Independent task execution | `SchM` |
-| `SWREQ-SYS-0045` | Period measured from the previous boundary | `SchM` |
-| `SWREQ-SYS-0050` | Execution budget | `SchM` |
-| `SWREQ-SYS-0055` | Bounded catch-up after an overrun | `SchM` |
-| `SWREQ-SYS-0058` | Observable task statistics | `SchM` |
-| `SWREQ-SYS-0060` | Non-fatal subsystem failure | `EcuM` |
-| `SWREQ-SYS-0065` | Defined startup order | `EcuM` |
-| `SWREQ-SYS-0070` | Crash-loop detection | `EcuM` |
-| `SWREQ-SYS-0075` | Degraded state is reported | `EcuM` |
-| `SWREQ-SYS-0080` | Orderly shutdown | `EcuM` |
-| `SWREQ-SYS-0085` | Recoverable stable-run reset | `EcuM` |
-| `SWREQ-COM-0001` | Discard and drain are distinct operations | `Uart` |
-| `SWREQ-COM-0002` | Transceiver turnaround | `Uart` |
-| `SWREQ-COM-0003` | Early-exit reads | `Uart` |
-| `SWREQ-COM-0020` | Shared bus arbitration | `Spi` |
-| `SWREQ-COM-0021` | Bus misuse is reported, not tolerated | `Spi` |
-| `SWREQ-COM-0040` | One bearer abstraction | `NetIf` |
-| `SWREQ-COM-0045` | Bounded reconnection backoff | `NetIf` |
-| `SWREQ-COM-0050` | Association and addressing are distinct | `NetIf` |
-| `SWREQ-COM-0055` | Bounded publish | `NetIf` |
-| `SWREQ-COM-0060` | Signal strength in real units | `NetIf` |
-| `SWREQ-COM-0070` | One bearer active at a time | `ComM` |
-| `SWREQ-COM-0075` | Hysteresis on bearer switching | `ComM` |
-| `SWREQ-COM-0082` | Bearer state is observable | `ComM` |
-| `SWREQ-STO-0001` | Records are self-verifying | `FsAbs` |
-| `SWREQ-STO-0005` | Chronological file naming | `FsAbs` |
-| `SWREQ-STO-0010` | Bounded housekeeping | `FsAbs` |
-| `SWREQ-STO-0015` | Every handle released | `FsAbs` |
-| `SWREQ-STO-0020` | Committed before reported | `FsAbs` |
-| `SWREQ-TEL-0030` | Store before send | `TelemSwc` |
-| `SWREQ-TEL-0040` | Backlog drain | `TelemSwc` |
-| `SWREQ-TEL-0050` | Application-level acknowledgement | `TelemSwc` |
-| `SWREQ-TEL-0060` | Health record | `TelemSwc` |
-| `SWREQ-DIAG-0001` | Contract violations are reported | `Det` |
-| `SWREQ-DIAG-0002` | Reports are deduplicated | `Det` |
-| `SWREQ-DIAG-0003` | Development and runtime errors are distinguished | `Det` |
-| `SWREQ-DIAG-0040` | Remote readout | `DiagSwc` |
-| `SWREQ-DIAG-0050` | Authenticated commands only | `DiagSwc` |
-| `SWREQ-DIAG-0060` | Reduced UDS over the telemetry channel | `DiagSwc` |
-| `SWREQ-DIAG-0068` | Correlated responses | `DiagSwc` |
-| `SWREQ-SNS-0030` | Oversampled with outlier rejection | `Adc`, `IoHwAb` |
-| `SWREQ-SNS-0031` | Failed conversions are not averaged | `Adc`, `IoHwAb` |
-| `SWREQ-SNS-0035` | Per-unit calibration | `IoHwAb` |
-| `SWREQ-SNS-0038` | Physical units above the MCAL | `IoHwAb` |
-| `SWREQ-HMI-0001` | Named indicators | `HmiSwc`, `IoHwAb` |
-| `SWREQ-HMI-0004` | Indication is decoupled from state | `HmiSwc`, `IoHwAb` |
-| `SWREQ-HMI-0008` | Distinguishable states | `HmiSwc` |
-| `SWREQ-HMI-0012` | Liveness is unambiguous | `HmiSwc` |
-
 ---
 
 ## Requirement → implementation → test
@@ -117,29 +47,29 @@ The rest are gaps.
 
 | Requirement | Statement | Modules | Suites |
 |---|---|---|---|
-| `SWREQ-SYS-0001` | Reset cause is recorded | `Mcu` | — |
-| `SWREQ-SYS-0002` | Stable device identity | `Mcu` | — |
-| `SWREQ-SYS-0010` | Single monotonic time source | `Gpt` | — |
-| `SWREQ-SYS-0011` | Wrap-safe interval comparison | `Gpt` | — |
-| `SWREQ-SYS-0020` | Single point of pin configuration | `Dio`, `Port` | — |
-| `SWREQ-SYS-0021` | Safe initial pin states | `Port` | — |
-| `SWREQ-SYS-0030` | Wall-clock time from a redundant source | `TimeAbs` | — |
-| `SWREQ-SYS-0031` | A stopped clock is reported, not guessed | `TimeAbs` | — |
-| `SWREQ-SYS-0032` | Plausibility window on absolute time | `TimeAbs` | — |
-| `SWREQ-SYS-0035` | Timestamps are UTC | `TimeAbs` | — |
-| `SWREQ-SYS-0038` | Calendar arithmetic is self-contained | `TimeAbs` | — |
-| `SWREQ-SYS-0040` | Acquisition period | `SchM` | — |
-| `SWREQ-SYS-0041` | Independent task execution | `SchM` | — |
-| `SWREQ-SYS-0045` | Period measured from the previous boundary | `SchM` | — |
-| `SWREQ-SYS-0050` | Execution budget | `SchM` | — |
-| `SWREQ-SYS-0055` | Bounded catch-up after an overrun | `SchM` | — |
-| `SWREQ-SYS-0058` | Observable task statistics | `SchM` | — |
-| `SWREQ-SYS-0060` | Non-fatal subsystem failure | `EcuM` | — |
-| `SWREQ-SYS-0065` | Defined startup order | `EcuM` | — |
-| `SWREQ-SYS-0070` | Crash-loop detection | `EcuM` | — |
-| `SWREQ-SYS-0075` | Degraded state is reported | `EcuM` | — |
-| `SWREQ-SYS-0080` | Orderly shutdown | `EcuM` | — |
-| `SWREQ-SYS-0085` | Recoverable stable-run reset | `EcuM` | — |
+| `SWREQ-SYS-0001` | Reset cause is recorded | `Mcu` | `test_system` |
+| `SWREQ-SYS-0002` | Stable device identity | `Mcu` | `test_system` |
+| `SWREQ-SYS-0010` | Single monotonic time source | `Gpt` | `test_core` |
+| `SWREQ-SYS-0011` | Wrap-safe interval comparison | `Gpt` | `test_core` |
+| `SWREQ-SYS-0020` | Single point of pin configuration | `Dio`, `Port` | `test_system` |
+| `SWREQ-SYS-0021` | Safe initial pin states | `Port` | `test_system` |
+| `SWREQ-SYS-0030` | Wall-clock time from a redundant source | `TimeAbs` | `test_time` |
+| `SWREQ-SYS-0031` | A stopped clock is reported, not guessed | `TimeAbs` | `test_time` |
+| `SWREQ-SYS-0032` | Plausibility window on absolute time | `TimeAbs` | `test_time` |
+| `SWREQ-SYS-0035` | Timestamps are UTC | `TimeAbs` | `test_time` |
+| `SWREQ-SYS-0038` | Calendar arithmetic is self-contained | `TimeAbs` | `test_time` |
+| `SWREQ-SYS-0040` | Acquisition period | `SchM` | `test_system` |
+| `SWREQ-SYS-0041` | Independent task execution | `SchM` | `test_system` |
+| `SWREQ-SYS-0045` | Period measured from the previous boundary | `SchM` | `test_system` |
+| `SWREQ-SYS-0050` | Execution budget | `SchM` | `test_system` |
+| `SWREQ-SYS-0055` | Bounded catch-up after an overrun | `SchM` | `test_system` |
+| `SWREQ-SYS-0058` | Observable task statistics | `SchM` | `test_system` |
+| `SWREQ-SYS-0060` | Non-fatal subsystem failure | `EcuM` | `test_system` |
+| `SWREQ-SYS-0065` | Defined startup order | `EcuM` | `test_system` |
+| `SWREQ-SYS-0070` | Crash-loop detection | `EcuM` | `test_system` |
+| `SWREQ-SYS-0075` | Degraded state is reported | `EcuM` | `test_system` |
+| `SWREQ-SYS-0080` | Orderly shutdown | `EcuM` | `test_system` |
+| `SWREQ-SYS-0085` | Recoverable stable-run reset | `EcuM` | `test_system` |
 
 ### ODO
 
@@ -171,26 +101,26 @@ The rest are gaps.
 
 | Requirement | Statement | Modules | Suites |
 |---|---|---|---|
-| `SWREQ-COM-0001` | Discard and drain are distinct operations | `Uart` | — |
-| `SWREQ-COM-0002` | Transceiver turnaround | `Uart` | — |
-| `SWREQ-COM-0003` | Early-exit reads | `Uart` | — |
+| `SWREQ-COM-0001` | Discard and drain are distinct operations | `Uart` | `test_core` |
+| `SWREQ-COM-0002` | Transceiver turnaround | `Uart` | `test_core` |
+| `SWREQ-COM-0003` | Early-exit reads | `Uart` | `test_core` |
 | `SWREQ-COM-0010` | CAN controller initialisation is verified | `Can` | `test_can` |
 | `SWREQ-COM-0012` | Platform-free CAN driver | `Can` | `test_can` |
 | `SWREQ-COM-0015` | Exhaustive identifier encoding | `Can` | `test_can` |
-| `SWREQ-COM-0020` | Shared bus arbitration | `Spi` | — |
-| `SWREQ-COM-0021` | Bus misuse is reported, not tolerated | `Spi` | — |
+| `SWREQ-COM-0020` | Shared bus arbitration | `Spi` | `test_system` |
+| `SWREQ-COM-0021` | Bus misuse is reported, not tolerated | `Spi` | `test_system` |
 | `SWREQ-COM-0030` | Decoded signals carry their age | `CanIf` | `test_sensors` |
 | `SWREQ-COM-0032` | Stale signals are not used | `CanIf` | `test_sensors` |
 | `SWREQ-COM-0035` | Byte order is configuration, not code | `CanIf` | `test_sensors` |
 | `SWREQ-COM-0038` | Frame filtering at the interface | `CanIf` | `test_sensors` |
-| `SWREQ-COM-0040` | One bearer abstraction | `NetIf` | — |
-| `SWREQ-COM-0045` | Bounded reconnection backoff | `NetIf` | — |
-| `SWREQ-COM-0050` | Association and addressing are distinct | `NetIf` | — |
-| `SWREQ-COM-0055` | Bounded publish | `NetIf` | — |
-| `SWREQ-COM-0060` | Signal strength in real units | `NetIf` | — |
-| `SWREQ-COM-0070` | One bearer active at a time | `ComM` | — |
-| `SWREQ-COM-0075` | Hysteresis on bearer switching | `ComM` | — |
-| `SWREQ-COM-0082` | Bearer state is observable | `ComM` | — |
+| `SWREQ-COM-0040` | One bearer abstraction | `NetIf` | `test_net` |
+| `SWREQ-COM-0045` | Bounded reconnection backoff | `NetIf` | `test_net` |
+| `SWREQ-COM-0050` | Association and addressing are distinct | `NetIf` | `test_net` |
+| `SWREQ-COM-0055` | Bounded publish | `NetIf` | `test_net` |
+| `SWREQ-COM-0060` | Signal strength in real units | `NetIf` | `test_net` |
+| `SWREQ-COM-0070` | One bearer active at a time | `ComM` | `test_net` |
+| `SWREQ-COM-0075` | Hysteresis on bearer switching | `ComM` | `test_net` |
+| `SWREQ-COM-0082` | Bearer state is observable | `ComM` | `test_net` |
 
 ### NVM
 
@@ -215,11 +145,11 @@ The rest are gaps.
 
 | Requirement | Statement | Modules | Suites |
 |---|---|---|---|
-| `SWREQ-STO-0001` | Records are self-verifying | `FsAbs` | — |
-| `SWREQ-STO-0005` | Chronological file naming | `FsAbs` | — |
-| `SWREQ-STO-0010` | Bounded housekeeping | `FsAbs` | — |
-| `SWREQ-STO-0015` | Every handle released | `FsAbs` | — |
-| `SWREQ-STO-0020` | Committed before reported | `FsAbs` | — |
+| `SWREQ-STO-0001` | Records are self-verifying | `FsAbs` | `test_telem` |
+| `SWREQ-STO-0005` | Chronological file naming | `FsAbs` | `test_telem` |
+| `SWREQ-STO-0010` | Bounded housekeeping | `FsAbs` | `test_telem` |
+| `SWREQ-STO-0015` | Every handle released | `FsAbs` | `test_telem` |
+| `SWREQ-STO-0020` | Committed before reported | `FsAbs` | `test_telem` |
 
 ### TEL
 
@@ -229,28 +159,28 @@ The rest are gaps.
 | `SWREQ-TEL-0005` | Field count is derived, not declared | `Com` | `test_com` |
 | `SWREQ-TEL-0010` | Bounded backfill parsing | `Com` | `test_com` |
 | `SWREQ-TEL-0020` | Chunk arithmetic is total | `Com` | `test_com` |
-| `SWREQ-TEL-0030` | Store before send | `TelemSwc` | — |
-| `SWREQ-TEL-0040` | Backlog drain | `TelemSwc` | — |
-| `SWREQ-TEL-0050` | Application-level acknowledgement | `TelemSwc` | — |
-| `SWREQ-TEL-0060` | Health record | `TelemSwc` | — |
+| `SWREQ-TEL-0030` | Store before send | `TelemSwc` | `test_telem` |
+| `SWREQ-TEL-0040` | Backlog drain | `TelemSwc` | `test_telem` |
+| `SWREQ-TEL-0050` | Application-level acknowledgement | `TelemSwc` | `test_telem` |
+| `SWREQ-TEL-0060` | Health record | `TelemSwc` | `test_telem` |
 
 ### DIAG
 
 | Requirement | Statement | Modules | Suites |
 |---|---|---|---|
-| `SWREQ-DIAG-0001` | Contract violations are reported | `Det` | — |
-| `SWREQ-DIAG-0002` | Reports are deduplicated | `Det` | — |
-| `SWREQ-DIAG-0003` | Development and runtime errors are distinguished | `Det` | — |
+| `SWREQ-DIAG-0001` | Contract violations are reported | `Det` | `test_core` |
+| `SWREQ-DIAG-0002` | Reports are deduplicated | `Det` | `test_core` |
+| `SWREQ-DIAG-0003` | Development and runtime errors are distinguished | `Det` | `test_core` |
 | `SWREQ-DIAG-0010` | Persistent trouble codes | `Dem` | `test_diag` |
 | `SWREQ-DIAG-0015` | Debounced confirmation | `Dem` | `test_diag` |
 | `SWREQ-DIAG-0020` | Healing | `Dem` | `test_diag` |
 | `SWREQ-DIAG-0025` | Freeze frames | `Dem` | `test_diag` |
-| `SWREQ-DIAG-0030` | Standard status semantics | `Dem` | `test_diag` |
+| `SWREQ-DIAG-0030` | Standard status semantics | `Dem` | `test_diag`, `test_system` |
 | `SWREQ-DIAG-0032` | Bounded store with visible saturation | `Dem` | `test_diag` |
-| `SWREQ-DIAG-0040` | Remote readout | `DiagSwc` | — |
-| `SWREQ-DIAG-0050` | Authenticated commands only | `DiagSwc` | — |
-| `SWREQ-DIAG-0060` | Reduced UDS over the telemetry channel | `DiagSwc` | — |
-| `SWREQ-DIAG-0068` | Correlated responses | `DiagSwc` | — |
+| `SWREQ-DIAG-0040` | Remote readout | `DiagSwc` | `test_system` |
+| `SWREQ-DIAG-0050` | Authenticated commands only | `DiagSwc` | `test_system` |
+| `SWREQ-DIAG-0060` | Reduced UDS over the telemetry channel | `DiagSwc` | `test_system` |
+| `SWREQ-DIAG-0068` | Correlated responses | `DiagSwc` | `test_system` |
 
 ### SAF
 
@@ -289,19 +219,19 @@ The rest are gaps.
 
 | Requirement | Statement | Modules | Suites |
 |---|---|---|---|
-| `SWREQ-SNS-0030` | Oversampled with outlier rejection | `Adc`, `IoHwAb` | — |
-| `SWREQ-SNS-0031` | Failed conversions are not averaged | `Adc`, `IoHwAb` | — |
-| `SWREQ-SNS-0035` | Per-unit calibration | `IoHwAb` | — |
-| `SWREQ-SNS-0038` | Physical units above the MCAL | `IoHwAb` | — |
+| `SWREQ-SNS-0030` | Oversampled with outlier rejection | `Adc`, `IoHwAb` | `test_hmi` |
+| `SWREQ-SNS-0031` | Failed conversions are not averaged | `Adc`, `IoHwAb` | `test_hmi` |
+| `SWREQ-SNS-0035` | Per-unit calibration | `IoHwAb` | `test_hmi` |
+| `SWREQ-SNS-0038` | Physical units above the MCAL | `IoHwAb` | `test_hmi` |
 
 ### HMI
 
 | Requirement | Statement | Modules | Suites |
 |---|---|---|---|
-| `SWREQ-HMI-0001` | Named indicators | `HmiSwc`, `IoHwAb` | — |
-| `SWREQ-HMI-0004` | Indication is decoupled from state | `HmiSwc`, `IoHwAb` | — |
-| `SWREQ-HMI-0008` | Distinguishable states | `HmiSwc` | — |
-| `SWREQ-HMI-0012` | Liveness is unambiguous | `HmiSwc` | — |
+| `SWREQ-HMI-0001` | Named indicators | `HmiSwc`, `IoHwAb` | `test_hmi` |
+| `SWREQ-HMI-0004` | Indication is decoupled from state | `HmiSwc`, `IoHwAb` | `test_hmi` |
+| `SWREQ-HMI-0008` | Distinguishable states | `HmiSwc` | `test_hmi` |
+| `SWREQ-HMI-0012` | Liveness is unambiguous | `HmiSwc` | `test_hmi` |
 
 ### SEC
 

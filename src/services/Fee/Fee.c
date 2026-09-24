@@ -9,6 +9,8 @@
 
 #include "services/Fee/Fee.h"
 
+#include <string.h>
+
 #include "services/Crc/Crc.h"
 #include "services/Det/Det.h"
 #include "mcal/Fls/Fls.h"
@@ -206,6 +208,7 @@ STATIC boolean Fee_CounterIsNewer(uint16 a, uint16 b)
 
 /**
  * @brief Read and validate sector @p index's header.
+ * @param[in]  index    Sector index, 0 or 1.
  * @param[out] sequence Sequence number, valid only when E_OK is returned.
  * @return E_OK if the header is present, the magic and version match and the CRC verifies.
  */
@@ -393,7 +396,8 @@ STATIC uint32 Fee_FindWriteCursor(void)
 /**
  * @brief Find the newest committed, CRC-verified record for @p blockId.
  *
- * @param[out] found Populated on success.
+ * @param[in]  blockId Block to search for.
+ * @param[out] found   Populated on success.
  * @return E_OK if such a record exists; E_NOT_FOUND if the block has never been written;
  *         E_CRC_FAIL if records exist but none verifies.
  */
@@ -575,12 +579,22 @@ STATIC Std_ReturnType Fee_AppendRecord(Fee_BlockIdType blockId, const uint8 *pay
     {
         uint8 padded[FEE_MAX_BLOCK_LENGTH + FEE_ALIGNMENT];
         const uint32 paddedLength = Fee_AlignUp((uint32)length);
-        uint32 j;
 
-        for (j = 0u; j < paddedLength; j++)
+        /* Checked here rather than relied upon. The configured block lengths do fit -- Fee_Cfg.h asserts
+         * it -- but that invariant lives two call levels away, and a bound this function cannot see is one
+         * a later change can break without anything pointing back here. */
+        if (paddedLength > (uint32)sizeof(padded))
         {
-            padded[j] = (j < (uint32)length) ? payload[j] : (uint8)FLS_ERASED_VALUE;
+            (void)Det_ReportError(MODULE_ID_FEE, INSTANCE_ID_SINGLE, FEE_API_ID_WRITE,
+                                  FEE_E_INVALID_BLOCK_NO);
+            return E_NOT_OK;
         }
+
+        /* The whole buffer is set to the erased value first, then the payload copied over it. The padding
+         * beyond the payload is never read -- only paddedLength bytes are written -- but initialising it
+         * costs a memset of at most 264 bytes and removes any question of what reaches the media. */
+        (void)memset(padded, (int)FLS_ERASED_VALUE, sizeof(padded));
+        (void)memcpy(padded, payload, (size_t)length);
 
         if (Fls_Write(base + FEE_RECORD_HEADER_SIZE, padded, (Fls_LengthType)paddedLength) != E_OK)
         {
@@ -690,10 +704,18 @@ Std_ReturnType Fee_GarbageCollect(void)
             uint8 padded[FEE_MAX_BLOCK_LENGTH + FEE_ALIGNMENT];
             const uint32 paddedLength = Fee_AlignUp((uint32)record.length);
 
-            for (i = 0u; i < paddedLength; i++)
+            /* Fee_ParseRecordHeader already rejects a length above FEE_MAX_BLOCK_LENGTH, so this cannot
+             * fire -- but a garbage collection that overran a stack buffer would corrupt the one operation
+             * that temporarily holds the only copy of every block, so it is checked anyway. */
+            if (paddedLength > (uint32)sizeof(padded))
             {
-                padded[i] = (i < (uint32)record.length) ? Fee_Staging[i] : (uint8)FLS_ERASED_VALUE;
+                (void)Det_ReportError(MODULE_ID_FEE, INSTANCE_ID_SINGLE, FEE_API_ID_GC,
+                                      FEE_E_INVALID_BLOCK_NO);
+                return E_NOT_OK;
             }
+
+            (void)memset(padded, (int)FLS_ERASED_VALUE, sizeof(padded));
+            (void)memcpy(padded, Fee_Staging, (size_t)record.length);
             if (Fls_Write(Fee_SectorBase(target) + targetCursor + FEE_RECORD_HEADER_SIZE, padded,
                           (Fls_LengthType)paddedLength) != E_OK)
             {
