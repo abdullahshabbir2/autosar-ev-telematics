@@ -163,10 +163,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install cppcheck
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y cppcheck
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # Pinned, not apt. The distro package moves between runner images, and a gate whose tool
+      # version drifts is a gate that passes locally and fails here for reasons unrelated to the
+      # change under test -- which is exactly what happened on the first run of this workflow.
+      # This wheel carries cppcheck 2.17.1, the version the suppression list was written against.
+      - name: Install cppcheck (pinned)
+        run: pip install cppcheck==1.5.1
 
       - name: Analyse the platform-independent sources
         run: |
@@ -204,10 +210,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install clang-format
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y clang-format
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # Pinned for the same reason as cppcheck: clang-format's line-breaking decisions change
+      # between releases, so an unpinned version reformats code that was correctly formatted by
+      # the version the author ran.
+      - name: Install clang-format (pinned)
+        run: pip install clang-format==23.1.1
 
       - name: Check, do not apply
         run: |
