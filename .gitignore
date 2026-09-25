@@ -28,3 +28,7 @@ config/Secrets.h
 # Python bytecode
 __pycache__/
 *.pyc
+
+# Doxygen output and logs. Generated, and the CI job is what gates the warnings.
+doxygen.out
+doxygen.err

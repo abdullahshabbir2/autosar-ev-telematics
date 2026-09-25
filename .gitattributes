@@ -1,0 +1,39 @@
+# Line endings and diff behaviour.
+#
+# Copyright (c) 2024-2026 Abdullah Shabbir. All rights reserved.
+#
+# Everything text is normalised to LF in the repository. Without this, a checkout on Windows commits CRLF and
+# the same file checked out on Linux CI differs from it, so every cross-platform diff is noise -- and the CRC
+# reference generator in tools/ would produce a different byte count for the same content.
+
+*               text=auto eol=lf
+
+# Sources and headers, explicit so a new extension cannot default the wrong way.
+*.c             text eol=lf
+*.h             text eol=lf
+*.cpp           text eol=lf
+*.py            text eol=lf
+*.md            text eol=lf
+*.csv           text eol=lf
+*.ini           text eol=lf
+*.yml           text eol=lf
+*.yaml          text eol=lf
+*.json          text eol=lf
+*.svg           text eol=lf
+.gitattributes  text eol=lf
+.gitignore      text eol=lf
+.clang-format   text eol=lf
+.clang-tidy     text eol=lf
+
+# Binary, so git never tries to normalise or diff them as text.
+*.png           binary
+*.jpg           binary
+*.pdf           binary
+*.bin           binary
+*.elf           binary
+*.zip           binary
+
+# Generated test vectors. Marked so a diff on them is collapsed by default in review: they are produced by
+# tools/crc_reference.py and tools/rs485_reference.py, and the thing to review is the generator, not its output.
+test/support/Crc_TestVectors.h    linguist-generated=true
+test/support/Rs485_TestVectors.h  linguist-generated=true

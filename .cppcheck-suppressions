@@ -29,3 +29,9 @@ unusedStructMember
 
 # Unity's own macros expand to constructs cppcheck flags. Not our code.
 *:*unity*
+
+# Informational notices, not findings. `normalCheckLevelMaxBranches` asks for --check-level=exhaustive,
+# which CI passes -- so it should not appear; suppressed anyway because --error-exitcode treats any
+# reported message as a failure, and a gate that fails on a tool's advice rather than on a defect is one
+# that gets bypassed.
+normalCheckLevelMaxBranches
