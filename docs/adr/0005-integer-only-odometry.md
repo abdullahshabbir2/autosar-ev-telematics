@@ -110,10 +110,15 @@ The remainder is therefore carried into the next interval. This bounds the total
 
 ## Consequences
 
-**Measured accuracy.** Over a simulated 1.26 km journey with acceleration, cruise and braking, the
-implementation is accurate to **0.85 mm** against a closed-form integral of the same speed profile, with
-**0.046 mm** of total rounding drift. Both figures come from `test_odo`, against a reference computed
-independently of the implementation.
+**Measured accuracy.** `test_odo` accumulates 10 000 increments of about 0.13 mm each -- 1263.5 m in
+total -- and the result lands within **2 mm** of the analytic answer computed independently of the
+implementation. The Q32/Q24 quantisation accounts for **0.046 mm** of that. A separate test requires a
+linear ramp from 0 to 6000 rpm to integrate to the same distance as its mean speed, within **16 mm**,
+which is what verifies the trapezoidal rule rather than the accumulator.
+
+The number that matters most is not any of those tolerances but the floor: an implementation that
+truncated per step would have accumulated **exactly zero** over that run, because every individual
+increment is smaller than a millimetre.
 
 **Reproducibility.** Two units with the same calibration compute bit-identical distances on any
 toolchain. Nothing in the path depends on rounding mode, evaluation order or FPU behaviour.
@@ -127,8 +132,8 @@ is the mitigation — the comment is longer than the code, deliberately.
 **An error caught by this decision.** Writing the test reference by hand, the wheel circumference was
 initially taken as 1 516 195 µm; the correct value for a 19-inch wheel is 1 516 133 µm
 (19 × 25.4 × π = 1516.1326 mm). The test passed with the wrong reference because the implementation's
-tolerance absorbed it. Fixing the reference is what made the 0.85 mm and 0.046 mm figures above
-meaningful — with a wrong reference, neither would have been visible.
+tolerance absorbed it. Fixing the reference is what made the figures above mean anything — with a
+wrong reference, none of them would have been visible.
 
 ## When this would be the wrong decision
 

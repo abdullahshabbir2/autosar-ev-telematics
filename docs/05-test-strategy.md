@@ -144,10 +144,13 @@ The odometer's reference circumference for a 19-inch wheel is 1 516 133 µm
 fifth significant figure — and the test passed anyway, because the implementation's tolerance
 absorbed it.
 
-Fixing the reference let the test measure what it was supposed to: over a simulated 1.26 km journey
-the implementation is accurate to **0.85 mm**, with **0.046 mm** of total rounding drift. Those two
-figures are the actual verification of SWREQ-ODO-0001 and SWREQ-ODO-0003, and neither would have
-been visible against a wrong reference.
+Fixing the reference let the tests measure what they were supposed to. TS-ODO-008 accumulates 10 000
+increments of about 0.13 mm each -- 1263.5 m in total, every one of them entirely fractional -- and
+requires the result to land within **2 mm** of the analytic answer; the Q32/Q24 quantisation accounts
+for **0.046 mm** of that budget. TS-ODO-007 requires a linear ramp to integrate to the same distance as
+its mean speed, within **16 mm**. Together those verify SWREQ-ODO-0001 and SWREQ-ODO-0003, and neither
+would have been visible against a wrong reference: a per-step truncation would have accumulated exactly
+zero over TS-ODO-008, which is the v1 defect made measurable.
 
 ### v1's own frames as golden vectors
 
