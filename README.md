@@ -3,6 +3,11 @@
 Production-grade firmware for an electric vehicle telematics and odometry control unit, built on an
 ESP32 in an AUTOSAR Classic layered architecture.
 
+[![CI](https://github.com/abdullahshabbir2/autosar-ev-telematics/actions/workflows/ci.yml/badge.svg)](https://github.com/abdullahshabbir2/autosar-ev-telematics/actions/workflows/ci.yml)
+[![Tests](https://img.shields.io/badge/host_tests-333_passing-1e5c33)](test/)
+[![Standard](https://img.shields.io/badge/AUTOSAR-Classic-C8102E)](docs/02-architecture.md)
+[![Licence](https://img.shields.io/badge/licence-proprietary-5a6273)](#licence)
+
 **333 host tests** across 16 suites · **`-Werror`** with eleven warning flags · **42.6 %** of one OTA
 slot · four hardware conflicts turned into build errors
 
