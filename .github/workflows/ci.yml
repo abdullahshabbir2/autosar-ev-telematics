@@ -240,10 +240,19 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install doxygen
+      # Pinned to the version the Doxyfile was written for. The apt package lags several minor
+      # versions behind, and doxygen warns on every tag it does not recognise -- so an older
+      # binary reports ~20 "ignoring unsupported tag" warnings and trips WARN_AS_ERROR without
+      # anything being wrong with the documentation.
+      - name: Install doxygen 1.18.0 and graphviz
         run: |
+          set -euo pipefail
           sudo apt-get update -qq
-          sudo apt-get install -y doxygen graphviz
+          sudo apt-get install -y graphviz
+          curl -fsSL -o /tmp/doxygen.tar.gz             https://www.doxygen.nl/files/doxygen-1.18.0.linux.bin.tar.gz
+          tar -xzf /tmp/doxygen.tar.gz -C /tmp
+          sudo install -m755 /tmp/doxygen-1.18.0/bin/doxygen /usr/local/bin/doxygen
+          doxygen --version
 
       - name: Build the API documentation, warnings as errors
         run: |
@@ -260,6 +269,9 @@ jobs:
           #
           # Setting this up found a stale @param naming an argument that had been renamed, two references
           # to files that do not exist, and a @req citing a requirement area with nothing defined in it.
+          # OUTPUT_DIRECTORY is under .build/, which is git-ignored and so does not exist on a
+          # fresh checkout. doxygen treats that as a hard error rather than creating it.
+          mkdir -p .build/doxygen
           doxygen Doxyfile 2>&1 | tee doxygen.log
           if grep -qE '^.*(warning|error):' doxygen.log; then
             echo "::error::Doxygen reported warnings. See the log above."
