@@ -133,7 +133,7 @@ STATIC Std_ReturnType GnssIf_FieldToU32(const GnssIf_FieldType *field, uint32 *r
         {
             return E_NOT_OK;
         }
-        value = (value * 10uL) + (uint32)(field->start[i] - '0');
+        value = (value * 10u) + (uint32)(field->start[i] - '0');
     }
 
     *result = value;
@@ -190,7 +190,7 @@ STATIC Std_ReturnType GnssIf_FieldToScaled(const GnssIf_FieldType *field, uint8 
                  * the conversion exactly reversible. */
                 if (fractionDigits < scaleDigits)
                 {
-                    fractionPart = (fractionPart * 10uL) + (uint32)(c - '0');
+                    fractionPart = (fractionPart * 10u) + (uint32)(c - '0');
                     fractionDigits++;
                 }
             }
@@ -200,7 +200,7 @@ STATIC Std_ReturnType GnssIf_FieldToScaled(const GnssIf_FieldType *field, uint8 
                 {
                     return E_NOT_OK;
                 }
-                integerPart = (integerPart * 10uL) + (uint32)(c - '0');
+                integerPart = (integerPart * 10u) + (uint32)(c - '0');
             }
         }
         else
@@ -332,7 +332,7 @@ Std_ReturnType GnssIf_ParseCoordinate(const char *field, char hemisphere, sint32
         {
             return E_NOT_OK;
         }
-        degrees = (degrees * 10uL) + (uint32)(field[i] - '0');
+        degrees = (degrees * 10u) + (uint32)(field[i] - '0');
     }
 
     /* Whole minutes, then the fraction, accumulated into one scaled integer. */
@@ -342,7 +342,7 @@ Std_ReturnType GnssIf_ParseCoordinate(const char *field, char hemisphere, sint32
         {
             return E_NOT_OK;
         }
-        minutesScaled = (minutesScaled * 10uL) + (uint32)(field[i] - '0');
+        minutesScaled = (minutesScaled * 10u) + (uint32)(field[i] - '0');
     }
     for (i = (uint16)(dotIndex + 1u); i < length; i++)
     {
@@ -356,7 +356,7 @@ Std_ReturnType GnssIf_ParseCoordinate(const char *field, char hemisphere, sint32
         {
             break;
         }
-        minutesScaled = (minutesScaled * 10uL) + (uint32)(field[i] - '0');
+        minutesScaled = (minutesScaled * 10u) + (uint32)(field[i] - '0');
         minuteScale *= 10uL;
     }
 
@@ -443,7 +443,7 @@ STATIC uint32 GnssIf_ToUnixTime(uint32 ddmmyy, uint32 hhmmss)
     {
         const boolean leap =
             (((y % 4uL) == 0uL) && (((y % 100uL) != 0uL) || ((y % 400uL) == 0uL))) ? TRUE : FALSE;
-        days += (leap != FALSE) ? 366uL : 365uL;
+        days += (leap != FALSE) ? 366u : 365u;
     }
 
     days += daysBeforeMonth[month - 1uL];
@@ -456,9 +456,9 @@ STATIC uint32 GnssIf_ToUnixTime(uint32 ddmmyy, uint32 hhmmss)
             days += 1uL;
         }
     }
-    days += (day - 1uL);
+    days += (day - 1u);
 
-    return (((days * 24uL) + hour) * 3600uL) + (minute * 60uL) + second;
+    return (((days * 24u) + hour) * 3600u) + (minute * 60u) + second;
 }
 
 /** Whether @p field names a sentence of type @p type from any talker. */

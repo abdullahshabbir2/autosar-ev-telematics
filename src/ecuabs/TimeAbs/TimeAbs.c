@@ -140,7 +140,7 @@ Std_ReturnType TimeAbs_FromDateTime(const TimeAbs_DateTimeType *dateTime, uint32
 
     for (y = 1970u; y < dateTime->year; y++)
     {
-        days += (TimeAbs_IsLeapYear(y) != FALSE) ? 366uL : 365uL;
+        days += (TimeAbs_IsLeapYear(y) != FALSE) ? 366u : 365u;
     }
     for (m = 1u; m < dateTime->month; m++)
     {
@@ -148,7 +148,7 @@ Std_ReturnType TimeAbs_FromDateTime(const TimeAbs_DateTimeType *dateTime, uint32
     }
     days += (uint32)(dateTime->day - 1u);
 
-    *unixTime = (days * 86400uL) + ((uint32)dateTime->hour * 3600uL) + ((uint32)dateTime->minute * 60uL)
+    *unixTime = (days * 86400u) + ((uint32)dateTime->hour * 3600u) + ((uint32)dateTime->minute * 60u)
                 + (uint32)dateTime->second;
 
     return E_OK;

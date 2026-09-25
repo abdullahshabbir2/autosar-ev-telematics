@@ -66,7 +66,7 @@
  * stale timeout behind.
  */
 #define RS485IF_RESPONSE_TIMEOUT_MS(bytes) \
-    ((((uint32)(bytes) * RS485IF_BITS_PER_CHAR * 2000uL) / UART_BAUD_RS485) + RS485IF_PROCESSING_ALLOWANCE_MS)
+    ((((uint32)(bytes) * RS485IF_BITS_PER_CHAR * 2000u) / UART_BAUD_RS485) + RS485IF_PROCESSING_ALLOWANCE_MS)
 
 /**
  * @brief Transceiver turnaround delay, in microseconds.
