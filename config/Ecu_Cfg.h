@@ -63,8 +63,7 @@
  *  neither clearly production nor clearly a bench build is how debug behaviour reaches a vehicle.
  *================================================================================================*/
 
-#if !defined(ECU_VARIANT_PRODUCTION) && !defined(ECU_VARIANT_BENCH) && \
-    !defined(ECU_VARIANT_SIMULATION)
+#if !defined(ECU_VARIANT_PRODUCTION) && !defined(ECU_VARIANT_BENCH) && !defined(ECU_VARIANT_SIMULATION)
 /* Default to production, because the safe failure mode for an unspecified build is the one with no
  * debug behaviour in it. */
 #define ECU_VARIANT_PRODUCTION
@@ -157,8 +156,7 @@ _Static_assert((ECU_CONNECTIVITY_PERIOD_MS % ECU_SCHEDULER_TICK_MS) == 0u,
  *================================================================================================*/
 
 #if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L)
-#if (defined(ECU_VARIANT_PRODUCTION) + defined(ECU_VARIANT_BENCH) + \
-     defined(ECU_VARIANT_SIMULATION)) > 1
+#if (defined(ECU_VARIANT_PRODUCTION) + defined(ECU_VARIANT_BENCH) + defined(ECU_VARIANT_SIMULATION)) > 1
 #error "Ecu_Cfg.h: exactly one ECU_VARIANT_* may be defined"
 #endif
 #endif

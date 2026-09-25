@@ -84,26 +84,26 @@ extern "C" {
 typedef struct
 {
     /* Identity and time. */
-    uint32 unixTime;          /**< Wall-clock time of the record, 0 if unknown.   */
-    uint32 uptimeMs;          /**< Monotonic time, always available.               */
-    uint32 sequenceNumber;    /**< Monotonically increasing per record.            */
-    const char *deviceId;     /**< NUL-terminated device identifier.               */
+    uint32 unixTime;       /**< Wall-clock time of the record, 0 if unknown.   */
+    uint32 uptimeMs;       /**< Monotonic time, always available.               */
+    uint32 sequenceNumber; /**< Monotonically increasing per record.            */
+    const char *deviceId;  /**< NUL-terminated device identifier.               */
 
     /* Supply. */
     uint16 auxVoltageMilliVolts; /**< Auxiliary battery, millivolts.               */
     boolean auxVoltageValid;     /**< FALSE if the ADC read failed.                */
 
     /* Drive. */
-    uint16 motorRpm;            /**< Motor speed.                                 */
-    uint16 dcVoltageDeciVolt;   /**< DC link voltage, 0.1 V per count.            */
-    uint16 dcCurrentDeciAmp;    /**< DC link current, 0.1 A per count.            */
-    uint32 speedMmPerSec;       /**< Vehicle speed.                               */
-    uint8 mcuFaultCode;         /**< Motor controller fault code.                 */
-    boolean driveDataValid;     /**< FALSE if the CAN signals were stale.         */
+    uint16 motorRpm;          /**< Motor speed.                                 */
+    uint16 dcVoltageDeciVolt; /**< DC link voltage, 0.1 V per count.            */
+    uint16 dcCurrentDeciAmp;  /**< DC link current, 0.1 A per count.            */
+    uint32 speedMmPerSec;     /**< Vehicle speed.                               */
+    uint8 mcuFaultCode;       /**< Motor controller fault code.                 */
+    boolean driveDataValid;   /**< FALSE if the CAN signals were stale.         */
 
     /* Odometry. */
-    uint64 totalDistanceMm;     /**< Lifetime distance.                           */
-    uint64 tripDistanceMm;      /**< Trip distance.                               */
+    uint64 totalDistanceMm; /**< Lifetime distance.                           */
+    uint64 tripDistanceMm;  /**< Trip distance.                               */
 
     /* Battery packs. */
     const Rs485If_PackStateType *packs; /**< Array of ::COM_PACK_COUNT entries.    */
@@ -112,9 +112,9 @@ typedef struct
     const GnssIf_PositionType *position; /**< May be NULL_PTR if no receiver.      */
 
     /* Health. */
-    uint16 confirmedDtcCount;   /**< Confirmed diagnostic trouble codes.          */
-    uint32 heapFreeBytes;       /**< Free heap at the time of the record.         */
-    uint8 bearerState;          /**< Which backhaul was active.                   */
+    uint16 confirmedDtcCount; /**< Confirmed diagnostic trouble codes.          */
+    uint32 heapFreeBytes;     /**< Free heap at the time of the record.         */
+    uint8 bearerState;        /**< Which backhaul was active.                   */
 } Com_TelemetryRecordType;
 
 /** How a file transfer divides into chunks. */
@@ -136,12 +136,12 @@ typedef struct
 /** Serialisation counters, published as diagnostic data. */
 typedef struct
 {
-    uint32 recordsSerialised; /**< Records successfully written.                   */
-    uint32 truncatedRecords;  /**< Records that did not fit their buffer.          */
-    uint32 requestsParsed;    /**< Backfill requests accepted.                    */
-    uint32 requestsRejected;  /**< Backfill requests with no usable dates.         */
-    uint32 datesDropped;      /**< Dates discarded because the array was full.     */
-    uint32 longestRecordBytes;/**< High-water mark of a serialised record.         */
+    uint32 recordsSerialised;  /**< Records successfully written.                   */
+    uint32 truncatedRecords;   /**< Records that did not fit their buffer.          */
+    uint32 requestsParsed;     /**< Backfill requests accepted.                    */
+    uint32 requestsRejected;   /**< Backfill requests with no usable dates.         */
+    uint32 datesDropped;       /**< Dates discarded because the array was full.     */
+    uint32 longestRecordBytes; /**< High-water mark of a serialised record.         */
 } Com_StatisticsType;
 
 /*==================================================================================================
@@ -178,8 +178,8 @@ CHECK_RETURN Std_ReturnType Com_FormatCsvHeader(char *buffer, uint16 size, uint1
  *         valid NUL-terminated prefix and @p written reports its length, so the caller can log the
  *         truncation with its actual size rather than guessing.
  */
-CHECK_RETURN Std_ReturnType Com_SerialiseCsvRecord(const Com_TelemetryRecordType *record,
-                                                   char *buffer, uint16 size, uint16 *written);
+CHECK_RETURN Std_ReturnType Com_SerialiseCsvRecord(const Com_TelemetryRecordType *record, char *buffer,
+                                                   uint16 size, uint16 *written);
 
 /**
  * @brief Work out how a file of @p fileSize bytes divides into @p chunkSize chunks.
@@ -192,8 +192,7 @@ CHECK_RETURN Std_ReturnType Com_SerialiseCsvRecord(const Com_TelemetryRecordType
  * @param[out] plan      Destination.
  * @return E_OK on success; E_NOT_OK if @p chunkSize is 0 or @p plan is NULL_PTR.
  */
-CHECK_RETURN Std_ReturnType Com_ComputeChunkPlan(uint32 fileSize, uint32 chunkSize,
-                                                 Com_ChunkPlanType *plan);
+CHECK_RETURN Std_ReturnType Com_ComputeChunkPlan(uint32 fileSize, uint32 chunkSize, Com_ChunkPlanType *plan);
 
 /**
  * @brief Byte offset and length of chunk @p index under @p plan.
@@ -205,8 +204,8 @@ CHECK_RETURN Std_ReturnType Com_ComputeChunkPlan(uint32 fileSize, uint32 chunkSi
  * @param[out] length    Byte length of the chunk.
  * @return E_OK on success; E_NOT_FOUND if @p index is past the end of the plan.
  */
-CHECK_RETURN Std_ReturnType Com_GetChunkExtent(const Com_ChunkPlanType *plan, uint32 index,
-                                               uint32 chunkSize, uint32 *offset, uint32 *length);
+CHECK_RETURN Std_ReturnType Com_GetChunkExtent(const Com_ChunkPlanType *plan, uint32 index, uint32 chunkSize,
+                                               uint32 *offset, uint32 *length);
 
 /**
  * @brief Parse a comma-separated list of "YYYYMMDD" dates from an inbound request.

@@ -86,16 +86,16 @@ typedef enum
 /** Link and session status, published in the telemetry health record. */
 typedef struct
 {
-    NetIf_BearerType activeBearer;  /**< Bearer currently carrying traffic.          */
-    NetIf_StateType state;          /**< Combined link and session state.            */
-    sint8 signalStrengthDbm;        /**< RSSI, 0 if unknown.                         */
-    uint32 publishCount;            /**< Payloads accepted by the broker.            */
-    uint32 publishFailures;         /**< Publishes the broker or link rejected.      */
-    uint32 linkUpCount;             /**< Times a bearer came up.                     */
-    uint32 linkDownCount;           /**< Times a bearer went down.                   */
-    uint32 sessionCount;            /**< Broker sessions established.                */
-    uint32 currentBackoffMs;        /**< Backoff in force, 0 when not backing off.   */
-    uint32 uptimeOnBearerMs;        /**< How long the current bearer has been up.    */
+    NetIf_BearerType activeBearer; /**< Bearer currently carrying traffic.          */
+    NetIf_StateType state;         /**< Combined link and session state.            */
+    sint8 signalStrengthDbm;       /**< RSSI, 0 if unknown.                         */
+    uint32 publishCount;           /**< Payloads accepted by the broker.            */
+    uint32 publishFailures;        /**< Publishes the broker or link rejected.      */
+    uint32 linkUpCount;            /**< Times a bearer came up.                     */
+    uint32 linkDownCount;          /**< Times a bearer went down.                   */
+    uint32 sessionCount;           /**< Broker sessions established.                */
+    uint32 currentBackoffMs;       /**< Backoff in force, 0 when not backing off.   */
+    uint32 uptimeOnBearerMs;       /**< How long the current bearer has been up.    */
 } NetIf_StatusType;
 
 /**

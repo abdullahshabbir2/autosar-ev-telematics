@@ -20,8 +20,7 @@
  *================================================================================================*/
 
 STATIC const Dio_ChannelType IoHwAb_IndicatorChannel[IOHWAB_INDICATOR_COUNT] = {
-    IOHWAB_DIO_ACQUISITION, IOHWAB_DIO_STORAGE, IOHWAB_DIO_LINK, IOHWAB_DIO_CLOUD,
-    IOHWAB_DIO_HEARTBEAT,
+    IOHWAB_DIO_ACQUISITION, IOHWAB_DIO_STORAGE, IOHWAB_DIO_LINK, IOHWAB_DIO_CLOUD, IOHWAB_DIO_HEARTBEAT,
 };
 
 #if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L)
@@ -121,8 +120,8 @@ Std_ReturnType IoHwAb_ReadAuxVoltage(IoHwAb_VoltageType *voltage)
 
     DET_CHECK_RETURN(IoHwAb_Initialised != FALSE, MODULE_ID_IOHWAB, INSTANCE_ID_SINGLE,
                      IOHWAB_API_ID_READ_VOLTAGE, IOHWAB_E_UNINIT, E_NOT_OK);
-    DET_CHECK_RETURN(voltage != NULL_PTR, MODULE_ID_IOHWAB, INSTANCE_ID_SINGLE,
-                     IOHWAB_API_ID_READ_VOLTAGE, IOHWAB_E_PARAM_POINTER, E_NOT_OK);
+    DET_CHECK_RETURN(voltage != NULL_PTR, MODULE_ID_IOHWAB, INSTANCE_ID_SINGLE, IOHWAB_API_ID_READ_VOLTAGE,
+                     IOHWAB_E_PARAM_POINTER, E_NOT_OK);
 
     if (Adc_ReadChannel(IOHWAB_CHANNEL_VBATT, &counts) != E_OK)
     {
@@ -136,15 +135,14 @@ Std_ReturnType IoHwAb_ReadAuxVoltage(IoHwAb_VoltageType *voltage)
         {
             IoHwAb_ConsecutiveReadFailures++;
         }
-        STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_VBATT_SENSE_FAULT, INSTANCE_ID_SINGLE,
-                                       DEM_EVENT_STATUS_FAILED));
+        STD_DISCARD(
+            Dem_SetEventStatus(DEM_EVENT_VBATT_SENSE_FAULT, INSTANCE_ID_SINGLE, DEM_EVENT_STATUS_FAILED));
         return E_NOT_OK;
     }
 
     IoHwAb_ConsecutiveReadFailures = 0u;
     IoHwAb_LastVoltage.rawCounts = counts;
-    IoHwAb_LastVoltage.milliVolts =
-        IoHwAb_CountsToMilliVolts(counts, IoHwAb_DividerMilli, IoHwAb_OffsetMv);
+    IoHwAb_LastVoltage.milliVolts = IoHwAb_CountsToMilliVolts(counts, IoHwAb_DividerMilli, IoHwAb_OffsetMv);
     IoHwAb_LastVoltage.valid = TRUE;
 
     /* An implausibly high reading means the divider or the channel has failed, not that the battery
@@ -152,23 +150,21 @@ Std_ReturnType IoHwAb_ReadAuxVoltage(IoHwAb_VoltageType *voltage)
      * one is a vehicle problem and the other is an ECU problem. */
     if (IoHwAb_LastVoltage.milliVolts > (uint16)IOHWAB_VBATT_IMPLAUSIBLE_MV)
     {
-        STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_VBATT_SENSE_FAULT, INSTANCE_ID_SINGLE,
-                                       DEM_EVENT_STATUS_FAILED));
+        STD_DISCARD(
+            Dem_SetEventStatus(DEM_EVENT_VBATT_SENSE_FAULT, INSTANCE_ID_SINGLE, DEM_EVENT_STATUS_FAILED));
     }
     else
     {
-        STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_VBATT_SENSE_FAULT, INSTANCE_ID_SINGLE,
-                                       DEM_EVENT_STATUS_PASSED));
+        STD_DISCARD(
+            Dem_SetEventStatus(DEM_EVENT_VBATT_SENSE_FAULT, INSTANCE_ID_SINGLE, DEM_EVENT_STATUS_PASSED));
 
         if (IoHwAb_LastVoltage.milliVolts < (uint16)IOHWAB_VBATT_LOW_MV)
         {
-            STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_VBATT_LOW, INSTANCE_ID_SINGLE,
-                                           DEM_EVENT_STATUS_FAILED));
+            STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_VBATT_LOW, INSTANCE_ID_SINGLE, DEM_EVENT_STATUS_FAILED));
         }
         else
         {
-            STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_VBATT_LOW, INSTANCE_ID_SINGLE,
-                                           DEM_EVENT_STATUS_PASSED));
+            STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_VBATT_LOW, INSTANCE_ID_SINGLE, DEM_EVENT_STATUS_PASSED));
         }
     }
 
@@ -179,20 +175,18 @@ Std_ReturnType IoHwAb_ReadAuxVoltage(IoHwAb_VoltageType *voltage)
 Std_ReturnType IoHwAb_SetIndicator(IoHwAb_IndicatorType indicator, boolean on)
 {
     DET_CHECK_RETURN(indicator < (IoHwAb_IndicatorType)IOHWAB_INDICATOR_COUNT, MODULE_ID_IOHWAB,
-                     (uint8)indicator, IOHWAB_API_ID_SET_INDICATOR, IOHWAB_E_PARAM_INDICATOR,
-                     E_NOT_OK);
+                     (uint8)indicator, IOHWAB_API_ID_SET_INDICATOR, IOHWAB_E_PARAM_INDICATOR, E_NOT_OK);
 
-    Dio_WriteChannel(IoHwAb_IndicatorChannel[indicator],
-                     (on != FALSE) ? (Dio_LevelType)IOHWAB_INDICATOR_ON_LEVEL
-                                   : (Dio_LevelType)IOHWAB_INDICATOR_OFF_LEVEL);
+    Dio_WriteChannel(IoHwAb_IndicatorChannel[indicator], (on != FALSE)
+                                                             ? (Dio_LevelType)IOHWAB_INDICATOR_ON_LEVEL
+                                                             : (Dio_LevelType)IOHWAB_INDICATOR_OFF_LEVEL);
     return E_OK;
 }
 
 Std_ReturnType IoHwAb_ToggleIndicator(IoHwAb_IndicatorType indicator)
 {
     DET_CHECK_RETURN(indicator < (IoHwAb_IndicatorType)IOHWAB_INDICATOR_COUNT, MODULE_ID_IOHWAB,
-                     (uint8)indicator, IOHWAB_API_ID_SET_INDICATOR, IOHWAB_E_PARAM_INDICATOR,
-                     E_NOT_OK);
+                     (uint8)indicator, IOHWAB_API_ID_SET_INDICATOR, IOHWAB_E_PARAM_INDICATOR, E_NOT_OK);
 
     (void)Dio_FlipChannel(IoHwAb_IndicatorChannel[indicator]);
     return E_OK;
@@ -204,8 +198,7 @@ boolean IoHwAb_GetIndicator(IoHwAb_IndicatorType indicator)
     {
         return FALSE;
     }
-    return (Dio_ReadChannel(IoHwAb_IndicatorChannel[indicator]) ==
-            (Dio_LevelType)IOHWAB_INDICATOR_ON_LEVEL)
+    return (Dio_ReadChannel(IoHwAb_IndicatorChannel[indicator]) == (Dio_LevelType)IOHWAB_INDICATOR_ON_LEVEL)
                ? TRUE
                : FALSE;
 }

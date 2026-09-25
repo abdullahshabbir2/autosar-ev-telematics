@@ -13,14 +13,14 @@
  *  Local constants
  *================================================================================================*/
 
-#define CRC8_POLYNOMIAL 0x1Du      /* SAE J1850                                  */
+#define CRC8_POLYNOMIAL 0x1Du /* SAE J1850                                  */
 #define CRC8_FINAL_XOR 0xFFu
 #define CRC8H2F_POLYNOMIAL 0x2Fu
 #define CRC8H2F_FINAL_XOR 0xFFu
-#define CRC16_POLYNOMIAL 0x1021u   /* CCITT-FALSE, MSB-first                     */
-#define CRC16ARC_POLY_REFLECTED 0xA001u /* ARC, 0x8005 reflected, LSB-first      */
-#define CRC32_POLY_REFLECTED 0xEDB88320uL      /* 0x04C11DB7 reflected           */
-#define CRC32P4_POLY_REFLECTED 0xC8DF352FuL    /* 0xF4ACFB13 reflected           */
+#define CRC16_POLYNOMIAL 0x1021u            /* CCITT-FALSE, MSB-first                     */
+#define CRC16ARC_POLY_REFLECTED 0xA001u     /* ARC, 0x8005 reflected, LSB-first      */
+#define CRC32_POLY_REFLECTED 0xEDB88320uL   /* 0x04C11DB7 reflected           */
+#define CRC32P4_POLY_REFLECTED 0xC8DF352FuL /* 0xF4ACFB13 reflected           */
 #define CRC32_FINAL_XOR 0xFFFFFFFFuL
 
 #define CRC_BITS_PER_BYTE 8u
@@ -128,8 +128,7 @@ uint8 Crc_CalculateCRC8(const uint8 *dataPtr, uint32 length, uint8 startValue, b
     return (uint8)(reg ^ CRC8_FINAL_XOR);
 }
 
-uint8 Crc_CalculateCRC8H2F(const uint8 *dataPtr, uint32 length, uint8 startValue,
-                           boolean isFirstCall)
+uint8 Crc_CalculateCRC8H2F(const uint8 *dataPtr, uint32 length, uint8 startValue, boolean isFirstCall)
 {
     uint8 reg;
 
@@ -138,8 +137,7 @@ uint8 Crc_CalculateCRC8H2F(const uint8 *dataPtr, uint32 length, uint8 startValue
         return CRC8H2F_INITIAL_VALUE;
     }
 
-    reg = (isFirstCall != FALSE) ? (uint8)CRC8H2F_INITIAL_VALUE
-                                 : (uint8)(startValue ^ CRC8H2F_FINAL_XOR);
+    reg = (isFirstCall != FALSE) ? (uint8)CRC8H2F_INITIAL_VALUE : (uint8)(startValue ^ CRC8H2F_FINAL_XOR);
 
     reg = Crc_Kernel8(dataPtr, length, reg, CRC8H2F_POLYNOMIAL);
 
@@ -150,8 +148,7 @@ uint8 Crc_CalculateCRC8H2F(const uint8 *dataPtr, uint32 length, uint8 startValue
  *  CRC-16/CCITT-FALSE (bit-at-a-time, MSB-first, non-reflected, no final XOR)
  *================================================================================================*/
 
-uint16 Crc_CalculateCRC16(const uint8 *dataPtr, uint32 length, uint16 startValue,
-                          boolean isFirstCall)
+uint16 Crc_CalculateCRC16(const uint8 *dataPtr, uint32 length, uint16 startValue, boolean isFirstCall)
 {
     uint16 reg;
     uint32 byteIndex;
@@ -188,8 +185,7 @@ uint16 Crc_CalculateCRC16(const uint8 *dataPtr, uint32 length, uint16 startValue
  *  CRC-16/ARC (bit-at-a-time, LSB-first, reflected in and out)
  *================================================================================================*/
 
-uint16 Crc_CalculateCRC16ARC(const uint8 *dataPtr, uint32 length, uint16 startValue,
-                             boolean isFirstCall)
+uint16 Crc_CalculateCRC16ARC(const uint8 *dataPtr, uint32 length, uint16 startValue, boolean isFirstCall)
 {
     uint16 reg;
     uint32 byteIndex;
@@ -231,8 +227,7 @@ uint16 Crc_CalculateCRC16ARC(const uint8 *dataPtr, uint32 length, uint16 startVa
 /**
  * @brief Shared reflected CRC-32 kernel.
  */
-STATIC uint32 Crc_Kernel32(const uint8 *dataPtr, uint32 length, uint32 register32,
-                           const uint32 *table)
+STATIC uint32 Crc_Kernel32(const uint8 *dataPtr, uint32 length, uint32 register32, const uint32 *table)
 {
     uint32 byteIndex;
 
@@ -244,8 +239,7 @@ STATIC uint32 Crc_Kernel32(const uint8 *dataPtr, uint32 length, uint32 register3
     return register32;
 }
 
-uint32 Crc_CalculateCRC32(const uint8 *dataPtr, uint32 length, uint32 startValue,
-                          boolean isFirstCall)
+uint32 Crc_CalculateCRC32(const uint8 *dataPtr, uint32 length, uint32 startValue, boolean isFirstCall)
 {
     uint32 reg;
 
@@ -267,8 +261,7 @@ uint32 Crc_CalculateCRC32(const uint8 *dataPtr, uint32 length, uint32 startValue
     return reg ^ CRC32_FINAL_XOR;
 }
 
-uint32 Crc_CalculateCRC32P4(const uint8 *dataPtr, uint32 length, uint32 startValue,
-                            boolean isFirstCall)
+uint32 Crc_CalculateCRC32P4(const uint8 *dataPtr, uint32 length, uint32 startValue, boolean isFirstCall)
 {
     uint32 reg;
 

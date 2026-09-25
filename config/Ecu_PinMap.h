@@ -145,10 +145,10 @@
  *  Status indication -- active high, LED anode to pin, cathode to GND via resistor
  *================================================================================================*/
 
-#define PIN_LED_ACQ 32u     /**< Green  -- a data record was acquired.    */
-#define PIN_LED_STORAGE 33u /**< Yellow -- a record was written to SD.    */
-#define PIN_LED_LINK 25u    /**< Blue   -- an IP bearer is up.            */
-#define PIN_LED_CLOUD 2u    /**< Red    -- broker session established.    */
+#define PIN_LED_ACQ 32u       /**< Green  -- a data record was acquired.    */
+#define PIN_LED_STORAGE 33u   /**< Yellow -- a record was written to SD.    */
+#define PIN_LED_LINK 25u      /**< Blue   -- an IP bearer is up.            */
+#define PIN_LED_CLOUD 2u      /**< Red    -- broker session established.    */
 #define PIN_LED_HEARTBEAT 15u /**< White -- scheduler alive.              */
 
 /*==================================================================================================
@@ -207,27 +207,23 @@
 /* clang-format on */
 
 /** Pins wired to the internal SPI flash on every WROOM-32 module. */
-#define ECU_PINMAP_FLASH_PINS                                                     \
-    (ECU_PIN_BIT(6u) | ECU_PIN_BIT(7u) | ECU_PIN_BIT(8u) | ECU_PIN_BIT(9u)        \
-     | ECU_PIN_BIT(10u) | ECU_PIN_BIT(11u))
+#define ECU_PINMAP_FLASH_PINS                                                                 \
+    (ECU_PIN_BIT(6u) | ECU_PIN_BIT(7u) | ECU_PIN_BIT(8u) | ECU_PIN_BIT(9u) | ECU_PIN_BIT(10u) \
+     | ECU_PIN_BIT(11u))
 
 /** Pins that can only ever be inputs on the ESP32. */
-#define ECU_PINMAP_INPUT_ONLY_PINS                                                \
-    (ECU_PIN_BIT(34u) | ECU_PIN_BIT(35u) | ECU_PIN_BIT(36u) | ECU_PIN_BIT(39u))
+#define ECU_PINMAP_INPUT_ONLY_PINS (ECU_PIN_BIT(34u) | ECU_PIN_BIT(35u) | ECU_PIN_BIT(36u) | ECU_PIN_BIT(39u))
 
 /** Every pin this design drives as an output. */
-#define ECU_PINMAP_OUTPUT_PINS                                                    \
-    (ECU_PIN_BIT(PIN_CONSOLE_TX) | ECU_PIN_BIT(PIN_SPI_SCK) | ECU_PIN_BIT(PIN_SPI_MOSI) \
-     | ECU_PIN_BIT(PIN_CAN_CS) | ECU_PIN_BIT(PIN_SD_CS)                           \
-     | ECU_PIN_BIT(PIN_RS485_TX) | ECU_PIN_BIT(PIN_RS485_DE)                      \
-     | ECU_PIN_BIT(PIN_GSM_TX) | ECU_PIN_BIT(PIN_GSM_PWRKEY)                      \
-     | ECU_PIN_BIT(PIN_LED_ACQ) | ECU_PIN_BIT(PIN_LED_STORAGE)                    \
-     | ECU_PIN_BIT(PIN_LED_LINK) | ECU_PIN_BIT(PIN_LED_CLOUD)                     \
-     | ECU_PIN_BIT(PIN_LED_HEARTBEAT))
+#define ECU_PINMAP_OUTPUT_PINS                                                             \
+    (ECU_PIN_BIT(PIN_CONSOLE_TX) | ECU_PIN_BIT(PIN_SPI_SCK) | ECU_PIN_BIT(PIN_SPI_MOSI)    \
+     | ECU_PIN_BIT(PIN_CAN_CS) | ECU_PIN_BIT(PIN_SD_CS) | ECU_PIN_BIT(PIN_RS485_TX)        \
+     | ECU_PIN_BIT(PIN_RS485_DE) | ECU_PIN_BIT(PIN_GSM_TX) | ECU_PIN_BIT(PIN_GSM_PWRKEY)   \
+     | ECU_PIN_BIT(PIN_LED_ACQ) | ECU_PIN_BIT(PIN_LED_STORAGE) | ECU_PIN_BIT(PIN_LED_LINK) \
+     | ECU_PIN_BIT(PIN_LED_CLOUD) | ECU_PIN_BIT(PIN_LED_HEARTBEAT))
 
 #if defined(__cplusplus)
-static_assert(ECU_PINMAP_BITS_OR == ECU_PINMAP_BITS_SUM,
-              "Ecu_PinMap.h: a GPIO is assigned to two signals");
+static_assert(ECU_PINMAP_BITS_OR == ECU_PINMAP_BITS_SUM, "Ecu_PinMap.h: a GPIO is assigned to two signals");
 static_assert((ECU_PINMAP_BITS_OR & ECU_PINMAP_FLASH_PINS) == 0uLL,
               "Ecu_PinMap.h: a signal is assigned to a GPIO wired to the internal flash");
 static_assert((ECU_PINMAP_BITS_OR & ECU_PIN_BIT(PIN_RESERVED_MTDI)) == 0uLL,
@@ -235,8 +231,7 @@ static_assert((ECU_PINMAP_BITS_OR & ECU_PIN_BIT(PIN_RESERVED_MTDI)) == 0uLL,
 static_assert((ECU_PINMAP_OUTPUT_PINS & ECU_PINMAP_INPUT_ONLY_PINS) == 0uLL,
               "Ecu_PinMap.h: an input-only GPIO is assigned to an output signal");
 #elif defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L)
-_Static_assert(ECU_PINMAP_BITS_OR == ECU_PINMAP_BITS_SUM,
-               "Ecu_PinMap.h: a GPIO is assigned to two signals");
+_Static_assert(ECU_PINMAP_BITS_OR == ECU_PINMAP_BITS_SUM, "Ecu_PinMap.h: a GPIO is assigned to two signals");
 _Static_assert((ECU_PINMAP_BITS_OR & ECU_PINMAP_FLASH_PINS) == 0uLL,
                "Ecu_PinMap.h: a signal is assigned to a GPIO wired to the internal flash");
 _Static_assert((ECU_PINMAP_BITS_OR & ECU_PIN_BIT(PIN_RESERVED_MTDI)) == 0uLL,

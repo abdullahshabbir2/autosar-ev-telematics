@@ -60,7 +60,9 @@ void setUp(void)
     TEST_ASSERT_EQUAL(E_OK, OdoSwc_Init());
 }
 
-void tearDown(void) {}
+void tearDown(void)
+{
+}
 
 /** Feed a constant speed for @p seconds at a @p stepMs sample period. */
 static void driveConstant(uint16 rpm, uint32 seconds, uint32 stepMs)
@@ -86,8 +88,8 @@ static void driveConstant(uint16 rpm, uint32 seconds, uint32 stepMs)
 /** @test TS-ODO-001 The default calibration produces the physically correct factor. */
 static void test_ConversionFactor_MatchesPhysics(void)
 {
-    const uint32 factor = OdoSwc_ComputeConversionFactorQ32(NVM_DEFAULT_TYRE_DIAMETER_MILLI_INCH,
-                                                            NVM_DEFAULT_GEAR_RATIO_MILLI);
+    const uint32 factor =
+        OdoSwc_ComputeConversionFactorQ32(NVM_DEFAULT_TYRE_DIAMETER_MILLI_INCH, NVM_DEFAULT_GEAR_RATIO_MILLI);
 
     /* C = pi x 19 x 25.4 / (6 x 60000) = 0.00421147948... mm per rpm-millisecond.
      * In Q32 that is 0.00421147948 x 2^32 = 18 088 165.7, so 18 088 166 after rounding down. */
@@ -120,10 +122,10 @@ static void test_ConversionFactor_RejectsImplausibleCalibration(void)
     TEST_ASSERT_EQUAL_UINT32(0u, OdoSwc_ComputeConversionFactorQ32(19000u, 65535u));
 
     /* The boundaries themselves are accepted. */
-    TEST_ASSERT_NOT_EQUAL(0u, OdoSwc_ComputeConversionFactorQ32(ODO_MIN_TYRE_MILLI_INCH,
-                                                                ODO_MIN_GEAR_RATIO_MILLI));
-    TEST_ASSERT_NOT_EQUAL(0u, OdoSwc_ComputeConversionFactorQ32(ODO_MAX_TYRE_MILLI_INCH,
-                                                                ODO_MAX_GEAR_RATIO_MILLI));
+    TEST_ASSERT_NOT_EQUAL(
+        0u, OdoSwc_ComputeConversionFactorQ32(ODO_MIN_TYRE_MILLI_INCH, ODO_MIN_GEAR_RATIO_MILLI));
+    TEST_ASSERT_NOT_EQUAL(
+        0u, OdoSwc_ComputeConversionFactorQ32(ODO_MAX_TYRE_MILLI_INCH, ODO_MAX_GEAR_RATIO_MILLI));
 }
 
 /*==================================================================================================
@@ -185,8 +187,7 @@ static void test_Integration_UsesMeasuredInterval(void)
 
     /* Within 0.1 %: the sample period must not influence the result. */
     TEST_ASSERT_UINT64_WITHIN_MESSAGE(fast.totalDistanceMm / 1000uLL, fast.totalDistanceMm,
-                                      slow.totalDistanceMm,
-                                      "distance depends on the sample period");
+                                      slow.totalDistanceMm, "distance depends on the sample period");
 }
 
 /**
@@ -207,8 +208,8 @@ static void test_Integration_TrapezoidalOnAcceleration(void)
     for (step = 1u; step <= 10u; step++)
     {
         Stub_Gpt_AdvanceMs(1000u);
-        TEST_ASSERT_EQUAL(E_OK, OdoSwc_ProcessSpeedSample((uint16)(step * 600u),
-                                                          Gpt_GetMonotonicMs(), NULL_PTR));
+        TEST_ASSERT_EQUAL(E_OK,
+                          OdoSwc_ProcessSpeedSample((uint16)(step * 600u), Gpt_GetMonotonicMs(), NULL_PTR));
     }
     TEST_ASSERT_EQUAL(E_OK, OdoSwc_GetState(&ramp));
 

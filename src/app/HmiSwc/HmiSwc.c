@@ -23,12 +23,12 @@
 
 typedef struct
 {
-    HmiSwc_PatternType pattern;         /**< Pattern currently requested.                */
+    HmiSwc_PatternType pattern;            /**< Pattern currently requested.                */
     HmiSwc_PatternType patternBeforePulse; /**< Pattern to return to after a pulse.      */
-    uint16 phaseTicks;                  /**< Ticks elapsed in the current half-period.   */
-    uint16 pulseTicksRemaining;         /**< Ticks a pulse still has to run.             */
-    boolean lit;                        /**< Whether the output is currently driven on.  */
-    uint32 transitionCount;             /**< Level changes since Init.                   */
+    uint16 phaseTicks;                     /**< Ticks elapsed in the current half-period.   */
+    uint16 pulseTicksRemaining;            /**< Ticks a pulse still has to run.             */
+    boolean lit;                           /**< Whether the output is currently driven on.  */
+    uint32 transitionCount;                /**< Level changes since Init.                   */
 } HmiSwc_EntryType;
 
 STATIC HmiSwc_EntryType HmiSwc_Indicators[IOHWAB_INDICATOR_COUNT];
@@ -160,8 +160,8 @@ Std_ReturnType HmiSwc_Pulse(IoHwAb_IndicatorType indicator)
 {
     uint8 index;
 
-    DET_CHECK_RETURN(HmiSwc_Initialised != FALSE, MODULE_ID_HMISWC, (uint8)indicator,
-                     HMISWC_API_ID_PULSE, HMISWC_E_UNINIT, E_NOT_OK);
+    DET_CHECK_RETURN(HmiSwc_Initialised != FALSE, MODULE_ID_HMISWC, (uint8)indicator, HMISWC_API_ID_PULSE,
+                     HMISWC_E_UNINIT, E_NOT_OK);
     DET_CHECK_RETURN(HmiSwc_IndicatorValid(indicator) != FALSE, MODULE_ID_HMISWC, (uint8)indicator,
                      HMISWC_API_ID_PULSE, HMISWC_E_PARAM_INDICATOR, E_NOT_OK);
 
@@ -217,9 +217,7 @@ void HmiSwc_MainFunction(void)
             {
                 /* OFF and SOLID need no timing; the level was set when the pattern was requested.
                  * Re-driving it here guards against an output that was disturbed elsewhere. */
-                HmiSwc_Drive(index,
-                             (entry->pattern == HMI_PATTERN_SOLID) ? (boolean)TRUE
-                                                                  : (boolean)FALSE);
+                HmiSwc_Drive(index, (entry->pattern == HMI_PATTERN_SOLID) ? (boolean)TRUE : (boolean)FALSE);
                 continue;
             }
 
@@ -237,8 +235,8 @@ Std_ReturnType HmiSwc_GetState(IoHwAb_IndicatorType indicator, HmiSwc_IndicatorS
 {
     DET_CHECK_RETURN(HmiSwc_IndicatorValid(indicator) != FALSE, MODULE_ID_HMISWC, (uint8)indicator,
                      HMISWC_API_ID_SET_PATTERN, HMISWC_E_PARAM_INDICATOR, E_NOT_OK);
-    DET_CHECK_RETURN(state != NULL_PTR, MODULE_ID_HMISWC, (uint8)indicator,
-                     HMISWC_API_ID_SET_PATTERN, E_PARAM_POINTER, E_NOT_OK);
+    DET_CHECK_RETURN(state != NULL_PTR, MODULE_ID_HMISWC, (uint8)indicator, HMISWC_API_ID_SET_PATTERN,
+                     E_PARAM_POINTER, E_NOT_OK);
 
     state->pattern = HmiSwc_Indicators[indicator].pattern;
     state->lit = HmiSwc_Indicators[indicator].lit;

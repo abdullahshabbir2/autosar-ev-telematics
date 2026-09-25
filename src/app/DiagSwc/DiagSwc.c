@@ -46,7 +46,7 @@ typedef struct
     uint16 structVersion; /**< Layout version; 1 for this definition.           */
     uint16 eventCount;    /**< Events the record holds, for forward tolerance.  */
     DiagSwc_PersistedEventType events[DIAGSWC_PERSISTENT_DTC_SLOTS];
-    uint32 crc;           /**< CRC-32 over everything above.                    */
+    uint32 crc; /**< CRC-32 over everything above.                    */
 } DiagSwc_DtcBlockType;
 
 #if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L)
@@ -70,8 +70,7 @@ STATIC uint16 DiagSwc_LastConfirmedCount;
 /** CRC over a block image, excluding the CRC field itself. */
 STATIC uint32 DiagSwc_BlockCrc(const DiagSwc_DtcBlockType *block)
 {
-    return Crc_CalculateCRC32((const uint8 *)block,
-                              (uint32)(sizeof(*block) - sizeof(block->crc)), 0u, TRUE);
+    return Crc_CalculateCRC32((const uint8 *)block, (uint32)(sizeof(*block) - sizeof(block->crc)), 0u, TRUE);
 }
 
 Std_ReturnType DiagSwc_Persist(void)
@@ -147,8 +146,7 @@ STATIC Std_ReturnType DiagSwc_Restore(void)
 
     if (block.crc != DiagSwc_BlockCrc(&block))
     {
-        (void)Det_ReportRuntimeError(MODULE_ID_DIAGSWC, INSTANCE_ID_SINGLE, DIAGSWC_API_ID_INIT,
-                                     E_CRC_FAIL);
+        (void)Det_ReportRuntimeError(MODULE_ID_DIAGSWC, INSTANCE_ID_SINGLE, DIAGSWC_API_ID_INIT, E_CRC_FAIL);
         return E_CRC_FAIL;
     }
 
@@ -170,8 +168,8 @@ STATIC Std_ReturnType DiagSwc_Restore(void)
             uint8 report;
             for (report = 0u; report < (uint8)DEM_DEFAULT_FAILURE_THRESHOLD + 8u; report++)
             {
-                STD_DISCARD(Dem_SetEventStatus((Dem_EventIdType)event, entry->instanceId,
-                                               DEM_EVENT_STATUS_FAILED));
+                STD_DISCARD(
+                    Dem_SetEventStatus((Dem_EventIdType)event, entry->instanceId, DEM_EVENT_STATUS_FAILED));
                 if (Dem_IsEventConfirmed((Dem_EventIdType)event) != FALSE)
                 {
                     break;
@@ -227,8 +225,8 @@ void DiagSwc_ProvideSnapshot(Dem_SnapshotType *snapshot)
  *================================================================================================*/
 
 /** Build a negative response for @p sid with code @p nrc. */
-STATIC Std_ReturnType DiagSwc_NegativeResponse(uint8 sid, uint8 nrc, uint8 *response,
-                                               uint16 responseCap, uint16 *responseLen)
+STATIC Std_ReturnType DiagSwc_NegativeResponse(uint8 sid, uint8 nrc, uint8 *response, uint16 responseCap,
+                                               uint16 *responseLen)
 {
     if (responseCap < 3u)
     {
@@ -260,8 +258,7 @@ STATIC uint16 DiagSwc_ReadU16(const uint8 *in)
 }
 
 /** Serve ReadDTCInformation. */
-STATIC Std_ReturnType DiagSwc_ServiceReadDtc(uint8 *response, uint16 responseCap,
-                                             uint16 *responseLen)
+STATIC Std_ReturnType DiagSwc_ServiceReadDtc(uint8 *response, uint16 responseCap, uint16 *responseLen)
 {
     Dem_DtcType codes[DEM_EVENT_COUNT];
     uint16 count;
@@ -294,8 +291,8 @@ STATIC Std_ReturnType DiagSwc_ServiceReadDtc(uint8 *response, uint16 responseCap
             uint16 event;
             for (event = 1u; event <= (uint16)DEM_EVENT_COUNT; event++)
             {
-                if ((Dem_GetDtcForEvent((Dem_EventIdType)event, 0u) & 0x00FFFF00uL) ==
-                    (codes[i] & 0x00FFFF00uL))
+                if ((Dem_GetDtcForEvent((Dem_EventIdType)event, 0u) & 0x00FFFF00uL)
+                    == (codes[i] & 0x00FFFF00uL))
                 {
                     STD_DISCARD(Dem_GetEventStatus((Dem_EventIdType)event, &status));
                     break;
@@ -328,8 +325,7 @@ STATIC Std_ReturnType DiagSwc_ServiceReadDid(uint16 did, uint8 *response, uint16
 
     switch (did)
     {
-    case DIAGSWC_DID_FIRMWARE_VERSION:
-    {
+    case DIAGSWC_DID_FIRMWARE_VERSION: {
         const char *version = ECU_FIRMWARE_VERSION;
         const uint16 length = (uint16)strlen(version);
 
@@ -342,8 +338,7 @@ STATIC Std_ReturnType DiagSwc_ServiceReadDid(uint16 did, uint8 *response, uint16
         break;
     }
 
-    case DIAGSWC_DID_DEVICE_ID:
-    {
+    case DIAGSWC_DID_DEVICE_ID: {
         char id[13];
 
         if (Mcu_GetDeviceIdString(id, (uint8)sizeof(id)) != E_OK)
@@ -360,8 +355,7 @@ STATIC Std_ReturnType DiagSwc_ServiceReadDid(uint16 did, uint8 *response, uint16
     }
 
     case DIAGSWC_DID_ODOMETER:
-    case DIAGSWC_DID_TRIP:
-    {
+    case DIAGSWC_DID_TRIP: {
         OdoSwc_StateType odo;
         uint64 value;
 
@@ -390,8 +384,7 @@ STATIC Std_ReturnType DiagSwc_ServiceReadDid(uint16 did, uint8 *response, uint16
 
     case DIAGSWC_DID_TYRE_DIAMETER:
     case DIAGSWC_DID_GEAR_RATIO:
-    case DIAGSWC_DID_VBATT_TRIM:
-    {
+    case DIAGSWC_DID_VBATT_TRIM: {
         NvM_CalibrationType calibration;
         uint16 value;
 
@@ -422,8 +415,7 @@ STATIC Std_ReturnType DiagSwc_ServiceReadDid(uint16 did, uint8 *response, uint16
         offset++;
         break;
 
-    case DIAGSWC_DID_HEALTH_SUMMARY:
-    {
+    case DIAGSWC_DID_HEALTH_SUMMARY: {
         Dem_StatisticsType dem;
         Mcu_HeapInfoType heap;
 
@@ -452,8 +444,7 @@ STATIC Std_ReturnType DiagSwc_ServiceReadDid(uint16 did, uint8 *response, uint16
 
 /** Serve WriteDataByIdentifier. */
 STATIC Std_ReturnType DiagSwc_ServiceWriteDid(uint16 did, const uint8 *value, uint16 valueLen,
-                                              uint8 *response, uint16 responseCap,
-                                              uint16 *responseLen)
+                                              uint8 *response, uint16 responseCap, uint16 *responseLen)
 {
     NvM_CalibrationType calibration;
 
@@ -465,8 +456,7 @@ STATIC Std_ReturnType DiagSwc_ServiceWriteDid(uint16 did, const uint8 *value, ui
     switch (did)
     {
     case DIAGSWC_DID_TYRE_DIAMETER:
-    case DIAGSWC_DID_GEAR_RATIO:
-    {
+    case DIAGSWC_DID_GEAR_RATIO: {
         uint16 newValue;
 
         if (valueLen != 2u)
@@ -500,8 +490,7 @@ STATIC Std_ReturnType DiagSwc_ServiceWriteDid(uint16 did, const uint8 *value, ui
         break;
     }
 
-    case DIAGSWC_DID_VBATT_TRIM:
-    {
+    case DIAGSWC_DID_VBATT_TRIM: {
         if (valueLen != 2u)
         {
             return E_INVALID_PARAM;
@@ -602,8 +591,8 @@ Std_ReturnType DiagSwc_HandleRequest(const uint8 *request, uint16 requestLen, ui
 
     if ((requestLen == 0u) || (requestLen > (uint16)DIAGSWC_MAX_REQUEST_SIZE))
     {
-        return DiagSwc_NegativeResponse(0x00u, (uint8)DIAGSWC_NRC_INCORRECT_LENGTH, response,
-                                        responseCap, responseLen);
+        return DiagSwc_NegativeResponse(0x00u, (uint8)DIAGSWC_NRC_INCORRECT_LENGTH, response, responseCap,
+                                        responseLen);
     }
 
     sid = request[0];
@@ -631,8 +620,7 @@ Std_ReturnType DiagSwc_HandleRequest(const uint8 *request, uint16 requestLen, ui
             }
             else
             {
-                response[0] =
-                    (uint8)(DIAGSWC_SID_CLEAR_DIAGNOSTIC_INFO + DIAGSWC_POSITIVE_RESPONSE_OFFSET);
+                response[0] = (uint8)(DIAGSWC_SID_CLEAR_DIAGNOSTIC_INFO + DIAGSWC_POSITIVE_RESPONSE_OFFSET);
                 *responseLen = 1u;
             }
         }
@@ -641,32 +629,29 @@ Std_ReturnType DiagSwc_HandleRequest(const uint8 *request, uint16 requestLen, ui
     case DIAGSWC_SID_READ_DATA_BY_ID:
         if (requestLen != 3u)
         {
-            return DiagSwc_NegativeResponse(sid, (uint8)DIAGSWC_NRC_INCORRECT_LENGTH, response,
-                                            responseCap, responseLen);
+            return DiagSwc_NegativeResponse(sid, (uint8)DIAGSWC_NRC_INCORRECT_LENGTH, response, responseCap,
+                                            responseLen);
         }
-        status = DiagSwc_ServiceReadDid(DiagSwc_ReadU16(&request[1]), response, responseCap,
-                                       responseLen);
+        status = DiagSwc_ServiceReadDid(DiagSwc_ReadU16(&request[1]), response, responseCap, responseLen);
         break;
 
     case DIAGSWC_SID_WRITE_DATA_BY_ID:
         if (requestLen < 4u)
         {
-            return DiagSwc_NegativeResponse(sid, (uint8)DIAGSWC_NRC_INCORRECT_LENGTH, response,
-                                            responseCap, responseLen);
+            return DiagSwc_NegativeResponse(sid, (uint8)DIAGSWC_NRC_INCORRECT_LENGTH, response, responseCap,
+                                            responseLen);
         }
-        status = DiagSwc_ServiceWriteDid(DiagSwc_ReadU16(&request[1]), &request[3],
-                                        (uint16)(requestLen - 3u), response, responseCap,
-                                        responseLen);
+        status = DiagSwc_ServiceWriteDid(DiagSwc_ReadU16(&request[1]), &request[3], (uint16)(requestLen - 3u),
+                                         response, responseCap, responseLen);
         break;
 
     case DIAGSWC_SID_ROUTINE_CONTROL:
         if (requestLen != 4u)
         {
-            return DiagSwc_NegativeResponse(sid, (uint8)DIAGSWC_NRC_INCORRECT_LENGTH, response,
-                                            responseCap, responseLen);
+            return DiagSwc_NegativeResponse(sid, (uint8)DIAGSWC_NRC_INCORRECT_LENGTH, response, responseCap,
+                                            responseLen);
         }
-        status = DiagSwc_ServiceRoutine(DiagSwc_ReadU16(&request[2]), response, responseCap,
-                                       responseLen);
+        status = DiagSwc_ServiceRoutine(DiagSwc_ReadU16(&request[2]), response, responseCap, responseLen);
         break;
 
     case DIAGSWC_SID_ECU_RESET:
@@ -686,30 +671,30 @@ Std_ReturnType DiagSwc_HandleRequest(const uint8 *request, uint16 requestLen, ui
             status = E_OK;
         }
 #else
-        return DiagSwc_NegativeResponse(sid, (uint8)DIAGSWC_NRC_SERVICE_NOT_SUPPORTED, response,
-                                        responseCap, responseLen);
+        return DiagSwc_NegativeResponse(sid, (uint8)DIAGSWC_NRC_SERVICE_NOT_SUPPORTED, response, responseCap,
+                                        responseLen);
 #endif
         break;
 
     default:
-        return DiagSwc_NegativeResponse(sid, (uint8)DIAGSWC_NRC_SERVICE_NOT_SUPPORTED, response,
-                                        responseCap, responseLen);
+        return DiagSwc_NegativeResponse(sid, (uint8)DIAGSWC_NRC_SERVICE_NOT_SUPPORTED, response, responseCap,
+                                        responseLen);
     }
 
     if (status == E_NOT_FOUND)
     {
-        return DiagSwc_NegativeResponse(sid, (uint8)DIAGSWC_NRC_REQUEST_OUT_OF_RANGE, response,
-                                        responseCap, responseLen);
+        return DiagSwc_NegativeResponse(sid, (uint8)DIAGSWC_NRC_REQUEST_OUT_OF_RANGE, response, responseCap,
+                                        responseLen);
     }
     if (status == E_INVALID_PARAM)
     {
-        return DiagSwc_NegativeResponse(sid, (uint8)DIAGSWC_NRC_REQUEST_OUT_OF_RANGE, response,
-                                        responseCap, responseLen);
+        return DiagSwc_NegativeResponse(sid, (uint8)DIAGSWC_NRC_REQUEST_OUT_OF_RANGE, response, responseCap,
+                                        responseLen);
     }
     if (status != E_OK)
     {
-        return DiagSwc_NegativeResponse(sid, (uint8)DIAGSWC_NRC_CONDITIONS_NOT_CORRECT, response,
-                                        responseCap, responseLen);
+        return DiagSwc_NegativeResponse(sid, (uint8)DIAGSWC_NRC_CONDITIONS_NOT_CORRECT, response, responseCap,
+                                        responseLen);
     }
 
     DiagSwc_Status.requestsServed++;
@@ -772,8 +757,8 @@ void DiagSwc_MainFunction(void)
 
 Std_ReturnType DiagSwc_GetStatus(DiagSwc_StatusType *status)
 {
-    DET_CHECK_RETURN(status != NULL_PTR, MODULE_ID_DIAGSWC, INSTANCE_ID_SINGLE,
-                     DIAGSWC_API_ID_MAIN_FUNCTION, DIAGSWC_E_PARAM_POINTER, E_NOT_OK);
+    DET_CHECK_RETURN(status != NULL_PTR, MODULE_ID_DIAGSWC, INSTANCE_ID_SINGLE, DIAGSWC_API_ID_MAIN_FUNCTION,
+                     DIAGSWC_E_PARAM_POINTER, E_NOT_OK);
 
     *status = DiagSwc_Status;
     return E_OK;

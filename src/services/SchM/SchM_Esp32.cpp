@@ -121,7 +121,7 @@ static void SchM_TaskBody(void *parameter)
  *================================================================================================*/
 
 extern "C" Std_ReturnType SchM_PlatformCreateTask(SchM_TaskType task, const char *name, uint32 stackBytes,
-                                                 uint8 priority, uint8 core, uint32 periodMs)
+                                                  uint8 priority, uint8 core, uint32 periodMs)
 {
     BaseType_t created;
 
@@ -140,8 +140,8 @@ extern "C" Std_ReturnType SchM_PlatformCreateTask(SchM_TaskType task, const char
      * 21 KiB across the four tasks here and, worse, would hide a genuine stack overflow during development
      * only to expose it when someone later "corrected" the units. */
     created = xTaskCreatePinnedToCore(SchM_TaskBody, name, (uint32_t)(stackBytes / sizeof(StackType_t)),
-                                      &SchM_TaskContext[task], (UBaseType_t)priority,
-                                      &SchM_TaskHandle[task], (BaseType_t)core);
+                                      &SchM_TaskContext[task], (UBaseType_t)priority, &SchM_TaskHandle[task],
+                                      (BaseType_t)core);
 
     if (created != pdPASS)
     {

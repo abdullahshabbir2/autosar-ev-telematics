@@ -110,14 +110,14 @@
 typedef unsigned char boolean;
 #endif
 
-typedef int8_t sint8;   /**< -128            .. +127            */
-typedef uint8_t uint8;  /**<  0              .. 255             */
-typedef int16_t sint16; /**< -32768          .. +32767          */
-typedef uint16_t uint16;/**<  0              .. 65535           */
-typedef int32_t sint32; /**< -2147483648     .. +2147483647     */
-typedef uint32_t uint32;/**<  0              .. 4294967295      */
-typedef int64_t sint64; /**< reserved for monotonic time only   */
-typedef uint64_t uint64;/**< reserved for monotonic time only   */
+typedef int8_t sint8;    /**< -128            .. +127            */
+typedef uint8_t uint8;   /**<  0              .. 255             */
+typedef int16_t sint16;  /**< -32768          .. +32767          */
+typedef uint16_t uint16; /**<  0              .. 65535           */
+typedef int32_t sint32;  /**< -2147483648     .. +2147483647     */
+typedef uint32_t uint32; /**<  0              .. 4294967295      */
+typedef int64_t sint64;  /**< reserved for monotonic time only   */
+typedef uint64_t uint64; /**< reserved for monotonic time only   */
 
 /* Optimised ("least"/"fast") variants, SWS_Platform_00050 .. 00057. On a 32-bit
  * core the widest natural register is used so that no masking code is emitted. */

@@ -1,0 +1,93 @@
+# clang-format configuration.
+#
+# Copyright (c) 2024-2026 Abdullah Shabbir. All rights reserved.
+#
+# Allman braces and a 110-column limit. The column limit is wider than the usual 80 because this code
+# carries long AUTOSAR identifiers -- Dem_SetEventStatus(DEM_EVENT_PACK_NO_RESPONSE, instance, ...) is
+# already 60 characters before any arguments -- and forcing those onto continuation lines makes a
+# function call harder to read, not easier.
+#
+# Checked in CI with --dry-run --Werror rather than applied. A formatting job that commits back to the
+# branch puts changes nobody wrote into every review diff, and makes a formatting commit
+# indistinguishable from a real one.
+
+Language: Cpp
+BasedOnStyle: LLVM
+
+# Allman braces, expressed through BraceWrapping rather than the Allman preset, because one case has to
+# differ: `extern "C" {` keeps its brace on the same line and does not indent its contents.
+#
+# With the preset, every header's entire body gained four spaces of indentation -- the `extern "C"`
+# guard that wraps all of them counts as a block. That reindented 107 files for no reason, made every
+# subsequent diff harder to read, and pushed lines that were already near the column limit over it.
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterClass: true
+  AfterControlStatement: Always
+  AfterEnum: true
+  AfterFunction: true
+  AfterNamespace: true
+  AfterStruct: true
+  AfterUnion: true
+  # The one deviation, and the reason BraceWrapping is spelled out at all.
+  AfterExternBlock: false
+  BeforeCatch: true
+  BeforeElse: true
+  IndentBraces: false
+  SplitEmptyFunction: true
+  SplitEmptyRecord: true
+
+# Contents of an extern "C" block sit at the same level as the rest of the file. Every header in this
+# project is wrapped in one, so indenting them would indent everything.
+IndentExternBlock: NoIndent
+
+ColumnLimit: 110
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+ContinuationIndentWidth: 4
+
+# Pointers bind to the name: `uint8 *buffer`, matching how the declaration reads aloud.
+PointerAlignment: Right
+DerivePointerAlignment: false
+
+# Never join a short if onto one line. A single-statement body without braces is how an added second
+# statement silently falls outside the condition.
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortBlocksOnASingleLine: Never
+
+# Case labels indented inside the switch body, so the switch reads as one block.
+IndentCaseLabels: false
+
+AlignAfterOpenBracket: Align
+AlignConsecutiveAssignments: false
+AlignConsecutiveDeclarations: false
+AlignEscapedNewlines: Left
+AlignOperands: true
+AlignTrailingComments: true
+
+# Leave comment reflowing alone. Several comments here are carefully laid-out tables and derivations,
+# and reflowing them destroys the alignment that makes them readable.
+ReflowComments: false
+
+BinPackArguments: true
+BinPackParameters: true
+BreakBeforeBinaryOperators: NonAssignment
+BreakStringLiterals: false
+
+SpaceAfterCStyleCast: false
+SpaceBeforeParens: ControlStatements
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+
+# Include ordering is left to the author. The convention is <external> then "project/layer/Module.h"
+# alphabetically, but clang-format's regex-based sorting reorders across those groups in ways that
+# break compilation where a header depends on a prior define -- TinyGSM's TINY_GSM_MODEM_SIM800 is
+# exactly that case.
+SortIncludes: false
+
+KeepEmptyLinesAtTheStartOfBlocks: false
+MaxEmptyLinesToKeep: 1

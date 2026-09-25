@@ -260,7 +260,7 @@ extern "C" Std_ReturnType NetIf_PlatformGsmConnect(void)
         return E_NOT_OK;
     }
 
-/* strlen of a string literal folds at compile time, so this costs nothing and reads as the condition it is.
+    /* strlen of a string literal folds at compile time, so this costs nothing and reads as the condition it is.
      * sizeof would not work here: it cannot appear in a #if. */
     if (strlen(SECRETS_SIM_PIN) > 0u)
     {
@@ -380,9 +380,10 @@ extern "C" Std_ReturnType NetIf_PlatformMqttConnect(const char *host, uint16 por
          * keeps both deployments working. */
         if (strlen(SECRETS_MQTT_USER) > 0u)
         {
-            connected = (NetIf_MqttClient.connect(clientId, SECRETS_MQTT_USER, SECRETS_MQTT_PASSWORD) != false)
-                            ? TRUE
-                            : FALSE;
+            connected =
+                (NetIf_MqttClient.connect(clientId, SECRETS_MQTT_USER, SECRETS_MQTT_PASSWORD) != false)
+                    ? TRUE
+                    : FALSE;
         }
         else
         {
@@ -476,7 +477,7 @@ extern "C" Std_ReturnType NetIf_PlatformMqttLoop(void)
 }
 
 extern "C" void NetIf_PlatformMqttSetCallback(void (*callback)(const char *topic, const uint8 *payload,
-                                                              uint16 payloadLen))
+                                                               uint16 payloadLen))
 {
     NetIf_InboundCallback = callback;
 }

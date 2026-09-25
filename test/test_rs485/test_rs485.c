@@ -53,16 +53,16 @@ static void test_BuildRequest_MatchesReferenceFrame(void)
 {
     uint8 frame[RS485IF_REQUEST_FRAME_SIZE];
 
-    TEST_ASSERT_EQUAL(E_OK, Rs485If_BuildRequest(frame, (uint8)sizeof(frame), RS485_TV_SERIAL,
-                                                 RS485IF_CMD_SERIAL_NUMBER));
+    TEST_ASSERT_EQUAL(
+        E_OK, Rs485If_BuildRequest(frame, (uint8)sizeof(frame), RS485_TV_SERIAL, RS485IF_CMD_SERIAL_NUMBER));
     TEST_ASSERT_EQUAL_HEX8_ARRAY(Rs485_Tv_RequestSerial, frame, sizeof(frame));
 
-    TEST_ASSERT_EQUAL(E_OK, Rs485If_BuildRequest(frame, (uint8)sizeof(frame), RS485_TV_SERIAL,
-                                                 RS485IF_CMD_BATTERY_PARAMS));
+    TEST_ASSERT_EQUAL(
+        E_OK, Rs485If_BuildRequest(frame, (uint8)sizeof(frame), RS485_TV_SERIAL, RS485IF_CMD_BATTERY_PARAMS));
     TEST_ASSERT_EQUAL_HEX8_ARRAY(Rs485_Tv_RequestBattery, frame, sizeof(frame));
 
-    TEST_ASSERT_EQUAL(E_OK, Rs485If_BuildRequest(frame, (uint8)sizeof(frame), RS485_TV_SERIAL,
-                                                 RS485IF_CMD_CELL_PARAMS));
+    TEST_ASSERT_EQUAL(
+        E_OK, Rs485If_BuildRequest(frame, (uint8)sizeof(frame), RS485_TV_SERIAL, RS485IF_CMD_CELL_PARAMS));
     TEST_ASSERT_EQUAL_HEX8_ARRAY(Rs485_Tv_RequestCells, frame, sizeof(frame));
 }
 
@@ -102,8 +102,8 @@ static void test_BuildRequest_DoesNotOverflowBuffer(void)
 
     /* Build the short frame into a buffer sized for the long one: indices 15 and 16 must be
      * left alone, because a 15-byte frame ends at index 14. */
-    TEST_ASSERT_EQUAL(E_OK, Rs485If_BuildRequest(buffer.frame, RS485IF_REQUEST_FRAME_SIZE,
-                                                 RS485_TV_SERIAL, RS485IF_CMD_SERIAL_NUMBER));
+    TEST_ASSERT_EQUAL(E_OK, Rs485If_BuildRequest(buffer.frame, RS485IF_REQUEST_FRAME_SIZE, RS485_TV_SERIAL,
+                                                 RS485IF_CMD_SERIAL_NUMBER));
     TEST_ASSERT_EQUAL_HEX8_MESSAGE(0xA5u, buffer.frame[15],
                                    "BuildRequest wrote past its declared frame length");
     TEST_ASSERT_EQUAL_HEX8_MESSAGE(0xA5u, buffer.frame[16],
@@ -112,14 +112,13 @@ static void test_BuildRequest_DoesNotOverflowBuffer(void)
     /* Now the long frame, which legitimately uses all 17 bytes. The guard beyond it must
      * still be untouched -- that is the byte v1 corrupted. */
     (void)memset(&buffer, 0xA5, sizeof(buffer));
-    TEST_ASSERT_EQUAL(E_OK, Rs485If_BuildRequestExt(buffer.frame, RS485IF_REQUEST_FRAME_SIZE_EXT,
-                                                    0u, RS485IF_CMD_BATTERY_PARAMS, 0x00u, 0x0Fu));
+    TEST_ASSERT_EQUAL(E_OK, Rs485If_BuildRequestExt(buffer.frame, RS485IF_REQUEST_FRAME_SIZE_EXT, 0u,
+                                                    RS485IF_CMD_BATTERY_PARAMS, 0x00u, 0x0Fu));
     {
         uint8 i;
         for (i = 0u; i < (uint8)sizeof(buffer.guard); i++)
         {
-            TEST_ASSERT_EQUAL_HEX8_MESSAGE(0xA5u, buffer.guard[i],
-                                           "BuildRequestExt overflowed its buffer");
+            TEST_ASSERT_EQUAL_HEX8_MESSAGE(0xA5u, buffer.guard[i], "BuildRequestExt overflowed its buffer");
         }
     }
 }
@@ -139,10 +138,10 @@ static void test_BuildRequest_RejectsUndersizedBuffer(void)
     (void)memset(tooSmall, 0x5Au, sizeof(tooSmall));
     (void)memset(extTooSmall, 0x5Au, sizeof(extTooSmall));
 
-    TEST_ASSERT_EQUAL(E_NOT_OK, Rs485If_BuildRequest(tooSmall, (uint8)sizeof(tooSmall),
-                                                     RS485_TV_SERIAL, RS485IF_CMD_SERIAL_NUMBER));
-    TEST_ASSERT_EQUAL(E_NOT_OK, Rs485If_BuildRequestExt(extTooSmall, (uint8)sizeof(extTooSmall),
-                                                        0u, RS485IF_CMD_BATTERY_PARAMS, 0u, 0u));
+    TEST_ASSERT_EQUAL(E_NOT_OK, Rs485If_BuildRequest(tooSmall, (uint8)sizeof(tooSmall), RS485_TV_SERIAL,
+                                                     RS485IF_CMD_SERIAL_NUMBER));
+    TEST_ASSERT_EQUAL(E_NOT_OK, Rs485If_BuildRequestExt(extTooSmall, (uint8)sizeof(extTooSmall), 0u,
+                                                        RS485IF_CMD_BATTERY_PARAMS, 0u, 0u));
 
     /* Nothing may have been written before the size was checked. */
     TEST_ASSERT_EACH_EQUAL_HEX8(0x5Au, tooSmall, sizeof(tooSmall));
@@ -158,8 +157,7 @@ static void test_BuildRequest_RejectsNullBuffer(void)
 {
     TEST_ASSERT_EQUAL(E_NOT_OK, Rs485If_BuildRequest(NULL_PTR, RS485IF_REQUEST_FRAME_SIZE, 0u, 0u));
     TEST_ASSERT_EQUAL(E_NOT_OK,
-                      Rs485If_BuildRequestExt(NULL_PTR, RS485IF_REQUEST_FRAME_SIZE_EXT, 0u, 0u,
-                                              0u, 0u));
+                      Rs485If_BuildRequestExt(NULL_PTR, RS485IF_REQUEST_FRAME_SIZE_EXT, 0u, 0u, 0u, 0u));
 }
 
 /*==================================================================================================
@@ -169,15 +167,13 @@ static void test_BuildRequest_RejectsNullBuffer(void)
 /** @test TS-RS485-006 A well-formed response is accepted. */
 static void test_ValidateResponse_AcceptsGoldenFrames(void)
 {
-    TEST_ASSERT_EQUAL(E_OK, Rs485If_ValidateResponse(Rs485_Tv_ResponseSerial,
-                                                     RS485IF_SERIAL_RESPONSE_SIZE,
+    TEST_ASSERT_EQUAL(E_OK, Rs485If_ValidateResponse(Rs485_Tv_ResponseSerial, RS485IF_SERIAL_RESPONSE_SIZE,
                                                      RS485IF_SERIAL_RESPONSE_SIZE));
-    TEST_ASSERT_EQUAL(E_OK, Rs485If_ValidateResponse(Rs485_Tv_ResponseCellsV1,
-                                                     RS485IF_CELL_RESPONSE_SIZE,
+    TEST_ASSERT_EQUAL(E_OK, Rs485If_ValidateResponse(Rs485_Tv_ResponseCellsV1, RS485IF_CELL_RESPONSE_SIZE,
                                                      RS485IF_CELL_RESPONSE_SIZE));
-    TEST_ASSERT_EQUAL(E_OK, Rs485If_ValidateResponse(Rs485_Tv_ResponseBatteryNominal,
-                                                     RS485IF_BATTERY_RESPONSE_SIZE,
-                                                     RS485IF_BATTERY_RESPONSE_SIZE));
+    TEST_ASSERT_EQUAL(E_OK,
+                      Rs485If_ValidateResponse(Rs485_Tv_ResponseBatteryNominal, RS485IF_BATTERY_RESPONSE_SIZE,
+                                               RS485IF_BATTERY_RESPONSE_SIZE));
 }
 
 /**
@@ -191,9 +187,9 @@ static void test_ValidateResponse_RejectsV1CorruptFrame(void)
 {
     Rs485If_StatisticsType stats;
 
-    TEST_ASSERT_EQUAL(E_CRC_FAIL, Rs485If_ValidateResponse(Rs485_Tv_ResponseBatteryV1Corrupt,
-                                                           RS485IF_BATTERY_RESPONSE_SIZE,
-                                                           RS485IF_BATTERY_RESPONSE_SIZE));
+    TEST_ASSERT_EQUAL(E_CRC_FAIL,
+                      Rs485If_ValidateResponse(Rs485_Tv_ResponseBatteryV1Corrupt,
+                                               RS485IF_BATTERY_RESPONSE_SIZE, RS485IF_BATTERY_RESPONSE_SIZE));
 
     /* Confirm the fixture really is the v1 one, and that its correct CRC differs. */
     TEST_ASSERT_NOT_EQUAL(RS485_TV_V1_BATT_CORRECT_CRC, RS485_TV_V1_BATT_EMBEDDED_CRC);
@@ -209,8 +205,8 @@ static void test_ValidateResponse_DetectsEverySingleBitError(void)
     uint16 bit;
 
     (void)memcpy(frame, Rs485_Tv_ResponseBatteryNominal, sizeof(frame));
-    TEST_ASSERT_EQUAL(E_OK, Rs485If_ValidateResponse(frame, (uint8)sizeof(frame),
-                                                     RS485IF_BATTERY_RESPONSE_SIZE));
+    TEST_ASSERT_EQUAL(E_OK,
+                      Rs485If_ValidateResponse(frame, (uint8)sizeof(frame), RS485IF_BATTERY_RESPONSE_SIZE));
 
     for (bit = 0u; bit < (uint16)(sizeof(frame) * 8u); bit++)
     {
@@ -218,10 +214,9 @@ static void test_ValidateResponse_DetectsEverySingleBitError(void)
         const uint8 mask = (uint8)(1u << (bit % 8u));
 
         frame[byteIdx] ^= mask;
-        TEST_ASSERT_NOT_EQUAL_MESSAGE(E_OK,
-                                      Rs485If_ValidateResponse(frame, (uint8)sizeof(frame),
-                                                               RS485IF_BATTERY_RESPONSE_SIZE),
-                                      "a single-bit corruption was accepted");
+        TEST_ASSERT_NOT_EQUAL_MESSAGE(
+            E_OK, Rs485If_ValidateResponse(frame, (uint8)sizeof(frame), RS485IF_BATTERY_RESPONSE_SIZE),
+            "a single-bit corruption was accepted");
         frame[byteIdx] ^= mask;
     }
 }
@@ -239,13 +234,13 @@ static void test_ValidateResponse_ClassifiesHeaderErrorsSeparately(void)
 
     (void)memcpy(frame, Rs485_Tv_ResponseBatteryNominal, sizeof(frame));
     frame[0] = 0xFEu; /* wrong start byte */
-    TEST_ASSERT_EQUAL(E_NOT_OK, Rs485If_ValidateResponse(frame, (uint8)sizeof(frame),
-                                                         RS485IF_BATTERY_RESPONSE_SIZE));
+    TEST_ASSERT_EQUAL(E_NOT_OK,
+                      Rs485If_ValidateResponse(frame, (uint8)sizeof(frame), RS485IF_BATTERY_RESPONSE_SIZE));
 
     (void)memcpy(frame, Rs485_Tv_ResponseBatteryNominal, sizeof(frame));
     frame[1] = RS485IF_DIR_REQUEST; /* our own echo, not a reply */
-    TEST_ASSERT_EQUAL(E_NOT_OK, Rs485If_ValidateResponse(frame, (uint8)sizeof(frame),
-                                                         RS485IF_BATTERY_RESPONSE_SIZE));
+    TEST_ASSERT_EQUAL(E_NOT_OK,
+                      Rs485If_ValidateResponse(frame, (uint8)sizeof(frame), RS485IF_BATTERY_RESPONSE_SIZE));
 
     TEST_ASSERT_EQUAL(E_OK, Rs485If_GetStatistics(&stats));
     TEST_ASSERT_EQUAL_UINT32(2u, stats.headerFailures);
@@ -270,8 +265,8 @@ static void test_ValidateResponse_RejectsWrongDeclaredLength(void)
         frame[sizeof(frame) - 1u] = (uint8)(crc & 0xFFu);
     }
 
-    TEST_ASSERT_EQUAL(E_INVALID_PARAM, Rs485If_ValidateResponse(frame, (uint8)sizeof(frame),
-                                                                RS485IF_BATTERY_RESPONSE_SIZE));
+    TEST_ASSERT_EQUAL(E_INVALID_PARAM,
+                      Rs485If_ValidateResponse(frame, (uint8)sizeof(frame), RS485IF_BATTERY_RESPONSE_SIZE));
 }
 
 /** @test TS-RS485-011 A truncated frame is rejected as short, before any field is read. */
@@ -279,10 +274,9 @@ static void test_ValidateResponse_RejectsShortFrame(void)
 {
     Rs485If_StatisticsType stats;
 
-    TEST_ASSERT_EQUAL(E_NOT_OK,
-                      Rs485If_ValidateResponse(Rs485_Tv_ResponseBatteryNominal,
-                                               RS485IF_BATTERY_RESPONSE_SIZE - 1u,
-                                               RS485IF_BATTERY_RESPONSE_SIZE));
+    TEST_ASSERT_EQUAL(E_NOT_OK, Rs485If_ValidateResponse(Rs485_Tv_ResponseBatteryNominal,
+                                                         RS485IF_BATTERY_RESPONSE_SIZE - 1u,
+                                                         RS485IF_BATTERY_RESPONSE_SIZE));
 
     TEST_ASSERT_EQUAL(E_OK, Rs485If_GetStatistics(&stats));
     TEST_ASSERT_EQUAL_UINT32(1u, stats.shortFrames);
@@ -369,16 +363,14 @@ static void test_ParseCellData_DecodesAllChannels(void)
      * than hidden behind identical values. */
     for (i = 0u; i < RS485IF_CELLS_PER_PACK; i++)
     {
-        const uint16 expected =
-            (uint16)(RS485_TV_CELL_BASE_MV + ((uint16)i * RS485_TV_CELL_STEP_MV));
+        const uint16 expected = (uint16)(RS485_TV_CELL_BASE_MV + ((uint16)i * RS485_TV_CELL_STEP_MV));
         TEST_ASSERT_EQUAL_UINT16(expected, data.cellVoltage[i]);
     }
 
     TEST_ASSERT_EQUAL_INT32(RS485_TV_CELL_CURRENT, data.current);
     for (i = 0u; i < RS485IF_TEMPS_PER_PACK; i++)
     {
-        const sint16 expected =
-            (sint16)(RS485_TV_CELL_TEMP_BASE + ((sint16)i * RS485_TV_CELL_TEMP_STEP));
+        const sint16 expected = (sint16)(RS485_TV_CELL_TEMP_BASE + ((sint16)i * RS485_TV_CELL_TEMP_STEP));
         TEST_ASSERT_EQUAL_INT16(expected, data.temperature[i]);
     }
     TEST_ASSERT_EQUAL_HEX32(RS485_TV_CELL_FLAGS1, data.statusFlags1);
@@ -431,8 +423,7 @@ static void test_Exchange_PurgesStaleReceiveDataFirst(void)
     STD_DISCARD(Rs485If_SwitchPacks(0x00u, 0x0Fu));
 
     TEST_ASSERT_EQUAL(E_OK, Rs485If_GetStatistics(&stats));
-    TEST_ASSERT_EQUAL_UINT32((uint32)sizeof(junk) + RS485IF_REQUEST_FRAME_SIZE_EXT,
-                             stats.staleRxBytes);
+    TEST_ASSERT_EQUAL_UINT32((uint32)sizeof(junk) + RS485IF_REQUEST_FRAME_SIZE_EXT, stats.staleRxBytes);
 }
 
 /**
@@ -533,8 +524,7 @@ static void test_Exchange_TimeoutIsBoundedByFrameLength(void)
     /* One attempt plus RS485IF_REQUEST_RETRIES retries, each bounded by the deadline, plus
      * the inter-request gaps. */
     TEST_ASSERT_LESS_OR_EQUAL_UINT32(
-        ((expectedDeadline + RS485IF_INTER_REQUEST_GAP_MS) * (RS485IF_REQUEST_RETRIES + 2u)),
-        elapsed);
+        ((expectedDeadline + RS485IF_INTER_REQUEST_GAP_MS) * (RS485IF_REQUEST_RETRIES + 2u)), elapsed);
 }
 
 /**
@@ -573,8 +563,7 @@ static void test_SwitchPacks_AcceptsValidAcknowledgement(void)
     TEST_ASSERT_EQUAL(E_OK, Uart_Init());
     TEST_ASSERT_EQUAL(E_OK, Rs485If_Init());
 
-    Stub_Uart_SetTxResponse(RS485_BUS, Rs485_Tv_ResponseSwitchAck,
-                            RS485IF_REQUEST_FRAME_SIZE_EXT, TRUE);
+    Stub_Uart_SetTxResponse(RS485_BUS, Rs485_Tv_ResponseSwitchAck, RS485IF_REQUEST_FRAME_SIZE_EXT, TRUE);
 
     TEST_ASSERT_EQUAL(E_OK, Rs485If_SwitchPacks(0x00u, 0x0Fu));
 
@@ -601,8 +590,7 @@ static void test_DiscoverPacks_LearnsSerialAndRejectsDuplicates(void)
     TEST_ASSERT_EQUAL(E_OK, Uart_Init());
     TEST_ASSERT_EQUAL(E_OK, Rs485If_Init());
 
-    Stub_Uart_SetTxResponse(RS485_BUS, Rs485_Tv_ResponseSerial, RS485IF_SERIAL_RESPONSE_SIZE,
-                            TRUE);
+    Stub_Uart_SetTxResponse(RS485_BUS, Rs485_Tv_ResponseSerial, RS485IF_SERIAL_RESPONSE_SIZE, TRUE);
 
     TEST_ASSERT_EQUAL(E_OK, Rs485If_DiscoverPacks());
 
@@ -629,14 +617,12 @@ static void test_ReadPackData_PopulatesCacheOnSuccess(void)
     TEST_ASSERT_EQUAL(E_OK, Uart_Init());
     TEST_ASSERT_EQUAL(E_OK, Rs485If_Init());
 
-    Stub_Uart_SetTxResponse(RS485_BUS, Rs485_Tv_ResponseSerial, RS485IF_SERIAL_RESPONSE_SIZE,
-                            TRUE);
+    Stub_Uart_SetTxResponse(RS485_BUS, Rs485_Tv_ResponseSerial, RS485IF_SERIAL_RESPONSE_SIZE, TRUE);
     TEST_ASSERT_EQUAL(E_OK, Rs485If_DiscoverPacks());
 
     /* The pack-parameter response echoes RS485_TV_SERIAL, which is what slot 1 learned, so
      * the echoed-serial check passes. */
-    Stub_Uart_SetTxResponse(RS485_BUS, Rs485_Tv_ResponseBatteryNominal,
-                            RS485IF_BATTERY_RESPONSE_SIZE, TRUE);
+    Stub_Uart_SetTxResponse(RS485_BUS, Rs485_Tv_ResponseBatteryNominal, RS485IF_BATTERY_RESPONSE_SIZE, TRUE);
 
     TEST_ASSERT_EQUAL(E_OK, Rs485If_ReadPackData(1u));
 
@@ -668,8 +654,7 @@ static void test_ReadPackData_RejectsReplyFromWrongPack(void)
     TEST_ASSERT_EQUAL(E_OK, Uart_Init());
     TEST_ASSERT_EQUAL(E_OK, Rs485If_Init());
 
-    Stub_Uart_SetTxResponse(RS485_BUS, Rs485_Tv_ResponseSerial, RS485IF_SERIAL_RESPONSE_SIZE,
-                            TRUE);
+    Stub_Uart_SetTxResponse(RS485_BUS, Rs485_Tv_ResponseSerial, RS485IF_SERIAL_RESPONSE_SIZE, TRUE);
     TEST_ASSERT_EQUAL(E_OK, Rs485If_DiscoverPacks());
 
     /* Take the valid frame and re-address it to a different pack, repairing the CRC so that
@@ -692,8 +677,7 @@ static void test_ReadPackData_RejectsReplyFromWrongPack(void)
     TEST_ASSERT_EQUAL(E_NOT_OK, Rs485If_ReadPackData(1u));
 
     TEST_ASSERT_EQUAL(E_OK, Rs485If_GetPackState(1u, &state));
-    TEST_ASSERT_FALSE_MESSAGE(state.packDataValid,
-                              "another pack's reading was cached as this pack's");
+    TEST_ASSERT_FALSE_MESSAGE(state.packDataValid, "another pack's reading was cached as this pack's");
     TEST_ASSERT_EQUAL_UINT32(1u, state.consecutiveFailures);
 
     TEST_ASSERT_EQUAL(E_OK, Rs485If_GetStatistics(&stats));

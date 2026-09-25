@@ -57,8 +57,8 @@ Std_ReturnType Adc_ReadChannel(Adc_ChannelType channel, Adc_ValueType *value)
     uint32 accumulator = 0u;
     uint8 i;
 
-    DET_CHECK_RETURN(value != NULL_PTR, MODULE_ID_ADC, INSTANCE_ID_SINGLE,
-                     ADC_API_ID_READ_CHANNEL, ADC_E_PARAM_POINTER, E_NOT_OK);
+    DET_CHECK_RETURN(value != NULL_PTR, MODULE_ID_ADC, INSTANCE_ID_SINGLE, ADC_API_ID_READ_CHANNEL,
+                     ADC_E_PARAM_POINTER, E_NOT_OK);
 
     for (i = 0u; i < ADC_OVERSAMPLE_COUNT; i++)
     {

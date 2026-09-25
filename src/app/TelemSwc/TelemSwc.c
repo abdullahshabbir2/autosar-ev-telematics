@@ -128,8 +128,9 @@ STATIC void TelemSwc_OnBackfillRequest(const char *topic, const uint8 *payload, 
         return;
     }
 
-    if (Com_ParseBackfillRequest(payload, payloadLen, TelemSwc_Backfill.dates,
-                                 (uint8)COM_MAX_BACKFILL_DATES, &count, &dropped) != E_OK)
+    if (Com_ParseBackfillRequest(payload, payloadLen, TelemSwc_Backfill.dates, (uint8)COM_MAX_BACKFILL_DATES,
+                                 &count, &dropped)
+        != E_OK)
     {
         return;
     }
@@ -248,16 +249,17 @@ Std_ReturnType TelemSwc_Init(void)
         }
     }
 
-    if ((TelemSwc_BuildTopic(TelemSwc_DataTopic, (uint16)sizeof(TelemSwc_DataTopic),
-                             TELEM_TOPIC_DATA_PREFIX) != E_OK) ||
-        (TelemSwc_BuildTopic(TelemSwc_HealthTopic, (uint16)sizeof(TelemSwc_HealthTopic),
-                             TELEM_TOPIC_HEALTH_PREFIX) != E_OK) ||
-        (TelemSwc_BuildTopic(TelemSwc_BackfillRequestTopic,
-                             (uint16)sizeof(TelemSwc_BackfillRequestTopic),
-                             TELEM_TOPIC_BACKFILL_REQUEST_PREFIX) != E_OK) ||
-        (TelemSwc_BuildTopic(TelemSwc_BackfillDataTopic,
-                             (uint16)sizeof(TelemSwc_BackfillDataTopic),
-                             TELEM_TOPIC_BACKFILL_DATA_PREFIX) != E_OK))
+    if ((TelemSwc_BuildTopic(TelemSwc_DataTopic, (uint16)sizeof(TelemSwc_DataTopic), TELEM_TOPIC_DATA_PREFIX)
+         != E_OK)
+        || (TelemSwc_BuildTopic(TelemSwc_HealthTopic, (uint16)sizeof(TelemSwc_HealthTopic),
+                                TELEM_TOPIC_HEALTH_PREFIX)
+            != E_OK)
+        || (TelemSwc_BuildTopic(TelemSwc_BackfillRequestTopic, (uint16)sizeof(TelemSwc_BackfillRequestTopic),
+                                TELEM_TOPIC_BACKFILL_REQUEST_PREFIX)
+            != E_OK)
+        || (TelemSwc_BuildTopic(TelemSwc_BackfillDataTopic, (uint16)sizeof(TelemSwc_BackfillDataTopic),
+                                TELEM_TOPIC_BACKFILL_DATA_PREFIX)
+            != E_OK))
     {
         return E_NOT_OK;
     }
@@ -282,11 +284,12 @@ Std_ReturnType TelemSwc_AcquireAndStore(void)
     TelemSwc_GatherRecord(&record);
 
     if (Com_SerialiseCsvRecord(&record, TelemSwc_LiveRecord, (uint16)sizeof(TelemSwc_LiveRecord),
-                               &TelemSwc_LiveRecordLength) != E_OK)
+                               &TelemSwc_LiveRecordLength)
+        != E_OK)
     {
         TelemSwc_Status.serialiseFailures++;
-        (void)Det_ReportRuntimeError(MODULE_ID_TELEMSWC, INSTANCE_ID_SINGLE,
-                                     TELEMSWC_API_ID_ACQUIRE, TELEMSWC_E_SERIALISE_FAILED);
+        (void)Det_ReportRuntimeError(MODULE_ID_TELEMSWC, INSTANCE_ID_SINGLE, TELEMSWC_API_ID_ACQUIRE,
+                                     TELEMSWC_E_SERIALISE_FAILED);
         return E_NOT_OK;
     }
 
@@ -306,8 +309,8 @@ Std_ReturnType TelemSwc_AcquireAndStore(void)
          * published live, where its monotonic uptime makes it orderable, but it is not stored -- a file
          * named after a guessed date would be almost impossible to reconcile later. */
         TelemSwc_Status.droppedNoClock++;
-        (void)Det_ReportRuntimeError(MODULE_ID_TELEMSWC, INSTANCE_ID_SINGLE,
-                                     TELEMSWC_API_ID_ACQUIRE, TELEMSWC_E_NO_CLOCK);
+        (void)Det_ReportRuntimeError(MODULE_ID_TELEMSWC, INSTANCE_ID_SINGLE, TELEMSWC_API_ID_ACQUIRE,
+                                     TELEMSWC_E_NO_CLOCK);
         return E_NOT_OK;
     }
 
@@ -332,8 +335,9 @@ STATIC void TelemSwc_PublishLive(void)
         return;
     }
 
-    if (NetIf_Publish(TelemSwc_DataTopic, (const uint8 *)TelemSwc_LiveRecord,
-                      TelemSwc_LiveRecordLength, FALSE) == E_OK)
+    if (NetIf_Publish(TelemSwc_DataTopic, (const uint8 *)TelemSwc_LiveRecord, TelemSwc_LiveRecordLength,
+                      FALSE)
+        == E_OK)
     {
         TelemSwc_Status.recordsPublishedLive++;
         TelemSwc_LivePending = FALSE;
@@ -357,12 +361,12 @@ STATIC void TelemSwc_DrainBacklog(void)
         return;
     }
 
-    while ((published < (uint8)TELEM_BACKLOG_RECORDS_PER_CYCLE) &&
-           (skipped < (uint8)TELEM_MAX_SKIPS_PER_CYCLE))
+    while ((published < (uint8)TELEM_BACKLOG_RECORDS_PER_CYCLE)
+           && (skipped < (uint8)TELEM_MAX_SKIPS_PER_CYCLE))
     {
         uint16 length = 0u;
-        const Std_ReturnType readStatus = FsAbs_ReadRecordAtCursor(
-            TelemSwc_BacklogRecord, (uint16)sizeof(TelemSwc_BacklogRecord), &length);
+        const Std_ReturnType readStatus =
+            FsAbs_ReadRecordAtCursor(TelemSwc_BacklogRecord, (uint16)sizeof(TelemSwc_BacklogRecord), &length);
 
         if (readStatus == E_NOT_FOUND)
         {
@@ -385,8 +389,7 @@ STATIC void TelemSwc_DrainBacklog(void)
             break;
         }
 
-        if (NetIf_Publish(TelemSwc_DataTopic, (const uint8 *)TelemSwc_BacklogRecord, length,
-                          FALSE) != E_OK)
+        if (NetIf_Publish(TelemSwc_DataTopic, (const uint8 *)TelemSwc_BacklogRecord, length, FALSE) != E_OK)
         {
             TelemSwc_Status.publishFailures++;
             /* The cursor is deliberately not advanced, so the record is retried rather than lost. */
@@ -430,8 +433,8 @@ STATIC void TelemSwc_ServeBackfill(void)
         }
 
         if (Com_FormatLogFileName(fileName, (uint16)sizeof(fileName),
-                                  TelemSwc_Backfill.dates[TelemSwc_Backfill.currentDate].date) !=
-            E_OK)
+                                  TelemSwc_Backfill.dates[TelemSwc_Backfill.currentDate].date)
+            != E_OK)
         {
             TelemSwc_Backfill.currentDate++;
             continue;
@@ -449,8 +452,8 @@ STATIC void TelemSwc_ServeBackfill(void)
                 TelemSwc_Backfill.currentDate++;
                 continue;
             }
-            if (Com_ComputeChunkPlan(fileSize, (uint32)COM_TRANSFER_CHUNK_SIZE,
-                                     &TelemSwc_Backfill.plan) != E_OK)
+            if (Com_ComputeChunkPlan(fileSize, (uint32)COM_TRANSFER_CHUNK_SIZE, &TelemSwc_Backfill.plan)
+                != E_OK)
             {
                 TelemSwc_Backfill.currentDate++;
                 continue;
@@ -465,7 +468,8 @@ STATIC void TelemSwc_ServeBackfill(void)
         }
 
         if (Com_GetChunkExtent(&TelemSwc_Backfill.plan, TelemSwc_Backfill.currentChunk,
-                               (uint32)COM_TRANSFER_CHUNK_SIZE, &offset, &length) != E_OK)
+                               (uint32)COM_TRANSFER_CHUNK_SIZE, &offset, &length)
+            != E_OK)
         {
             /* Past the end of this file: move to the next requested day. */
             TelemSwc_Backfill.currentDate++;
@@ -546,37 +550,34 @@ void TelemSwc_PublishHealth(void)
 
     /* A compact key=value line rather than JSON: it is a third of the size on a metered link, and every
      * consumer of it is a script. */
-    written = snprintf(buffer, sizeof(buffer),
-                       "up=%lu dtc=%u det=%lu rt=%lu heap=%lu hmin=%lu "
-                       "bearer=%u rssi=%d pub=%lu pubf=%lu "
-                       "sd=%u free=%lu rec=%lu recf=%lu corrupt=%lu "
-                       "odo=%llu trip=%llu odoacc=%lu odorej=%lu "
-                       "b485s=%lu b485crc=%lu b485to=%lu",
-                       (unsigned long)Gpt_GetMonotonicMs(), (unsigned int)dem.confirmedCount,
-                       (unsigned long)det.devErrorCount, (unsigned long)det.runtimeErrorCount,
-                       (unsigned long)heap.heapFreeBytes, (unsigned long)heap.heapMinFreeBytes,
-                       (unsigned int)net.activeBearer, (int)net.signalStrengthDbm,
-                       (unsigned long)net.publishCount, (unsigned long)net.publishFailures,
-                       (unsigned int)(fs.mounted != FALSE ? 1u : 0u), (unsigned long)fs.freeMiB,
-                       (unsigned long)fs.recordsWritten, (unsigned long)fs.writeFailures,
-                       (unsigned long)fs.corruptRecords,
-                       (unsigned long long)odo.totalDistanceMm,
-                       (unsigned long long)odo.tripDistanceMm,
-                       (unsigned long)odo.acceptedSamples, (unsigned long)odo.rejectedRpmSamples,
-                       (unsigned long)bus.framesSent, (unsigned long)bus.crcFailures,
-                       (unsigned long)bus.timeouts);
+    written =
+        snprintf(buffer, sizeof(buffer),
+                 "up=%lu dtc=%u det=%lu rt=%lu heap=%lu hmin=%lu "
+                 "bearer=%u rssi=%d pub=%lu pubf=%lu "
+                 "sd=%u free=%lu rec=%lu recf=%lu corrupt=%lu "
+                 "odo=%llu trip=%llu odoacc=%lu odorej=%lu "
+                 "b485s=%lu b485crc=%lu b485to=%lu",
+                 (unsigned long)Gpt_GetMonotonicMs(), (unsigned int)dem.confirmedCount,
+                 (unsigned long)det.devErrorCount, (unsigned long)det.runtimeErrorCount,
+                 (unsigned long)heap.heapFreeBytes, (unsigned long)heap.heapMinFreeBytes,
+                 (unsigned int)net.activeBearer, (int)net.signalStrengthDbm, (unsigned long)net.publishCount,
+                 (unsigned long)net.publishFailures, (unsigned int)(fs.mounted != FALSE ? 1u : 0u),
+                 (unsigned long)fs.freeMiB, (unsigned long)fs.recordsWritten, (unsigned long)fs.writeFailures,
+                 (unsigned long)fs.corruptRecords, (unsigned long long)odo.totalDistanceMm,
+                 (unsigned long long)odo.tripDistanceMm, (unsigned long)odo.acceptedSamples,
+                 (unsigned long)odo.rejectedRpmSamples, (unsigned long)bus.framesSent,
+                 (unsigned long)bus.crcFailures, (unsigned long)bus.timeouts);
 
     if ((written > 0) && ((uint32)written < sizeof(buffer)))
     {
-        STD_DISCARD(NetIf_Publish(TelemSwc_HealthTopic, (const uint8 *)buffer, (uint16)written,
-                                  TRUE));
+        STD_DISCARD(NetIf_Publish(TelemSwc_HealthTopic, (const uint8 *)buffer, (uint16)written, TRUE));
     }
 }
 
 Std_ReturnType TelemSwc_GetStatus(TelemSwc_StatusType *status)
 {
-    DET_CHECK_RETURN(status != NULL_PTR, MODULE_ID_TELEMSWC, INSTANCE_ID_SINGLE,
-                     TELEMSWC_API_ID_GET_STATUS, TELEMSWC_E_PARAM_POINTER, E_NOT_OK);
+    DET_CHECK_RETURN(status != NULL_PTR, MODULE_ID_TELEMSWC, INSTANCE_ID_SINGLE, TELEMSWC_API_ID_GET_STATUS,
+                     TELEMSWC_E_PARAM_POINTER, E_NOT_OK);
 
     *status = TelemSwc_Status;
     return E_OK;

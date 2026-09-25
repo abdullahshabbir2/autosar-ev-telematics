@@ -51,16 +51,13 @@ Std_ReturnType CanIf_DecodeMcuDriveState(const Can_PduType *pdu, CanIf_McuDataTy
 {
     DET_CHECK_RETURN((pdu != NULL_PTR) && (data != NULL_PTR), MODULE_ID_CANIF, INSTANCE_ID_SINGLE,
                      CANIF_API_ID_DECODE, CANIF_E_PARAM_POINTER, E_NOT_OK);
-    DET_CHECK_RETURN(pdu->dlc >= CANIF_DS_MIN_DLC, MODULE_ID_CANIF, INSTANCE_ID_SINGLE,
-                     CANIF_API_ID_DECODE, CANIF_E_INVALID_DLC, E_NOT_OK);
+    DET_CHECK_RETURN(pdu->dlc >= CANIF_DS_MIN_DLC, MODULE_ID_CANIF, INSTANCE_ID_SINGLE, CANIF_API_ID_DECODE,
+                     CANIF_E_INVALID_DLC, E_NOT_OK);
 
-    data->direction =
-        (CanIf_DirectionType)(pdu->sdu[CANIF_DS_OFF_FLAGS] & CANIF_DS_MASK_DIRECTION);
-    data->speedMode = (CanIf_SpeedModeType)((pdu->sdu[CANIF_DS_OFF_FLAGS] >>
-                                             CANIF_DS_SHIFT_SPEED_MODE) &
-                                            CANIF_DS_MASK_SPEED_MODE);
-    data->motorRpm =
-        CanIf_Assemble16(pdu->sdu[CANIF_DS_OFF_RPM_LOW], pdu->sdu[CANIF_DS_OFF_RPM_HIGH]);
+    data->direction = (CanIf_DirectionType)(pdu->sdu[CANIF_DS_OFF_FLAGS] & CANIF_DS_MASK_DIRECTION);
+    data->speedMode = (CanIf_SpeedModeType)((pdu->sdu[CANIF_DS_OFF_FLAGS] >> CANIF_DS_SHIFT_SPEED_MODE)
+                                            & CANIF_DS_MASK_SPEED_MODE);
+    data->motorRpm = CanIf_Assemble16(pdu->sdu[CANIF_DS_OFF_RPM_LOW], pdu->sdu[CANIF_DS_OFF_RPM_HIGH]);
     data->faultCode = pdu->sdu[CANIF_DS_OFF_FAULT];
 
     /* Compared against the specific value the controller uses rather than tested for non-zero: the
@@ -79,16 +76,16 @@ Std_ReturnType CanIf_DecodeMcuCurrentVoltage(const Can_PduType *pdu, CanIf_McuDa
 {
     DET_CHECK_RETURN((pdu != NULL_PTR) && (data != NULL_PTR), MODULE_ID_CANIF, INSTANCE_ID_SINGLE,
                      CANIF_API_ID_DECODE, CANIF_E_PARAM_POINTER, E_NOT_OK);
-    DET_CHECK_RETURN(pdu->dlc >= CANIF_CV_MIN_DLC, MODULE_ID_CANIF, INSTANCE_ID_SINGLE,
-                     CANIF_API_ID_DECODE, CANIF_E_INVALID_DLC, E_NOT_OK);
+    DET_CHECK_RETURN(pdu->dlc >= CANIF_CV_MIN_DLC, MODULE_ID_CANIF, INSTANCE_ID_SINGLE, CANIF_API_ID_DECODE,
+                     CANIF_E_INVALID_DLC, E_NOT_OK);
 
     /* Kept in the protocol's own 0.1 V and 0.1 A units. v1 multiplied by 0.1f here, which turned an
      * exact integer into a float that then had to be formatted back to text for logging -- two
      * conversions, each rounding, for no gain. The scaling belongs at the point of display. */
-    data->dcVoltageDeciVolt = CanIf_Assemble16(pdu->sdu[CANIF_CV_OFF_VOLTAGE_LOW],
-                                               pdu->sdu[CANIF_CV_OFF_VOLTAGE_HIGH]);
-    data->dcCurrentDeciAmp = CanIf_Assemble16(pdu->sdu[CANIF_CV_OFF_CURRENT_LOW],
-                                              pdu->sdu[CANIF_CV_OFF_CURRENT_HIGH]);
+    data->dcVoltageDeciVolt =
+        CanIf_Assemble16(pdu->sdu[CANIF_CV_OFF_VOLTAGE_LOW], pdu->sdu[CANIF_CV_OFF_VOLTAGE_HIGH]);
+    data->dcCurrentDeciAmp =
+        CanIf_Assemble16(pdu->sdu[CANIF_CV_OFF_CURRENT_LOW], pdu->sdu[CANIF_CV_OFF_CURRENT_HIGH]);
 
     data->currentVoltageTimestamp = pdu->timestamp;
     data->currentVoltageValid = TRUE;
@@ -173,8 +170,8 @@ Std_ReturnType CanIf_GetMcuData(CanIf_McuDataType *data)
 {
     DET_CHECK_RETURN(CanIf_Initialised != FALSE, MODULE_ID_CANIF, INSTANCE_ID_SINGLE,
                      CANIF_API_ID_GET_MCU_DATA, CANIF_E_UNINIT, E_NOT_OK);
-    DET_CHECK_RETURN(data != NULL_PTR, MODULE_ID_CANIF, INSTANCE_ID_SINGLE,
-                     CANIF_API_ID_GET_MCU_DATA, CANIF_E_PARAM_POINTER, E_NOT_OK);
+    DET_CHECK_RETURN(data != NULL_PTR, MODULE_ID_CANIF, INSTANCE_ID_SINGLE, CANIF_API_ID_GET_MCU_DATA,
+                     CANIF_E_PARAM_POINTER, E_NOT_OK);
 
     *data = CanIf_McuData;
 
@@ -189,16 +186,16 @@ Std_ReturnType CanIf_GetMcuData(CanIf_McuDataType *data)
         {
             /* Reported once on crossing the threshold rather than on every stale read, so a
              * disconnected controller produces one diagnostic event instead of thousands. */
-            STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_CAN_TIMEOUT, INSTANCE_ID_SINGLE,
-                                           DEM_EVENT_STATUS_FAILED));
+            STD_DISCARD(
+                Dem_SetEventStatus(DEM_EVENT_CAN_TIMEOUT, INSTANCE_ID_SINGLE, DEM_EVENT_STATUS_FAILED));
         }
     }
     else
     {
         if (CanIf_ConsecutiveStale > 0u)
         {
-            STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_CAN_TIMEOUT, INSTANCE_ID_SINGLE,
-                                           DEM_EVENT_STATUS_PASSED));
+            STD_DISCARD(
+                Dem_SetEventStatus(DEM_EVENT_CAN_TIMEOUT, INSTANCE_ID_SINGLE, DEM_EVENT_STATUS_PASSED));
         }
         CanIf_ConsecutiveStale = 0u;
     }
@@ -229,8 +226,8 @@ boolean CanIf_IsMcuDataFresh(void)
 
 Std_ReturnType CanIf_GetStatistics(CanIf_StatisticsType *stats)
 {
-    DET_CHECK_RETURN(stats != NULL_PTR, MODULE_ID_CANIF, INSTANCE_ID_SINGLE,
-                     CANIF_API_ID_MAIN_FUNCTION, CANIF_E_PARAM_POINTER, E_NOT_OK);
+    DET_CHECK_RETURN(stats != NULL_PTR, MODULE_ID_CANIF, INSTANCE_ID_SINGLE, CANIF_API_ID_MAIN_FUNCTION,
+                     CANIF_E_PARAM_POINTER, E_NOT_OK);
 
     *stats = CanIf_Stats;
     return E_OK;

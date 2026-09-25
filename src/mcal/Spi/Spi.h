@@ -75,10 +75,10 @@ typedef enum
 /** Bus usage counters, published as diagnostic data. */
 typedef struct
 {
-    uint32 transferCount;      /**< Completed ::Spi_Transfer calls.                */
-    uint32 bytesTransferred;   /**< Total bytes clocked in either direction.       */
-    uint32 lockContentionCount;/**< Times a lock had to wait for the other device. */
-    uint32 lockTimeoutCount;   /**< Times a lock gave up -- always a defect.       */
+    uint32 transferCount;       /**< Completed ::Spi_Transfer calls.                */
+    uint32 bytesTransferred;    /**< Total bytes clocked in either direction.       */
+    uint32 lockContentionCount; /**< Times a lock had to wait for the other device. */
+    uint32 lockTimeoutCount;    /**< Times a lock gave up -- always a defect.       */
 } Spi_StatisticsType;
 
 /**
@@ -133,8 +133,8 @@ CHECK_RETURN Std_ReturnType Spi_Transfer(Spi_DeviceType device, const uint8 *txD
  * the MCP2515 SPI command set does. The caller is responsible for the matching
  * ::Spi_ChipSelectAssert and ::Spi_ChipSelectDeassert.
  */
-CHECK_RETURN Std_ReturnType Spi_TransferContinuous(Spi_DeviceType device, const uint8 *txData,
-                                                   uint8 *rxData, uint16 length);
+CHECK_RETURN Std_ReturnType Spi_TransferContinuous(Spi_DeviceType device, const uint8 *txData, uint8 *rxData,
+                                                   uint16 length);
 
 /** Assert (drive low) @p device's chip select. Requires the bus lock. */
 CHECK_RETURN Std_ReturnType Spi_ChipSelectAssert(Spi_DeviceType device);

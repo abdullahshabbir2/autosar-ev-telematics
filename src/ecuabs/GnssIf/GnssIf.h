@@ -89,17 +89,17 @@ typedef enum
 /** A validated position. */
 typedef struct
 {
-    sint32 latitudeE7;      /**< Latitude in degrees x 10^7, positive north.  */
-    sint32 longitudeE7;     /**< Longitude in degrees x 10^7, positive east.  */
-    sint32 altitudeMm;      /**< Altitude above mean sea level, millimetres.  */
-    uint32 speedMmPerSec;   /**< Ground speed from the receiver.               */
-    uint16 headingDeciDeg;  /**< Course over ground, 0.1 degree per count.     */
-    uint8 satellitesUsed;   /**< Satellites contributing to the fix.           */
-    uint8 fixQuality;       /**< ::GnssIf_FixQualityType.                      */
-    uint16 hdopCentiUnits;  /**< Horizontal dilution of precision x 100.       */
-    uint32 fixTimestampMs;  /**< Monotonic time the fix was accepted.          */
-    uint32 fixUnixTime;     /**< UTC of the fix, 0 if the date was absent.     */
-    boolean valid;          /**< TRUE if a fix has been accepted.              */
+    sint32 latitudeE7;     /**< Latitude in degrees x 10^7, positive north.  */
+    sint32 longitudeE7;    /**< Longitude in degrees x 10^7, positive east.  */
+    sint32 altitudeMm;     /**< Altitude above mean sea level, millimetres.  */
+    uint32 speedMmPerSec;  /**< Ground speed from the receiver.               */
+    uint16 headingDeciDeg; /**< Course over ground, 0.1 degree per count.     */
+    uint8 satellitesUsed;  /**< Satellites contributing to the fix.           */
+    uint8 fixQuality;      /**< ::GnssIf_FixQualityType.                      */
+    uint16 hdopCentiUnits; /**< Horizontal dilution of precision x 100.       */
+    uint32 fixTimestampMs; /**< Monotonic time the fix was accepted.          */
+    uint32 fixUnixTime;    /**< UTC of the fix, 0 if the date was absent.     */
+    boolean valid;         /**< TRUE if a fix has been accepted.              */
 } GnssIf_PositionType;
 
 /** Parser and receiver counters, published as diagnostic data. */
@@ -180,8 +180,7 @@ CHECK_RETURN Std_ReturnType GnssIf_VerifyChecksum(const char *sentence);
  *       @c degrees + minutes/60.0 in double -- introduces a rounding error that varies with
  *       position, so two receivers reporting the same coordinate could log different values.
  */
-CHECK_RETURN Std_ReturnType GnssIf_ParseCoordinate(const char *field, char hemisphere,
-                                                   sint32 *result);
+CHECK_RETURN Std_ReturnType GnssIf_ParseCoordinate(const char *field, char hemisphere, sint32 *result);
 
 /**
  * @brief Parse one complete sentence into @p position.
@@ -195,8 +194,7 @@ CHECK_RETURN Std_ReturnType GnssIf_ParseCoordinate(const char *field, char hemis
  *         ::E_CRC_FAIL on a checksum mismatch; E_NOT_FOUND if the sentence type is not one this
  *         module consumes; E_NOT_OK if it was malformed or reported no fix.
  */
-CHECK_RETURN Std_ReturnType GnssIf_ParseSentence(const char *sentence,
-                                                 GnssIf_PositionType *position);
+CHECK_RETURN Std_ReturnType GnssIf_ParseSentence(const char *sentence, GnssIf_PositionType *position);
 
 /**
  * @brief Whether moving from @p from to @p to within @p deltaMs is physically possible.
@@ -208,8 +206,8 @@ CHECK_RETURN Std_ReturnType GnssIf_ParseSentence(const char *sentence,
  *
  * @return TRUE if the transition is plausible, or if @p from is not yet valid.
  */
-boolean GnssIf_IsTransitionPlausible(const GnssIf_PositionType *from,
-                                     const GnssIf_PositionType *to, uint32 deltaMs);
+boolean GnssIf_IsTransitionPlausible(const GnssIf_PositionType *from, const GnssIf_PositionType *to,
+                                     uint32 deltaMs);
 
 /**
  * @brief Read the parser counters.

@@ -63,17 +63,17 @@ extern "C" {
 /** Telemetry counters, published in the health record and readable over diagnostics. */
 typedef struct
 {
-    uint32 recordsAcquired;      /**< Records assembled.                             */
-    uint32 recordsStored;        /**< Records written to the card.                   */
-    uint32 recordsPublishedLive; /**< Records published as they were acquired.       */
+    uint32 recordsAcquired;         /**< Records assembled.                             */
+    uint32 recordsStored;           /**< Records written to the card.                   */
+    uint32 recordsPublishedLive;    /**< Records published as they were acquired.       */
     uint32 recordsPublishedBacklog; /**< Records published from the card's backlog.   */
-    uint32 storeFailures;        /**< Records the card would not accept.             */
-    uint32 publishFailures;      /**< Publishes the broker or link rejected.         */
-    uint32 serialiseFailures;    /**< Records that would not fit their buffer.       */
-    uint32 backfillRequests;     /**< Backfill requests served.                      */
-    uint32 backfillChunksSent;   /**< Chunks transmitted for backfill.               */
-    uint32 droppedNoClock;       /**< Records not stored because the clock was invalid.*/
-    uint32 sequenceNumber;       /**< Sequence number of the next record.            */
+    uint32 storeFailures;           /**< Records the card would not accept.             */
+    uint32 publishFailures;         /**< Publishes the broker or link rejected.         */
+    uint32 serialiseFailures;       /**< Records that would not fit their buffer.       */
+    uint32 backfillRequests;        /**< Backfill requests served.                      */
+    uint32 backfillChunksSent;      /**< Chunks transmitted for backfill.               */
+    uint32 droppedNoClock;          /**< Records not stored because the clock was invalid.*/
+    uint32 sequenceNumber;          /**< Sequence number of the next record.            */
 } TelemSwc_StatusType;
 
 /*==================================================================================================

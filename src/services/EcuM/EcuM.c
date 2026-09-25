@@ -86,8 +86,7 @@ STATIC void EcuM_EvaluateCrashLoop(void)
     windowExpired = FALSE;
     if ((timeValid != FALSE) && (info.windowStartUnixTime != 0u))
     {
-        windowExpired = ((now - info.windowStartUnixTime) > (uint32)ECUM_CRASH_LOOP_WINDOW_S) ? TRUE
-                                                                                             : FALSE;
+        windowExpired = ((now - info.windowStartUnixTime) > (uint32)ECUM_CRASH_LOOP_WINDOW_S) ? TRUE : FALSE;
     }
 
     if (windowExpired != FALSE)
@@ -117,16 +116,15 @@ STATIC void EcuM_EvaluateCrashLoop(void)
     if (info.restartCount >= (uint16)ECUM_CRASH_LOOP_COUNT)
     {
         EcuM_Status.crashLoopDetected = TRUE;
-        STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_CRASH_LOOP, INSTANCE_ID_SINGLE,
-                                       DEM_EVENT_STATUS_FAILED));
+        STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_CRASH_LOOP, INSTANCE_ID_SINGLE, DEM_EVENT_STATUS_FAILED));
 
         /* Which subsystem to skip is inferred from the previous run's reset cause. A watchdog bite or a
          * panic means something hung or trapped, and the two candidates on this ECU are the battery bus
          * -- a blocking half-duplex protocol -- and the card, whose driver can block for seconds. Both are
          * skipped, because startup cannot tell which of them it was and running without either still
          * produces a unit that reports its own fault. */
-        if ((info.lastResetReason == (uint32)MCU_RESET_WATCHDOG) ||
-            (info.lastResetReason == (uint32)MCU_RESET_PANIC))
+        if ((info.lastResetReason == (uint32)MCU_RESET_WATCHDOG)
+            || (info.lastResetReason == (uint32)MCU_RESET_PANIC))
         {
             EcuM_Status.degradedSubsystemMask |= (uint8)(ECUM_DEGRADED_PACKS | ECUM_DEGRADED_STORAGE);
         }
@@ -139,8 +137,7 @@ STATIC void EcuM_EvaluateCrashLoop(void)
         }
 
         LOG_ERROR(MODULE_ID_ECUM, "crash loop: %u resets, degrading mask 0x%02X",
-                  (unsigned int)info.restartCount,
-                  (unsigned int)EcuM_Status.degradedSubsystemMask);
+                  (unsigned int)info.restartCount, (unsigned int)EcuM_Status.degradedSubsystemMask);
     }
 #endif
 
@@ -175,8 +172,7 @@ void EcuM_ClearCrashLoopCounter(void)
     EcuM_Status.crashLoopDetected = FALSE;
     EcuM_Status.degradedSubsystemMask = 0u;
 
-    STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_CRASH_LOOP, INSTANCE_ID_SINGLE,
-                                   DEM_EVENT_STATUS_PASSED));
+    STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_CRASH_LOOP, INSTANCE_ID_SINGLE, DEM_EVENT_STATUS_PASSED));
 }
 
 /*==================================================================================================
@@ -200,8 +196,7 @@ STATIC Std_ReturnType EcuM_InitMcal(void)
     status |= Log_Init();
 
     LOG_INFO(MODULE_ID_ECUM, "%s %s (%s, %s) reset=%s", "telematics-ecu", ECU_FIRMWARE_VERSION,
-             ECU_BUILD_GIT_DESCRIBE, ECU_BUILD_TIMESTAMP,
-             Mcu_GetResetReasonName(Mcu_GetResetReason()));
+             ECU_BUILD_GIT_DESCRIBE, ECU_BUILD_TIMESTAMP, Mcu_GetResetReasonName(Mcu_GetResetReason()));
 
     /* Port before Spi: both chip selects must be driven high before the SPI peripheral starts clocking, or
      * an attached device reads the initialisation traffic as a command. */
@@ -242,13 +237,13 @@ STATIC void EcuM_InitMemory(void)
                 EcuM_Status.subsystems.nvmValid = FALSE;
                 LOG_WARN(MODULE_ID_ECUM, "%lu NV blocks fell back to defaults",
                          (unsigned long)stats.defaultsApplied);
-                STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_NVM_INTEGRITY, INSTANCE_ID_SINGLE,
-                                               DEM_EVENT_STATUS_FAILED));
+                STD_DISCARD(
+                    Dem_SetEventStatus(DEM_EVENT_NVM_INTEGRITY, INSTANCE_ID_SINGLE, DEM_EVENT_STATUS_FAILED));
             }
             else
             {
-                STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_NVM_INTEGRITY, INSTANCE_ID_SINGLE,
-                                               DEM_EVENT_STATUS_PASSED));
+                STD_DISCARD(
+                    Dem_SetEventStatus(DEM_EVENT_NVM_INTEGRITY, INSTANCE_ID_SINGLE, DEM_EVENT_STATUS_PASSED));
             }
         }
     }
@@ -261,8 +256,8 @@ STATIC void EcuM_InitSensors(void)
     {
         EcuM_Status.subsystems.canAvailable = TRUE;
         STD_DISCARD(CanIf_Init());
-        STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_CAN_INIT_FAILED, INSTANCE_ID_SINGLE,
-                                       DEM_EVENT_STATUS_PASSED));
+        STD_DISCARD(
+            Dem_SetEventStatus(DEM_EVENT_CAN_INIT_FAILED, INSTANCE_ID_SINGLE, DEM_EVENT_STATUS_PASSED));
     }
     else
     {
@@ -270,8 +265,8 @@ STATIC void EcuM_InitSensors(void)
          * reports "no CAN" is far more useful than one rebooting every second -- which is what v1's
          * ESP.restart() on this path produced. */
         LOG_ERROR(MODULE_ID_ECUM, "CAN controller did not initialise; no odometry this run");
-        STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_CAN_INIT_FAILED, INSTANCE_ID_SINGLE,
-                                       DEM_EVENT_STATUS_FAILED));
+        STD_DISCARD(
+            Dem_SetEventStatus(DEM_EVENT_CAN_INIT_FAILED, INSTANCE_ID_SINGLE, DEM_EVENT_STATUS_FAILED));
         STD_DISCARD(CanIf_Init());
     }
 
@@ -426,16 +421,14 @@ Std_ReturnType EcuM_Init(void)
     if (SchM_Init() != E_OK)
     {
         LOG_ERROR(MODULE_ID_ECUM, "scheduler could not be initialised");
-        (void)Det_ReportError(MODULE_ID_ECUM, INSTANCE_ID_SINGLE, ECUM_API_ID_INIT,
-                              ECUM_E_STARTUP_FAILED);
+        (void)Det_ReportError(MODULE_ID_ECUM, INSTANCE_ID_SINGLE, ECUM_API_ID_INIT, ECUM_E_STARTUP_FAILED);
         return E_NOT_OK;
     }
 
     if (SchM_StartTasks() != E_OK)
     {
         LOG_ERROR(MODULE_ID_ECUM, "tasks could not be created");
-        (void)Det_ReportError(MODULE_ID_ECUM, INSTANCE_ID_SINGLE, ECUM_API_ID_INIT,
-                              ECUM_E_STARTUP_FAILED);
+        (void)Det_ReportError(MODULE_ID_ECUM, INSTANCE_ID_SINGLE, ECUM_API_ID_INIT, ECUM_E_STARTUP_FAILED);
         return E_NOT_OK;
     }
 
@@ -449,8 +442,7 @@ Std_ReturnType EcuM_Init(void)
     Dem_StartOperationCycle();
 
     EcuM_Status.startupDurationMs = Gpt_ElapsedSince(EcuM_StartupBeganMs);
-    EcuM_Status.state = (EcuM_Status.degradedSubsystemMask == 0u) ? ECUM_STATE_RUN
-                                                                 : ECUM_STATE_RUN_DEGRADED;
+    EcuM_Status.state = (EcuM_Status.degradedSubsystemMask == 0u) ? ECUM_STATE_RUN : ECUM_STATE_RUN_DEGRADED;
     EcuM_Initialised = TRUE;
 
     LOG_INFO(MODULE_ID_ECUM, "startup complete in %lu ms, state=%u, can=%u packs=%u gnss=%u sd=%u",
@@ -500,8 +492,8 @@ EcuM_StateType EcuM_GetState(void)
 
 Std_ReturnType EcuM_GetStatus(EcuM_StatusType *status)
 {
-    DET_CHECK_RETURN(status != NULL_PTR, MODULE_ID_ECUM, INSTANCE_ID_SINGLE,
-                     ECUM_API_ID_GET_STATE, ECUM_E_PARAM_POINTER, E_NOT_OK);
+    DET_CHECK_RETURN(status != NULL_PTR, MODULE_ID_ECUM, INSTANCE_ID_SINGLE, ECUM_API_ID_GET_STATE,
+                     ECUM_E_PARAM_POINTER, E_NOT_OK);
 
     *status = EcuM_Status;
     return E_OK;

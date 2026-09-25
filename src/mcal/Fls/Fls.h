@@ -93,12 +93,12 @@ typedef enum
 /** Wear and error counters, published as diagnostic data. */
 typedef struct
 {
-    uint32 readCount;       /**< Completed read operations.                    */
-    uint32 writeCount;      /**< Completed write operations.                   */
-    uint32 eraseCount;      /**< Completed sector erases -- the wear figure.    */
-    uint32 bytesWritten;    /**< Total bytes programmed since first boot.      */
-    uint32 writeFailures;   /**< Writes the media rejected.                    */
-    uint32 verifyFailures;  /**< Writes that read back differently.            */
+    uint32 readCount;      /**< Completed read operations.                    */
+    uint32 writeCount;     /**< Completed write operations.                   */
+    uint32 eraseCount;     /**< Completed sector erases -- the wear figure.    */
+    uint32 bytesWritten;   /**< Total bytes programmed since first boot.      */
+    uint32 writeFailures;  /**< Writes the media rejected.                    */
+    uint32 verifyFailures; /**< Writes that read back differently.            */
 } Fls_StatisticsType;
 
 /**
@@ -119,8 +119,7 @@ CHECK_RETURN Std_ReturnType Fls_Init(void);
  * @return E_OK on success; E_NOT_OK for a range that leaves the partition, a NULL
  *         @p buffer, or a media read error.
  */
-CHECK_RETURN Std_ReturnType Fls_Read(Fls_AddressType address, uint8 *buffer,
-                                     Fls_LengthType length);
+CHECK_RETURN Std_ReturnType Fls_Read(Fls_AddressType address, uint8 *buffer, Fls_LengthType length);
 
 /**
  * @brief Program @p length bytes from @p buffer at @p address.
@@ -140,8 +139,7 @@ CHECK_RETURN Std_ReturnType Fls_Read(Fls_AddressType address, uint8 *buffer,
  * @return E_OK on success; ::FLS_E_UNALIGNED, ::FLS_E_WRITE_FAILED or
  *         ::FLS_E_VERIFY_FAILED as applicable.
  */
-CHECK_RETURN Std_ReturnType Fls_Write(Fls_AddressType address, const uint8 *buffer,
-                                      Fls_LengthType length);
+CHECK_RETURN Std_ReturnType Fls_Write(Fls_AddressType address, const uint8 *buffer, Fls_LengthType length);
 
 /**
  * @brief Erase whole sectors, setting every byte to 0xFF.
@@ -155,8 +153,7 @@ CHECK_RETURN Std_ReturnType Fls_Erase(Fls_AddressType address, Fls_LengthType le
  * @brief Compare flash content against @p buffer without copying it out.
  * @return E_OK if identical; E_NOT_OK if different or on a parameter error.
  */
-CHECK_RETURN Std_ReturnType Fls_Compare(Fls_AddressType address, const uint8 *buffer,
-                                        Fls_LengthType length);
+CHECK_RETURN Std_ReturnType Fls_Compare(Fls_AddressType address, const uint8 *buffer, Fls_LengthType length);
 
 /**
  * @brief Check that a range is fully erased.

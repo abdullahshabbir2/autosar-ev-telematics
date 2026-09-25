@@ -179,9 +179,8 @@ STATIC uint8 Com_DaysInMonth(uint16 year, uint8 month)
 
     if (month == 2u)
     {
-        const boolean leap = (((year % 4u) == 0u) && (((year % 100u) != 0u) || ((year % 400u) == 0u)))
-                                 ? TRUE
-                                 : FALSE;
+        const boolean leap =
+            (((year % 4u) == 0u) && (((year % 100u) != 0u) || ((year % 400u) == 0u))) ? TRUE : FALSE;
         return (leap != FALSE) ? 29u : 28u;
     }
 
@@ -212,8 +211,8 @@ boolean Com_IsValidDate(const char *date)
         return FALSE;
     }
 
-    year = (uint16)(((uint16)(date[0] - '0') * 1000u) + ((uint16)(date[1] - '0') * 100u) +
-                    ((uint16)(date[2] - '0') * 10u) + (uint16)(date[3] - '0'));
+    year = (uint16)(((uint16)(date[0] - '0') * 1000u) + ((uint16)(date[1] - '0') * 100u)
+                    + ((uint16)(date[2] - '0') * 10u) + (uint16)(date[3] - '0'));
     month = (uint8)(((uint8)(date[4] - '0') * 10u) + (uint8)(date[5] - '0'));
     day = (uint8)(((uint8)(date[6] - '0') * 10u) + (uint8)(date[7] - '0'));
 
@@ -260,8 +259,8 @@ Std_ReturnType Com_ComputeChunkPlan(uint32 fileSize, uint32 chunkSize, Com_Chunk
 {
     DET_CHECK_RETURN(plan != NULL_PTR, MODULE_ID_COM, INSTANCE_ID_SINGLE, COM_API_ID_CHUNK_PLAN,
                      COM_E_PARAM_POINTER, E_NOT_OK);
-    DET_CHECK_RETURN(chunkSize > 0u, MODULE_ID_COM, INSTANCE_ID_SINGLE, COM_API_ID_CHUNK_PLAN,
-                     E_PARAM_VALUE, E_NOT_OK);
+    DET_CHECK_RETURN(chunkSize > 0u, MODULE_ID_COM, INSTANCE_ID_SINGLE, COM_API_ID_CHUNK_PLAN, E_PARAM_VALUE,
+                     E_NOT_OK);
 
     /* An empty file yields a zero-chunk plan, stated explicitly. This is the case that broke v1: it
      * computed a chunk count of 0 and then looped to `count - 1`, which on an unsigned type is
@@ -294,11 +293,10 @@ Std_ReturnType Com_ComputeChunkPlan(uint32 fileSize, uint32 chunkSize, Com_Chunk
 Std_ReturnType Com_GetChunkExtent(const Com_ChunkPlanType *plan, uint32 index, uint32 chunkSize,
                                   uint32 *offset, uint32 *length)
 {
-    DET_CHECK_RETURN((plan != NULL_PTR) && (offset != NULL_PTR) && (length != NULL_PTR),
-                     MODULE_ID_COM, INSTANCE_ID_SINGLE, COM_API_ID_CHUNK_PLAN,
-                     COM_E_PARAM_POINTER, E_NOT_OK);
-    DET_CHECK_RETURN(chunkSize > 0u, MODULE_ID_COM, INSTANCE_ID_SINGLE, COM_API_ID_CHUNK_PLAN,
-                     E_PARAM_VALUE, E_NOT_OK);
+    DET_CHECK_RETURN((plan != NULL_PTR) && (offset != NULL_PTR) && (length != NULL_PTR), MODULE_ID_COM,
+                     INSTANCE_ID_SINGLE, COM_API_ID_CHUNK_PLAN, COM_E_PARAM_POINTER, E_NOT_OK);
+    DET_CHECK_RETURN(chunkSize > 0u, MODULE_ID_COM, INSTANCE_ID_SINGLE, COM_API_ID_CHUNK_PLAN, E_PARAM_VALUE,
+                     E_NOT_OK);
 
     if (index >= plan->chunkCount)
     {
@@ -324,9 +322,8 @@ Std_ReturnType Com_GetChunkExtent(const Com_ChunkPlanType *plan, uint32 index, u
  *  Backfill requests
  *================================================================================================*/
 
-Std_ReturnType Com_ParseBackfillRequest(const uint8 *payload, uint16 payloadLen,
-                                        Com_BackfillDateType *dates, uint8 maxDates, uint8 *count,
-                                        uint8 *dropped)
+Std_ReturnType Com_ParseBackfillRequest(const uint8 *payload, uint16 payloadLen, Com_BackfillDateType *dates,
+                                        uint8 maxDates, uint8 *count, uint8 *dropped)
 {
     uint16 i;
     uint16 fieldStart = 0u;
@@ -334,9 +331,8 @@ Std_ReturnType Com_ParseBackfillRequest(const uint8 *payload, uint16 payloadLen,
     uint8 discarded = 0u;
     uint16 scanLimit;
 
-    DET_CHECK_RETURN((payload != NULL_PTR) && (dates != NULL_PTR) && (count != NULL_PTR),
-                     MODULE_ID_COM, INSTANCE_ID_SINGLE, COM_API_ID_PARSE_REQUEST,
-                     COM_E_PARAM_POINTER, E_NOT_OK);
+    DET_CHECK_RETURN((payload != NULL_PTR) && (dates != NULL_PTR) && (count != NULL_PTR), MODULE_ID_COM,
+                     INSTANCE_ID_SINGLE, COM_API_ID_PARSE_REQUEST, COM_E_PARAM_POINTER, E_NOT_OK);
     DET_CHECK_RETURN(maxDates > 0u, MODULE_ID_COM, INSTANCE_ID_SINGLE, COM_API_ID_PARSE_REQUEST,
                      E_PARAM_VALUE, E_NOT_OK);
 
@@ -348,15 +344,13 @@ Std_ReturnType Com_ParseBackfillRequest(const uint8 *payload, uint16 payloadLen,
 
     /* The payload comes from the network. Scanning is bounded so that an oversized message costs a
      * fixed amount of work rather than however much the sender chose to send. */
-    scanLimit = (payloadLen > (uint16)COM_MAX_REQUEST_PAYLOAD) ? (uint16)COM_MAX_REQUEST_PAYLOAD
-                                                              : payloadLen;
+    scanLimit = (payloadLen > (uint16)COM_MAX_REQUEST_PAYLOAD) ? (uint16)COM_MAX_REQUEST_PAYLOAD : payloadLen;
 
     for (i = 0u; i <= scanLimit; i++)
     {
         const boolean atEnd = (i == scanLimit) ? TRUE : FALSE;
         const boolean isSeparator =
-            ((atEnd != FALSE) || (payload[i] == (uint8)',') || (payload[i] == (uint8)'\0')) ? TRUE
-                                                                                           : FALSE;
+            ((atEnd != FALSE) || (payload[i] == (uint8)',') || (payload[i] == (uint8)'\0')) ? TRUE : FALSE;
 
         if (isSeparator == FALSE)
         {
@@ -422,8 +416,8 @@ Std_ReturnType Com_ParseBackfillRequest(const uint8 *payload, uint16 payloadLen,
 STATIC void Com_WritePackHeader(Com_WriterType *w, uint8 index)
 {
     STATIC const char *const packFields[] = {
-        "V",      "V_HI",   "V_LO",   "I",      "T",      "T_HI",  "T_LO",
-        "SOC",    "SOH",    "CHG_WH", "DIS_WH", "CHG_S",  "DIS_S", "FLAGS",
+        "V",   "V_HI", "V_LO",   "I",      "T",     "T_HI",  "T_LO",
+        "SOC", "SOH",  "CHG_WH", "DIS_WH", "CHG_S", "DIS_S", "FLAGS",
     };
     STATIC const char *const cellTail[] = {"C_I", "C_T1", "C_T2", "C_T3", "C_T4", "C_F1", "C_F2"};
     uint8 f;
@@ -462,8 +456,8 @@ Std_ReturnType Com_FormatCsvHeader(char *buffer, uint16 size, uint16 *written)
     Com_WriterType writer;
     uint8 pack;
 
-    DET_CHECK_RETURN((buffer != NULL_PTR) && (written != NULL_PTR), MODULE_ID_COM,
-                     INSTANCE_ID_SINGLE, COM_API_ID_FORMAT_HEADER, COM_E_PARAM_POINTER, E_NOT_OK);
+    DET_CHECK_RETURN((buffer != NULL_PTR) && (written != NULL_PTR), MODULE_ID_COM, INSTANCE_ID_SINGLE,
+                     COM_API_ID_FORMAT_HEADER, COM_E_PARAM_POINTER, E_NOT_OK);
 
     *written = 0u;
     Com_WriterInit(&writer, buffer, size);
@@ -487,7 +481,7 @@ Std_ReturnType Com_FormatCsvHeader(char *buffer, uint16 size, uint16 *written)
             buffer[0] = '\0';
         }
         (void)Det_ReportError(MODULE_ID_COM, INSTANCE_ID_SINGLE, COM_API_ID_FORMAT_HEADER,
-                             COM_E_BUFFER_TOO_SMALL);
+                              COM_E_BUFFER_TOO_SMALL);
         return E_NO_SPACE;
     }
 
@@ -509,8 +503,7 @@ STATIC void Com_WritePackRecord(Com_WriterType *w, const Rs485If_PackStateType *
     Com_WriteSeparator(w);
     Com_WriteU64OrBlank(w, (packValid != FALSE) ? (uint64)pack->pack.voltage : 0uLL, packValid);
     Com_WriteSeparator(w);
-    Com_WriteU64OrBlank(w, (packValid != FALSE) ? (uint64)pack->pack.voltageHighest : 0uLL,
-                        packValid);
+    Com_WriteU64OrBlank(w, (packValid != FALSE) ? (uint64)pack->pack.voltageHighest : 0uLL, packValid);
     Com_WriteSeparator(w);
     Com_WriteU64OrBlank(w, (packValid != FALSE) ? (uint64)pack->pack.voltageLowest : 0uLL, packValid);
     Com_WriteSeparator(w);
@@ -526,16 +519,13 @@ STATIC void Com_WritePackRecord(Com_WriterType *w, const Rs485If_PackStateType *
     Com_WriteSeparator(w);
     Com_WriteU64OrBlank(w, (packValid != FALSE) ? (uint64)pack->pack.stateOfHealth : 0uLL, packValid);
     Com_WriteSeparator(w);
-    Com_WriteU64OrBlank(w, (packValid != FALSE) ? (uint64)pack->pack.chargeEnergyWh : 0uLL,
-                        packValid);
+    Com_WriteU64OrBlank(w, (packValid != FALSE) ? (uint64)pack->pack.chargeEnergyWh : 0uLL, packValid);
     Com_WriteSeparator(w);
-    Com_WriteU64OrBlank(w, (packValid != FALSE) ? (uint64)pack->pack.dischargeEnergyWh : 0uLL,
-                        packValid);
+    Com_WriteU64OrBlank(w, (packValid != FALSE) ? (uint64)pack->pack.dischargeEnergyWh : 0uLL, packValid);
     Com_WriteSeparator(w);
     Com_WriteU64OrBlank(w, (packValid != FALSE) ? (uint64)pack->pack.chargeTimeSec : 0uLL, packValid);
     Com_WriteSeparator(w);
-    Com_WriteU64OrBlank(w, (packValid != FALSE) ? (uint64)pack->pack.dischargeTimeSec : 0uLL,
-                        packValid);
+    Com_WriteU64OrBlank(w, (packValid != FALSE) ? (uint64)pack->pack.dischargeTimeSec : 0uLL, packValid);
     Com_WriteSeparator(w);
     Com_WriteU64OrBlank(w, (packValid != FALSE) ? (uint64)pack->pack.statusFlags : 0uLL, packValid);
 
@@ -551,8 +541,7 @@ STATIC void Com_WritePackRecord(Com_WriterType *w, const Rs485If_PackStateType *
     for (cell = 0u; cell < (uint8)RS485IF_TEMPS_PER_PACK; cell++)
     {
         Com_WriteSeparator(w);
-        Com_WriteS32OrBlank(w, (cellValid != FALSE) ? (sint32)pack->cells.temperature[cell] : 0,
-                            cellValid);
+        Com_WriteS32OrBlank(w, (cellValid != FALSE) ? (sint32)pack->cells.temperature[cell] : 0, cellValid);
     }
     Com_WriteSeparator(w);
     Com_WriteU64OrBlank(w, (cellValid != FALSE) ? (uint64)pack->cells.statusFlags1 : 0uLL, cellValid);
@@ -560,8 +549,8 @@ STATIC void Com_WritePackRecord(Com_WriterType *w, const Rs485If_PackStateType *
     Com_WriteU64OrBlank(w, (cellValid != FALSE) ? (uint64)pack->cells.statusFlags2 : 0uLL, cellValid);
 }
 
-Std_ReturnType Com_SerialiseCsvRecord(const Com_TelemetryRecordType *record, char *buffer,
-                                      uint16 size, uint16 *written)
+Std_ReturnType Com_SerialiseCsvRecord(const Com_TelemetryRecordType *record, char *buffer, uint16 size,
+                                      uint16 *written)
 {
     Com_WriterType writer;
     uint8 pack;
@@ -570,9 +559,8 @@ Std_ReturnType Com_SerialiseCsvRecord(const Com_TelemetryRecordType *record, cha
             ? TRUE
             : FALSE;
 
-    DET_CHECK_RETURN((record != NULL_PTR) && (buffer != NULL_PTR) && (written != NULL_PTR),
-                     MODULE_ID_COM, INSTANCE_ID_SINGLE, COM_API_ID_SERIALISE, COM_E_PARAM_POINTER,
-                     E_NOT_OK);
+    DET_CHECK_RETURN((record != NULL_PTR) && (buffer != NULL_PTR) && (written != NULL_PTR), MODULE_ID_COM,
+                     INSTANCE_ID_SINGLE, COM_API_ID_SERIALISE, COM_E_PARAM_POINTER, E_NOT_OK);
 
     *written = 0u;
     Com_WriterInit(&writer, buffer, size);
@@ -581,8 +569,7 @@ Std_ReturnType Com_SerialiseCsvRecord(const Com_TelemetryRecordType *record, cha
     Com_WriteSeparator(&writer);
     /* A zero wall-clock time means the RTC was not trusted. Emitted blank rather than as 0, because
      * a literal 0 decodes as 1 January 1970 and would be plotted as a real timestamp. */
-    Com_WriteU64OrBlank(&writer, (uint64)record->unixTime,
-                        (record->unixTime > 0u) ? TRUE : FALSE);
+    Com_WriteU64OrBlank(&writer, (uint64)record->unixTime, (record->unixTime > 0u) ? TRUE : FALSE);
     Com_WriteSeparator(&writer);
     Com_WriteU64(&writer, (uint64)record->uptimeMs);
     Com_WriteSeparator(&writer);
@@ -610,33 +597,25 @@ Std_ReturnType Com_SerialiseCsvRecord(const Com_TelemetryRecordType *record, cha
     Com_WriteU64(&writer, record->tripDistanceMm);
 
     Com_WriteSeparator(&writer);
-    Com_WriteS32OrBlank(&writer, (havePosition != FALSE) ? record->position->latitudeE7 : 0,
+    Com_WriteS32OrBlank(&writer, (havePosition != FALSE) ? record->position->latitudeE7 : 0, havePosition);
+    Com_WriteSeparator(&writer);
+    Com_WriteS32OrBlank(&writer, (havePosition != FALSE) ? record->position->longitudeE7 : 0, havePosition);
+    Com_WriteSeparator(&writer);
+    Com_WriteS32OrBlank(&writer, (havePosition != FALSE) ? record->position->altitudeMm : 0, havePosition);
+    Com_WriteSeparator(&writer);
+    Com_WriteU64OrBlank(&writer, (havePosition != FALSE) ? (uint64)record->position->speedMmPerSec : 0uLL,
                         havePosition);
     Com_WriteSeparator(&writer);
-    Com_WriteS32OrBlank(&writer, (havePosition != FALSE) ? record->position->longitudeE7 : 0,
+    Com_WriteU64OrBlank(&writer, (havePosition != FALSE) ? (uint64)record->position->headingDeciDeg : 0uLL,
                         havePosition);
     Com_WriteSeparator(&writer);
-    Com_WriteS32OrBlank(&writer, (havePosition != FALSE) ? record->position->altitudeMm : 0,
+    Com_WriteU64OrBlank(&writer, (havePosition != FALSE) ? (uint64)record->position->satellitesUsed : 0uLL,
                         havePosition);
     Com_WriteSeparator(&writer);
-    Com_WriteU64OrBlank(&writer,
-                        (havePosition != FALSE) ? (uint64)record->position->speedMmPerSec : 0uLL,
+    Com_WriteU64OrBlank(&writer, (havePosition != FALSE) ? (uint64)record->position->fixQuality : 0uLL,
                         havePosition);
     Com_WriteSeparator(&writer);
-    Com_WriteU64OrBlank(&writer,
-                        (havePosition != FALSE) ? (uint64)record->position->headingDeciDeg : 0uLL,
-                        havePosition);
-    Com_WriteSeparator(&writer);
-    Com_WriteU64OrBlank(&writer,
-                        (havePosition != FALSE) ? (uint64)record->position->satellitesUsed : 0uLL,
-                        havePosition);
-    Com_WriteSeparator(&writer);
-    Com_WriteU64OrBlank(&writer,
-                        (havePosition != FALSE) ? (uint64)record->position->fixQuality : 0uLL,
-                        havePosition);
-    Com_WriteSeparator(&writer);
-    Com_WriteU64OrBlank(&writer,
-                        (havePosition != FALSE) ? (uint64)record->position->hdopCentiUnits : 0uLL,
+    Com_WriteU64OrBlank(&writer, (havePosition != FALSE) ? (uint64)record->position->hdopCentiUnits : 0uLL,
                         havePosition);
 
     Com_WriteSeparator(&writer);
@@ -648,8 +627,7 @@ Std_ReturnType Com_SerialiseCsvRecord(const Com_TelemetryRecordType *record, cha
 
     for (pack = 0u; pack < (uint8)COM_PACK_COUNT; pack++)
     {
-        Com_WritePackRecord(&writer,
-                            (record->packs != NULL_PTR) ? &record->packs[pack] : NULL_PTR);
+        Com_WritePackRecord(&writer, (record->packs != NULL_PTR) ? &record->packs[pack] : NULL_PTR);
     }
 
     *written = writer.length;

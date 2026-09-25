@@ -164,7 +164,8 @@ STATIC void FsAbs_SkipCsvHeader(void)
     }
 
     if (FsAbs_PlatformRead(FsAbs_Cursor.fileName, 0u, (uint8 *)FsAbs_HeaderPeek,
-                           (uint32)sizeof(FsAbs_HeaderPeek) - 1u, &read) != E_OK)
+                           (uint32)sizeof(FsAbs_HeaderPeek) - 1u, &read)
+        != E_OK)
     {
         return;
     }
@@ -237,8 +238,8 @@ Std_ReturnType FsAbs_Init(void)
     if (FsAbs_PlatformMount() != E_OK)
     {
         FsAbs_Status.mounted = FALSE;
-        STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_SD_MOUNT_FAILED, INSTANCE_ID_SINGLE,
-                                       DEM_EVENT_STATUS_FAILED));
+        STD_DISCARD(
+            Dem_SetEventStatus(DEM_EVENT_SD_MOUNT_FAILED, INSTANCE_ID_SINGLE, DEM_EVENT_STATUS_FAILED));
         /* Not fatal. Live publishing continues without a store-and-forward buffer, which is far better
          * than refusing to run -- v1 restarted the whole ECU after ten minutes of a failed card, which
          * only guaranteed that nothing was ever logged. */
@@ -246,8 +247,7 @@ Std_ReturnType FsAbs_Init(void)
     }
 
     FsAbs_Status.mounted = TRUE;
-    STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_SD_MOUNT_FAILED, INSTANCE_ID_SINGLE,
-                                   DEM_EVENT_STATUS_PASSED));
+    STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_SD_MOUNT_FAILED, INSTANCE_ID_SINGLE, DEM_EVENT_STATUS_PASSED));
 
     if (FsAbs_PlatformGetSpace(&FsAbs_Status.capacityMiB, &FsAbs_Status.usedMiB) == E_OK)
     {
@@ -275,10 +275,10 @@ Std_ReturnType FsAbs_AppendRecord(const char *dateStamp, const char *record)
     uint32 lineLength;
     boolean isNewFile;
 
-    DET_CHECK_RETURN(FsAbs_Initialised != FALSE, MODULE_ID_FSABS, INSTANCE_ID_SINGLE,
-                     FSABS_API_ID_APPEND, FSABS_E_UNINIT, E_NOT_OK);
-    DET_CHECK_RETURN((dateStamp != NULL_PTR) && (record != NULL_PTR), MODULE_ID_FSABS,
-                     INSTANCE_ID_SINGLE, FSABS_API_ID_APPEND, FSABS_E_PARAM_POINTER, E_NOT_OK);
+    DET_CHECK_RETURN(FsAbs_Initialised != FALSE, MODULE_ID_FSABS, INSTANCE_ID_SINGLE, FSABS_API_ID_APPEND,
+                     FSABS_E_UNINIT, E_NOT_OK);
+    DET_CHECK_RETURN((dateStamp != NULL_PTR) && (record != NULL_PTR), MODULE_ID_FSABS, INSTANCE_ID_SINGLE,
+                     FSABS_API_ID_APPEND, FSABS_E_PARAM_POINTER, E_NOT_OK);
 
     if (FsAbs_Status.mounted == FALSE)
     {
@@ -293,8 +293,7 @@ Std_ReturnType FsAbs_AppendRecord(const char *dateStamp, const char *record)
     textLength = (uint16)strlen(record);
     if ((uint32)textLength + FSABS_CRC_FIELD_CHARS + 2u > (uint32)sizeof(FsAbs_LineBuffer))
     {
-        (void)Det_ReportError(MODULE_ID_FSABS, INSTANCE_ID_SINGLE, FSABS_API_ID_APPEND,
-                              E_PARAM_VALUE);
+        (void)Det_ReportError(MODULE_ID_FSABS, INSTANCE_ID_SINGLE, FSABS_API_ID_APPEND, E_PARAM_VALUE);
         return E_NOT_OK;
     }
 
@@ -337,16 +336,15 @@ Std_ReturnType FsAbs_AppendRecord(const char *dateStamp, const char *record)
         if (FsAbs_ConsecutiveWriteFailures >= (uint16)FSABS_WRITE_FAILURE_LIMIT)
         {
             FsAbs_Status.mounted = FALSE;
-            STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_SD_WRITE_FAILED, INSTANCE_ID_SINGLE,
-                                           DEM_EVENT_STATUS_FAILED));
+            STD_DISCARD(
+                Dem_SetEventStatus(DEM_EVENT_SD_WRITE_FAILED, INSTANCE_ID_SINGLE, DEM_EVENT_STATUS_FAILED));
         }
         return E_NOT_OK;
     }
 
     FsAbs_ConsecutiveWriteFailures = 0u;
     FsAbs_Status.recordsWritten++;
-    STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_SD_WRITE_FAILED, INSTANCE_ID_SINGLE,
-                                   DEM_EVENT_STATUS_PASSED));
+    STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_SD_WRITE_FAILED, INSTANCE_ID_SINGLE, DEM_EVENT_STATUS_PASSED));
 
     /* The first record ever written establishes the transfer cursor. */
     if (FsAbs_Cursor.valid == FALSE)
@@ -401,10 +399,10 @@ Std_ReturnType FsAbs_ReadRecordAtCursor(char *buffer, uint16 size, uint16 *lengt
     uint32 lineEnd = 0u;
     boolean foundTerminator = FALSE;
 
-    DET_CHECK_RETURN(FsAbs_Initialised != FALSE, MODULE_ID_FSABS, INSTANCE_ID_SINGLE,
-                     FSABS_API_ID_READ_NEXT, FSABS_E_UNINIT, E_NOT_OK);
-    DET_CHECK_RETURN((buffer != NULL_PTR) && (length != NULL_PTR), MODULE_ID_FSABS,
-                     INSTANCE_ID_SINGLE, FSABS_API_ID_READ_NEXT, FSABS_E_PARAM_POINTER, E_NOT_OK);
+    DET_CHECK_RETURN(FsAbs_Initialised != FALSE, MODULE_ID_FSABS, INSTANCE_ID_SINGLE, FSABS_API_ID_READ_NEXT,
+                     FSABS_E_UNINIT, E_NOT_OK);
+    DET_CHECK_RETURN((buffer != NULL_PTR) && (length != NULL_PTR), MODULE_ID_FSABS, INSTANCE_ID_SINGLE,
+                     FSABS_API_ID_READ_NEXT, FSABS_E_PARAM_POINTER, E_NOT_OK);
 
     *length = 0u;
     FsAbs_PendingRecordSpan = 0u;
@@ -416,9 +414,9 @@ Std_ReturnType FsAbs_ReadRecordAtCursor(char *buffer, uint16 size, uint16 *lengt
 
     FsAbs_SkipCsvHeader();
 
-    if (FsAbs_PlatformRead(FsAbs_Cursor.fileName, FsAbs_Cursor.offset,
-                           (uint8 *)FsAbs_LineBuffer,
-                           (uint32)sizeof(FsAbs_LineBuffer) - 1u, &read) != E_OK)
+    if (FsAbs_PlatformRead(FsAbs_Cursor.fileName, FsAbs_Cursor.offset, (uint8 *)FsAbs_LineBuffer,
+                           (uint32)sizeof(FsAbs_LineBuffer) - 1u, &read)
+        != E_OK)
     {
         return E_NOT_FOUND;
     }
@@ -483,8 +481,7 @@ Std_ReturnType FsAbs_ReadRecordAtCursor(char *buffer, uint16 size, uint16 *lengt
             }
         }
 
-        if ((foundSeparator == FALSE) ||
-            ((lineEnd - separator) != (uint32)(FSABS_CRC_FIELD_CHARS + 1u)))
+        if ((foundSeparator == FALSE) || ((lineEnd - separator) != (uint32)(FSABS_CRC_FIELD_CHARS + 1u)))
         {
             FsAbs_Status.corruptRecords++;
             FsAbs_PendingRecordSpan = lineEnd + 1u;
@@ -501,8 +498,8 @@ Std_ReturnType FsAbs_ReadRecordAtCursor(char *buffer, uint16 size, uint16 *lengt
         if (Crc_CalculateCRC32((const uint8 *)FsAbs_LineBuffer, separator, 0u, TRUE) != storedCrc)
         {
             FsAbs_Status.corruptRecords++;
-            (void)Det_ReportRuntimeError(MODULE_ID_FSABS, INSTANCE_ID_SINGLE,
-                                         FSABS_API_ID_READ_NEXT, FSABS_E_RECORD_CORRUPT);
+            (void)Det_ReportRuntimeError(MODULE_ID_FSABS, INSTANCE_ID_SINGLE, FSABS_API_ID_READ_NEXT,
+                                         FSABS_E_RECORD_CORRUPT);
             FsAbs_PendingRecordSpan = lineEnd + 1u;
             return E_CRC_FAIL;
         }
@@ -525,8 +522,8 @@ Std_ReturnType FsAbs_ReadRecordAtCursor(char *buffer, uint16 size, uint16 *lengt
 
 Std_ReturnType FsAbs_AdvanceCursor(void)
 {
-    DET_CHECK_RETURN(FsAbs_Initialised != FALSE, MODULE_ID_FSABS, INSTANCE_ID_SINGLE,
-                     FSABS_API_ID_ADVANCE, FSABS_E_UNINIT, E_NOT_OK);
+    DET_CHECK_RETURN(FsAbs_Initialised != FALSE, MODULE_ID_FSABS, INSTANCE_ID_SINGLE, FSABS_API_ID_ADVANCE,
+                     FSABS_E_UNINIT, E_NOT_OK);
 
     if (FsAbs_PendingRecordSpan == 0u)
     {
@@ -545,8 +542,8 @@ Std_ReturnType FsAbs_AdvanceCursor(void)
 
 Std_ReturnType FsAbs_SkipCorruptRecord(void)
 {
-    DET_CHECK_RETURN(FsAbs_Initialised != FALSE, MODULE_ID_FSABS, INSTANCE_ID_SINGLE,
-                     FSABS_API_ID_ADVANCE, FSABS_E_UNINIT, E_NOT_OK);
+    DET_CHECK_RETURN(FsAbs_Initialised != FALSE, MODULE_ID_FSABS, INSTANCE_ID_SINGLE, FSABS_API_ID_ADVANCE,
+                     FSABS_E_UNINIT, E_NOT_OK);
 
     if (FsAbs_PendingRecordSpan == 0u)
     {
@@ -562,11 +559,10 @@ Std_ReturnType FsAbs_SkipCorruptRecord(void)
 Std_ReturnType FsAbs_ReadFileChunk(const char *fileName, uint32 offset, uint8 *buffer, uint32 size,
                                    uint32 *read)
 {
-    DET_CHECK_RETURN(FsAbs_Initialised != FALSE, MODULE_ID_FSABS, INSTANCE_ID_SINGLE,
-                     FSABS_API_ID_READ_CHUNK, FSABS_E_UNINIT, E_NOT_OK);
-    DET_CHECK_RETURN((fileName != NULL_PTR) && (buffer != NULL_PTR) && (read != NULL_PTR),
-                     MODULE_ID_FSABS, INSTANCE_ID_SINGLE, FSABS_API_ID_READ_CHUNK,
-                     FSABS_E_PARAM_POINTER, E_NOT_OK);
+    DET_CHECK_RETURN(FsAbs_Initialised != FALSE, MODULE_ID_FSABS, INSTANCE_ID_SINGLE, FSABS_API_ID_READ_CHUNK,
+                     FSABS_E_UNINIT, E_NOT_OK);
+    DET_CHECK_RETURN((fileName != NULL_PTR) && (buffer != NULL_PTR) && (read != NULL_PTR), MODULE_ID_FSABS,
+                     INSTANCE_ID_SINGLE, FSABS_API_ID_READ_CHUNK, FSABS_E_PARAM_POINTER, E_NOT_OK);
 
     if (FsAbs_Status.mounted == FALSE)
     {
@@ -578,8 +574,8 @@ Std_ReturnType FsAbs_ReadFileChunk(const char *fileName, uint32 offset, uint8 *b
 
 Std_ReturnType FsAbs_GetFileSize(const char *fileName, uint32 *size)
 {
-    DET_CHECK_RETURN((fileName != NULL_PTR) && (size != NULL_PTR), MODULE_ID_FSABS,
-                     INSTANCE_ID_SINGLE, FSABS_API_ID_READ_CHUNK, FSABS_E_PARAM_POINTER, E_NOT_OK);
+    DET_CHECK_RETURN((fileName != NULL_PTR) && (size != NULL_PTR), MODULE_ID_FSABS, INSTANCE_ID_SINGLE,
+                     FSABS_API_ID_READ_CHUNK, FSABS_E_PARAM_POINTER, E_NOT_OK);
 
     if (FsAbs_Status.mounted == FALSE)
     {
@@ -615,11 +611,9 @@ void FsAbs_MainFunction(void)
     {
         uint32 size = 0u;
 
-        if ((FsAbs_Cursor.valid != FALSE) &&
-            (FsAbs_PlatformSize(FsAbs_Cursor.fileName, &size) == E_OK))
+        if ((FsAbs_Cursor.valid != FALSE) && (FsAbs_PlatformSize(FsAbs_Cursor.fileName, &size) == E_OK))
         {
-            FsAbs_Status.unsentBytes =
-                (size > FsAbs_Cursor.offset) ? (size - FsAbs_Cursor.offset) : 0u;
+            FsAbs_Status.unsentBytes = (size > FsAbs_Cursor.offset) ? (size - FsAbs_Cursor.offset) : 0u;
         }
         else
         {
@@ -629,13 +623,11 @@ void FsAbs_MainFunction(void)
 
     if (FsAbs_Status.freeMiB < (uint32)FSABS_CRITICAL_SPACE_MIB)
     {
-        STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_SD_SPACE_LOW, INSTANCE_ID_SINGLE,
-                                       DEM_EVENT_STATUS_FAILED));
+        STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_SD_SPACE_LOW, INSTANCE_ID_SINGLE, DEM_EVENT_STATUS_FAILED));
     }
     else
     {
-        STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_SD_SPACE_LOW, INSTANCE_ID_SINGLE,
-                                       DEM_EVENT_STATUS_PASSED));
+        STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_SD_SPACE_LOW, INSTANCE_ID_SINGLE, DEM_EVENT_STATUS_PASSED));
     }
 
     if (FsAbs_Status.freeMiB >= (uint32)FSABS_LOW_SPACE_LIMIT_MIB)
@@ -672,8 +664,8 @@ void FsAbs_MainFunction(void)
 
 Std_ReturnType FsAbs_GetCursor(FsAbs_CursorType *cursor)
 {
-    DET_CHECK_RETURN(cursor != NULL_PTR, MODULE_ID_FSABS, INSTANCE_ID_SINGLE,
-                     FSABS_API_ID_READ_NEXT, FSABS_E_PARAM_POINTER, E_NOT_OK);
+    DET_CHECK_RETURN(cursor != NULL_PTR, MODULE_ID_FSABS, INSTANCE_ID_SINGLE, FSABS_API_ID_READ_NEXT,
+                     FSABS_E_PARAM_POINTER, E_NOT_OK);
 
     *cursor = FsAbs_Cursor;
     return E_OK;
@@ -681,8 +673,8 @@ Std_ReturnType FsAbs_GetCursor(FsAbs_CursorType *cursor)
 
 Std_ReturnType FsAbs_GetStatus(FsAbs_StatusType *status)
 {
-    DET_CHECK_RETURN(status != NULL_PTR, MODULE_ID_FSABS, INSTANCE_ID_SINGLE,
-                     FSABS_API_ID_HOUSEKEEP, FSABS_E_PARAM_POINTER, E_NOT_OK);
+    DET_CHECK_RETURN(status != NULL_PTR, MODULE_ID_FSABS, INSTANCE_ID_SINGLE, FSABS_API_ID_HOUSEKEEP,
+                     FSABS_E_PARAM_POINTER, E_NOT_OK);
 
     *status = FsAbs_Status;
     return E_OK;

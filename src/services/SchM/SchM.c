@@ -103,11 +103,11 @@ typedef struct
 STATIC const SchM_RunnableType SchM_SchedulerRunnables[] = {
     /* Supervision first, so that if anything below overruns, the supervision for this cycle has already
      * been recorded rather than being lost along with the rest of the activation. */
-    {&WdgM_MainFunction, 100u, "WdgM"},   /* 1 s: the supervision cycle.        */
-    {&SchM_RunCanRead, 1u, "CanRead"},    /* 10 ms: drain the controller.       */
-    {&SchM_RunCanIf, 1u, "CanIf"},        /* 10 ms: decode what was drained.    */
-    {&SchM_RunGnss, 10u, "Gnss"},         /* 100 ms: NMEA arrives at 1 Hz.      */
-    {&HmiSwc_MainFunction, 10u, "Hmi"},   /* 100 ms: the blink tick.            */
+    {&WdgM_MainFunction, 100u, "WdgM"}, /* 1 s: the supervision cycle.        */
+    {&SchM_RunCanRead, 1u, "CanRead"},  /* 10 ms: drain the controller.       */
+    {&SchM_RunCanIf, 1u, "CanIf"},      /* 10 ms: decode what was drained.    */
+    {&SchM_RunGnss, 10u, "Gnss"},       /* 100 ms: NMEA arrives at 1 Hz.      */
+    {&HmiSwc_MainFunction, 10u, "Hmi"}, /* 100 ms: the blink tick.            */
 };
 
 /*---- Acquisition, every 3 s ------------------------------------------------*/
@@ -154,15 +154,15 @@ typedef struct
 } SchM_TaskConfigType;
 
 STATIC const SchM_TaskConfigType SchM_TaskConfig[SCHM_TASK_COUNT] = {
-    {SchM_SchedulerRunnables, (uint8)STD_ARRAY_SIZE(SchM_SchedulerRunnables),
-     SCHM_PERIOD_SCHEDULER_MS, SCHM_BUDGET_SCHEDULER_US, SCHM_PRIORITY_SCHEDULER,
-     SCHM_CORE_SCHEDULER, SCHM_STACK_SCHEDULER, SCHM_SE_SCHEDULER, "SchM"},
-    {SchM_AcquisitionRunnables, (uint8)STD_ARRAY_SIZE(SchM_AcquisitionRunnables),
-     SCHM_PERIOD_ACQUISITION_MS, SCHM_BUDGET_ACQUISITION_US, SCHM_PRIORITY_ACQUISITION,
-     SCHM_CORE_ACQUISITION, SCHM_STACK_ACQUISITION, SCHM_SE_ACQUISITION, "Acq"},
+    {SchM_SchedulerRunnables, (uint8)STD_ARRAY_SIZE(SchM_SchedulerRunnables), SCHM_PERIOD_SCHEDULER_MS,
+     SCHM_BUDGET_SCHEDULER_US, SCHM_PRIORITY_SCHEDULER, SCHM_CORE_SCHEDULER, SCHM_STACK_SCHEDULER,
+     SCHM_SE_SCHEDULER, "SchM"},
+    {SchM_AcquisitionRunnables, (uint8)STD_ARRAY_SIZE(SchM_AcquisitionRunnables), SCHM_PERIOD_ACQUISITION_MS,
+     SCHM_BUDGET_ACQUISITION_US, SCHM_PRIORITY_ACQUISITION, SCHM_CORE_ACQUISITION, SCHM_STACK_ACQUISITION,
+     SCHM_SE_ACQUISITION, "Acq"},
     {SchM_StorageRunnables, (uint8)STD_ARRAY_SIZE(SchM_StorageRunnables), SCHM_PERIOD_STORAGE_MS,
-     SCHM_BUDGET_STORAGE_US, SCHM_PRIORITY_STORAGE, SCHM_CORE_STORAGE, SCHM_STACK_STORAGE,
-     SCHM_SE_STORAGE, "Store"},
+     SCHM_BUDGET_STORAGE_US, SCHM_PRIORITY_STORAGE, SCHM_CORE_STORAGE, SCHM_STACK_STORAGE, SCHM_SE_STORAGE,
+     "Store"},
     {SchM_ConnectivityRunnables, (uint8)STD_ARRAY_SIZE(SchM_ConnectivityRunnables),
      SCHM_PERIOD_CONNECTIVITY_MS, SCHM_BUDGET_CONNECTIVITY_US, SCHM_PRIORITY_CONNECTIVITY,
      SCHM_CORE_CONNECTIVITY, SCHM_STACK_CONNECTIVITY, SCHM_SE_CONNECTIVITY, "Conn"},
@@ -256,15 +256,12 @@ void SchM_RunTask(SchM_TaskType task)
     if (stats->lastCaseUs > config->budgetUs)
     {
         stats->overruns++;
-        (void)Det_ReportRuntimeError(MODULE_ID_SCHM, (uint8)task, SCHM_API_ID_START,
-                                     SCHM_E_OVERRUN);
-        STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_TASK_OVERRUN, (uint8)task,
-                                       DEM_EVENT_STATUS_FAILED));
+        (void)Det_ReportRuntimeError(MODULE_ID_SCHM, (uint8)task, SCHM_API_ID_START, SCHM_E_OVERRUN);
+        STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_TASK_OVERRUN, (uint8)task, DEM_EVENT_STATUS_FAILED));
     }
     else
     {
-        STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_TASK_OVERRUN, (uint8)task,
-                                       DEM_EVENT_STATUS_PASSED));
+        STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_TASK_OVERRUN, (uint8)task, DEM_EVENT_STATUS_PASSED));
     }
 
     stats->stackHighWaterMark = SchM_PlatformGetStackHighWaterMark();
@@ -276,18 +273,18 @@ Std_ReturnType SchM_StartTasks(void)
 {
     uint8 task;
 
-    DET_CHECK_RETURN(SchM_Initialised != FALSE, MODULE_ID_SCHM, INSTANCE_ID_SINGLE,
-                     SCHM_API_ID_START, SCHM_E_UNINIT, E_NOT_OK);
+    DET_CHECK_RETURN(SchM_Initialised != FALSE, MODULE_ID_SCHM, INSTANCE_ID_SINGLE, SCHM_API_ID_START,
+                     SCHM_E_UNINIT, E_NOT_OK);
 
     for (task = 0u; task < (uint8)SCHM_TASK_COUNT; task++)
     {
         const SchM_TaskConfigType *config = &SchM_TaskConfig[task];
 
-        if (SchM_PlatformCreateTask((SchM_TaskType)task, config->name, config->stackBytes,
-                                    config->priority, config->core, config->periodMs) != E_OK)
+        if (SchM_PlatformCreateTask((SchM_TaskType)task, config->name, config->stackBytes, config->priority,
+                                    config->core, config->periodMs)
+            != E_OK)
         {
-            (void)Det_ReportError(MODULE_ID_SCHM, task, SCHM_API_ID_START,
-                                  SCHM_E_TASK_CREATE_FAILED);
+            (void)Det_ReportError(MODULE_ID_SCHM, task, SCHM_API_ID_START, SCHM_E_TASK_CREATE_FAILED);
             /* Fatal to the caller. An ECU missing one of its four tasks would silently stop doing part of
              * its job -- acquiring but never storing, for instance -- and nothing downstream would
              * distinguish that from a vehicle that was not moving. */

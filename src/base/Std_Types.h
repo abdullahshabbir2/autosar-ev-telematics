@@ -51,15 +51,15 @@ typedef uint8 Std_ReturnType;
 #define E_NOT_OK ((Std_ReturnType)0x01u) /**< Operation failed, no further detail.       */
 #endif
 
-#define E_PENDING ((Std_ReturnType)0x02u)      /**< Accepted; result available later.    */
-#define E_BUSY ((Std_ReturnType)0x03u)         /**< Resource is in use, retry later.     */
-#define E_TIMEOUT ((Std_ReturnType)0x04u)      /**< Peer did not answer within deadline. */
-#define E_CRC_FAIL ((Std_ReturnType)0x05u)     /**< Integrity check mismatch.            */
-#define E_NOT_FOUND ((Std_ReturnType)0x06u)    /**< Requested object does not exist.     */
-#define E_NO_SPACE ((Std_ReturnType)0x07u)     /**< Destination is full.                 */
-#define E_INVALID_PARAM ((Std_ReturnType)0x08u)/**< Caller passed an out-of-range value. */
+#define E_PENDING ((Std_ReturnType)0x02u)         /**< Accepted; result available later.    */
+#define E_BUSY ((Std_ReturnType)0x03u)            /**< Resource is in use, retry later.     */
+#define E_TIMEOUT ((Std_ReturnType)0x04u)         /**< Peer did not answer within deadline. */
+#define E_CRC_FAIL ((Std_ReturnType)0x05u)        /**< Integrity check mismatch.            */
+#define E_NOT_FOUND ((Std_ReturnType)0x06u)       /**< Requested object does not exist.     */
+#define E_NO_SPACE ((Std_ReturnType)0x07u)        /**< Destination is full.                 */
+#define E_INVALID_PARAM ((Std_ReturnType)0x08u)   /**< Caller passed an out-of-range value. */
 #define E_NOT_INITIALISED ((Std_ReturnType)0x09u) /**< Module used before its Init().    */
-#define E_UNSUPPORTED ((Std_ReturnType)0x0Au)  /**< Feature absent in this build.        */
+#define E_UNSUPPORTED ((Std_ReturnType)0x0Au)     /**< Feature absent in this build.        */
 
 /*==================================================================================================
  *  Std_VersionInfoType (SWS_Std_00015)
@@ -68,11 +68,11 @@ typedef uint8 Std_ReturnType;
 /** Version information returned by every module's `<Mip>_GetVersionInfo()`. */
 typedef struct
 {
-    uint16 vendorID;         /**< Vendor identifier.               */
-    uint16 moduleID;         /**< AUTOSAR module identifier.       */
-    uint8 sw_major_version;  /**< Implementation major version.    */
-    uint8 sw_minor_version;  /**< Implementation minor version.    */
-    uint8 sw_patch_version;  /**< Implementation patch version.    */
+    uint16 vendorID;        /**< Vendor identifier.               */
+    uint16 moduleID;        /**< AUTOSAR module identifier.       */
+    uint8 sw_major_version; /**< Implementation major version.    */
+    uint8 sw_minor_version; /**< Implementation minor version.    */
+    uint8 sw_patch_version; /**< Implementation patch version.    */
 } Std_VersionInfoType;
 
 /*==================================================================================================
@@ -135,11 +135,11 @@ typedef struct
  * already decided to fail and has nothing left to do with a second error -- releasing a
  * bus lock while unwinding, for instance. Anywhere else, propagate the status.
  */
-#define STD_DISCARD(expr)                        \
-    do                                           \
-    {                                            \
+#define STD_DISCARD(expr)                            \
+    do                                               \
+    {                                                \
         const Std_ReturnType stdDiscarded_ = (expr); \
-        (void)stdDiscarded_;                     \
+        (void)stdDiscarded_;                         \
     } while (0)
 
 #endif /* STD_TYPES_H */

@@ -40,13 +40,13 @@
  *  would make those records decode as the new block.
  *================================================================================================*/
 
-#define FEE_BLOCK_ODOMETER ((Fee_BlockIdType)0x0001u)    /**< Accumulated distance + trip.   */
-#define FEE_BLOCK_DEVICE_CONFIG ((Fee_BlockIdType)0x0002u)/**< Device id, broker address.     */
-#define FEE_BLOCK_CALIBRATION ((Fee_BlockIdType)0x0003u) /**< Gear ratio, tyre size, trims.  */
-#define FEE_BLOCK_RESTART_INFO ((Fee_BlockIdType)0x0004u)/**< Crash-loop detector state.     */
-#define FEE_BLOCK_DTC_STORE ((Fee_BlockIdType)0x0005u)   /**< Persistent diagnostic records.  */
-#define FEE_BLOCK_TELEMETRY_CURSOR ((Fee_BlockIdType)0x0006u)/**< Store-and-forward position. */
-#define FEE_BLOCK_ENERGY_COUNTERS ((Fee_BlockIdType)0x0007u)/**< Lifetime Wh in and out.     */
+#define FEE_BLOCK_ODOMETER ((Fee_BlockIdType)0x0001u)         /**< Accumulated distance + trip.   */
+#define FEE_BLOCK_DEVICE_CONFIG ((Fee_BlockIdType)0x0002u)    /**< Device id, broker address.     */
+#define FEE_BLOCK_CALIBRATION ((Fee_BlockIdType)0x0003u)      /**< Gear ratio, tyre size, trims.  */
+#define FEE_BLOCK_RESTART_INFO ((Fee_BlockIdType)0x0004u)     /**< Crash-loop detector state.     */
+#define FEE_BLOCK_DTC_STORE ((Fee_BlockIdType)0x0005u)        /**< Persistent diagnostic records.  */
+#define FEE_BLOCK_TELEMETRY_CURSOR ((Fee_BlockIdType)0x0006u) /**< Store-and-forward position. */
+#define FEE_BLOCK_ENERGY_COUNTERS ((Fee_BlockIdType)0x0007u)  /**< Lifetime Wh in and out.     */
 
 /** Highest identifier in use. Reads and writes outside 1 .. this are rejected. */
 #define FEE_BLOCK_ID_MAX FEE_BLOCK_ENERGY_COUNTERS

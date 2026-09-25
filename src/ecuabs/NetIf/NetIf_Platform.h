@@ -65,8 +65,8 @@ sint8 NetIf_PlatformGsmRssi(void);
  * @param keepAliveS Keep-alive interval in seconds.
  * @return E_OK once CONNACK has been received; E_TIMEOUT otherwise.
  */
-CHECK_RETURN Std_ReturnType NetIf_PlatformMqttConnect(const char *host, uint16 port,
-                                                     const char *clientId, uint16 keepAliveS);
+CHECK_RETURN Std_ReturnType NetIf_PlatformMqttConnect(const char *host, uint16 port, const char *clientId,
+                                                      uint16 keepAliveS);
 
 /** Close the broker session. */
 void NetIf_PlatformMqttDisconnect(void);
@@ -96,7 +96,7 @@ CHECK_RETURN Std_ReturnType NetIf_PlatformMqttLoop(void);
  * @brief Register the function the platform calls when a subscribed message arrives.
  */
 void NetIf_PlatformMqttSetCallback(void (*callback)(const char *topic, const uint8 *payload,
-                                                   uint16 payloadLen));
+                                                    uint16 payloadLen));
 
 #ifdef __cplusplus
 }

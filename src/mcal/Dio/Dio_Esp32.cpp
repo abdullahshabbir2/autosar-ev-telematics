@@ -73,8 +73,8 @@ extern "C" Dio_LevelType Dio_FlipChannel(Dio_ChannelType channelId)
     Dio_LevelType next;
 
 #if (DIO_DEV_ERROR_DETECT == STD_ON)
-    if ((Dio_ChannelIsConfigured(channelId) == FALSE) ||
-        ((ECU_PIN_BIT(channelId) & ECU_PINMAP_INPUT_ONLY_PINS) != 0uLL))
+    if ((Dio_ChannelIsConfigured(channelId) == FALSE)
+        || ((ECU_PIN_BIT(channelId) & ECU_PINMAP_INPUT_ONLY_PINS) != 0uLL))
     {
         (void)Det_ReportError(MODULE_ID_DIO, INSTANCE_ID_SINGLE, DIO_API_ID_FLIP_CHANNEL,
                               DIO_E_PARAM_INVALID_CHANNEL_ID);

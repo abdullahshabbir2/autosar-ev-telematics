@@ -92,13 +92,13 @@ typedef enum
  */
 typedef enum
 {
-    CANIF_MCU_FAULT_NONE = 0,             /**< No fault.                        */
-    CANIF_MCU_FAULT_OVER_CURRENT = 3,     /**< Phase current limit exceeded.     */
-    CANIF_MCU_FAULT_CONTROLLER_HOT = 4,   /**< Controller over temperature.      */
-    CANIF_MCU_FAULT_UNDER_VOLTAGE = 9,    /**< DC link below its minimum.         */
-    CANIF_MCU_FAULT_OVER_VOLTAGE = 10,    /**< DC link above its maximum.         */
-    CANIF_MCU_FAULT_MOTOR_HOT = 11,       /**< Motor over temperature.            */
-    CANIF_MCU_FAULT_ACCELERATOR = 13      /**< Accelerator input implausible.     */
+    CANIF_MCU_FAULT_NONE = 0,           /**< No fault.                        */
+    CANIF_MCU_FAULT_OVER_CURRENT = 3,   /**< Phase current limit exceeded.     */
+    CANIF_MCU_FAULT_CONTROLLER_HOT = 4, /**< Controller over temperature.      */
+    CANIF_MCU_FAULT_UNDER_VOLTAGE = 9,  /**< DC link below its minimum.         */
+    CANIF_MCU_FAULT_OVER_VOLTAGE = 10,  /**< DC link above its maximum.         */
+    CANIF_MCU_FAULT_MOTOR_HOT = 11,     /**< Motor over temperature.            */
+    CANIF_MCU_FAULT_ACCELERATOR = 13    /**< Accelerator input implausible.     */
 } CanIf_McuFaultType;
 
 /** Value the controller reports in its low-power-mode byte when that mode is active. */
@@ -108,30 +108,30 @@ typedef enum
 typedef struct
 {
     /* From CAN_ID_MCU_DRIVE_STATE. */
-    CanIf_DirectionType direction;   /**< Selected direction.                        */
-    CanIf_SpeedModeType speedMode;   /**< Selected speed mode.                       */
-    uint16 motorRpm;                 /**< Motor speed, rpm.                          */
-    uint8 faultCode;                 /**< ::CanIf_McuFaultType.                      */
-    boolean lowPowerMode;            /**< TRUE when the controller is in low power.   */
-    uint32 driveStateTimestamp;      /**< When the drive-state frame arrived.         */
-    boolean driveStateValid;         /**< TRUE once a drive-state frame has arrived.  */
+    CanIf_DirectionType direction; /**< Selected direction.                        */
+    CanIf_SpeedModeType speedMode; /**< Selected speed mode.                       */
+    uint16 motorRpm;               /**< Motor speed, rpm.                          */
+    uint8 faultCode;               /**< ::CanIf_McuFaultType.                      */
+    boolean lowPowerMode;          /**< TRUE when the controller is in low power.   */
+    uint32 driveStateTimestamp;    /**< When the drive-state frame arrived.         */
+    boolean driveStateValid;       /**< TRUE once a drive-state frame has arrived.  */
 
     /* From CAN_ID_MCU_CURRENT_VOLTAGE. */
-    uint16 dcVoltageDeciVolt;        /**< DC link voltage, 0.1 V per count.           */
-    uint16 dcCurrentDeciAmp;         /**< DC link current, 0.1 A per count.           */
-    uint32 currentVoltageTimestamp;  /**< When the current/voltage frame arrived.     */
-    boolean currentVoltageValid;     /**< TRUE once such a frame has arrived.         */
+    uint16 dcVoltageDeciVolt;       /**< DC link voltage, 0.1 V per count.           */
+    uint16 dcCurrentDeciAmp;        /**< DC link current, 0.1 A per count.           */
+    uint32 currentVoltageTimestamp; /**< When the current/voltage frame arrived.     */
+    boolean currentVoltageValid;    /**< TRUE once such a frame has arrived.         */
 } CanIf_McuDataType;
 
 /** Interface counters, published as diagnostic data. */
 typedef struct
 {
-    uint32 framesProcessed;  /**< Frames taken from the driver.                   */
-    uint32 driveStateFrames; /**< Drive-state frames decoded.                     */
+    uint32 framesProcessed;      /**< Frames taken from the driver.                   */
+    uint32 driveStateFrames;     /**< Drive-state frames decoded.                     */
     uint32 currentVoltageFrames; /**< Current/voltage frames decoded.              */
-    uint32 unknownIdFrames;  /**< Frames whose identifier is not in the matrix.    */
-    uint32 badDlcFrames;     /**< Frames too short for the signals they carry.     */
-    uint32 staleReads;       /**< Reads that found the data older than its limit.  */
+    uint32 unknownIdFrames;      /**< Frames whose identifier is not in the matrix.    */
+    uint32 badDlcFrames;         /**< Frames too short for the signals they carry.     */
+    uint32 staleReads;           /**< Reads that found the data older than its limit.  */
 } CanIf_StatisticsType;
 
 /*==================================================================================================
@@ -179,15 +179,13 @@ boolean CanIf_IsMcuDataFresh(void);
  * @param[out] data Fields updated in place; the current/voltage half is left untouched.
  * @return E_OK on success; E_NOT_OK if the DLC is too short or a pointer is NULL.
  */
-CHECK_RETURN Std_ReturnType CanIf_DecodeMcuDriveState(const Can_PduType *pdu,
-                                                      CanIf_McuDataType *data);
+CHECK_RETURN Std_ReturnType CanIf_DecodeMcuDriveState(const Can_PduType *pdu, CanIf_McuDataType *data);
 
 /**
  * @brief Decode a current/voltage frame into @p data.
  * @copydetails CanIf_DecodeMcuDriveState
  */
-CHECK_RETURN Std_ReturnType CanIf_DecodeMcuCurrentVoltage(const Can_PduType *pdu,
-                                                          CanIf_McuDataType *data);
+CHECK_RETURN Std_ReturnType CanIf_DecodeMcuCurrentVoltage(const Can_PduType *pdu, CanIf_McuDataType *data);
 
 /**
  * @brief Read the interface counters.

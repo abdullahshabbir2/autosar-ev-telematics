@@ -536,11 +536,9 @@ static void test_Nvm_RejectsBadArguments(void)
 
     TnBringUpErased();
 
-    TEST_ASSERT_NOT_EQUAL(E_OK,
-                          NvM_ReadBlock((NvM_BlockIdType)NVM_BLOCK_COUNT, &odometer));
+    TEST_ASSERT_NOT_EQUAL(E_OK, NvM_ReadBlock((NvM_BlockIdType)NVM_BLOCK_COUNT, &odometer));
     TEST_ASSERT_NOT_EQUAL(E_OK, NvM_ReadBlock(NVM_BLOCK_ODOMETER, NULL_PTR));
-    TEST_ASSERT_NOT_EQUAL(E_OK,
-                          NvM_WriteBlock((NvM_BlockIdType)NVM_BLOCK_COUNT, &odometer));
+    TEST_ASSERT_NOT_EQUAL(E_OK, NvM_WriteBlock((NvM_BlockIdType)NVM_BLOCK_COUNT, &odometer));
     TEST_ASSERT_NOT_EQUAL(E_OK, NvM_WriteBlock(NVM_BLOCK_ODOMETER, NULL_PTR));
     TEST_ASSERT_NOT_EQUAL(E_OK, NvM_GetStatistics(NULL_PTR));
 }

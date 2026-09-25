@@ -154,8 +154,8 @@
  * on a 32-bit core where the index loads and stores are atomic.
  */
 STATIC Can_PduType Can_RxQueue[CAN_RX_QUEUE_DEPTH];
-STATIC uint8 Can_RxHead;  /* next slot to write */
-STATIC uint8 Can_RxTail;  /* next slot to read  */
+STATIC uint8 Can_RxHead; /* next slot to write */
+STATIC uint8 Can_RxTail; /* next slot to read  */
 STATIC uint8 Can_RxCount;
 
 STATIC Can_ControllerStateType Can_State = CAN_CS_UNINIT;
@@ -182,8 +182,8 @@ void Can_EncodeIdentifier(Can_IdType id, uint8 *regs)
          * top two EID bits in its low two -- which is why this cannot be written as a
          * simple byte split. */
         regs[0] = (uint8)((raw >> 21u) & 0xFFu);
-        regs[1] = (uint8)((uint8)((raw >> 13u) & 0xE0u) | (uint8)MCP_SIDL_EXIDE |
-                          (uint8)((raw >> 16u) & 0x03u));
+        regs[1] =
+            (uint8)((uint8)((raw >> 13u) & 0xE0u) | (uint8)MCP_SIDL_EXIDE | (uint8)((raw >> 16u) & 0x03u));
         regs[2] = (uint8)((raw >> 8u) & 0xFFu);
         regs[3] = (uint8)(raw & 0xFFu);
     }
@@ -209,9 +209,8 @@ Can_IdType Can_DecodeIdentifier(const uint8 *regs)
 
     if ((regs[1] & MCP_SIDL_EXIDE) != 0u)
     {
-        id = ((Can_IdType)regs[0] << 21u) | (((Can_IdType)regs[1] & 0xE0uL) << 13u) |
-             (((Can_IdType)regs[1] & 0x03uL) << 16u) | ((Can_IdType)regs[2] << 8u) |
-             (Can_IdType)regs[3];
+        id = ((Can_IdType)regs[0] << 21u) | (((Can_IdType)regs[1] & 0xE0uL) << 13u)
+             | (((Can_IdType)regs[1] & 0x03uL) << 16u) | ((Can_IdType)regs[2] << 8u) | (Can_IdType)regs[3];
         id |= CAN_ID_EXTENDED_FLAG;
     }
     else
@@ -405,14 +404,13 @@ STATIC Std_ReturnType Can_Mcp_Configure(void)
     status |= Can_Mcp_WriteIdRegisters(MCP_REG_RXF5SIDH, idRegs);
 
     /* Filters on, and rollover enabled so the pair of frames cannot be clipped. */
-    status |= Can_Mcp_WriteRegister(MCP_REG_RXB0CTRL,
-                                    (uint8)(MCP_RXBCTRL_RXM_FILTERS | MCP_RXB0CTRL_BUKT));
+    status |= Can_Mcp_WriteRegister(MCP_REG_RXB0CTRL, (uint8)(MCP_RXBCTRL_RXM_FILTERS | MCP_RXB0CTRL_BUKT));
     status |= Can_Mcp_WriteRegister(MCP_REG_RXB1CTRL, MCP_RXBCTRL_RXM_FILTERS);
 
     /* Interrupt flags are enabled even though the INT line is only polled: CANINTF is
      * read as the "is there a frame" indication, and the enable bits gate it. */
-    status |= Can_Mcp_WriteRegister(
-        MCP_REG_CANINTE, (uint8)(MCP_CANINTE_RX0IE | MCP_CANINTE_RX1IE | MCP_CANINTE_ERRIE));
+    status |= Can_Mcp_WriteRegister(MCP_REG_CANINTE,
+                                    (uint8)(MCP_CANINTE_RX0IE | MCP_CANINTE_RX1IE | MCP_CANINTE_ERRIE));
     status |= Can_Mcp_WriteRegister(MCP_REG_CANINTF, 0x00u);
 
     return (status == E_OK) ? E_OK : E_NOT_OK;
@@ -523,8 +521,7 @@ Std_ReturnType Can_Init(void)
         Gpt_DelayMs(CAN_RESET_SETTLE_MS);
     }
 
-    (void)Det_ReportRuntimeError(MODULE_ID_CAN, INSTANCE_ID_SINGLE, CAN_API_ID_INIT,
-                                 CAN_E_INIT_FAILED);
+    (void)Det_ReportRuntimeError(MODULE_ID_CAN, INSTANCE_ID_SINGLE, CAN_API_ID_INIT, CAN_E_INIT_FAILED);
     return E_NOT_OK;
 }
 
@@ -586,8 +583,8 @@ Std_ReturnType Can_Write(const Can_PduType *pdu)
                      CAN_E_PARAM_POINTER, E_NOT_OK);
     DET_CHECK_RETURN(pdu->dlc <= CAN_MAX_DLC, MODULE_ID_CAN, INSTANCE_ID_SINGLE, CAN_API_ID_WRITE,
                      CAN_E_PARAM_DLC, E_NOT_OK);
-    DET_CHECK_RETURN(Can_State == CAN_CS_STARTED, MODULE_ID_CAN, INSTANCE_ID_SINGLE,
-                     CAN_API_ID_WRITE, CAN_E_TRANSITION, E_NOT_OK);
+    DET_CHECK_RETURN(Can_State == CAN_CS_STARTED, MODULE_ID_CAN, INSTANCE_ID_SINGLE, CAN_API_ID_WRITE,
+                     CAN_E_TRANSITION, E_NOT_OK);
 
     if (Spi_Lock(SPI_DEVICE_CAN, SPI_LOCK_TIMEOUT_MS) != E_OK)
     {
@@ -663,13 +660,13 @@ uint8 Can_MainFunction_Read(void)
     if (Can_Mcp_ReadRegister(MCP_REG_CANINTF, &intf) != E_OK)
     {
         STD_DISCARD(Spi_Unlock(SPI_DEVICE_CAN));
-        (void)Det_ReportRuntimeError(MODULE_ID_CAN, INSTANCE_ID_SINGLE,
-                                     CAN_API_ID_MAIN_FUNCTION_READ, CAN_E_SPI_FAILURE);
+        (void)Det_ReportRuntimeError(MODULE_ID_CAN, INSTANCE_ID_SINGLE, CAN_API_ID_MAIN_FUNCTION_READ,
+                                     CAN_E_SPI_FAILURE);
         return 0u;
     }
 
-    while ((moved < (uint8)CAN_MAX_FRAMES_PER_CYCLE) &&
-           ((intf & (MCP_CANINTF_RX0IF | MCP_CANINTF_RX1IF)) != 0u))
+    while ((moved < (uint8)CAN_MAX_FRAMES_PER_CYCLE)
+           && ((intf & (MCP_CANINTF_RX0IF | MCP_CANINTF_RX1IF)) != 0u))
     {
         uint8 raw[MCP_RX_FRAME_BYTES];
         const uint8 instruction =
@@ -677,8 +674,8 @@ uint8 Can_MainFunction_Read(void)
 
         if (Can_Mcp_ReadRxBuffer(instruction, raw) != E_OK)
         {
-            (void)Det_ReportRuntimeError(MODULE_ID_CAN, INSTANCE_ID_SINGLE,
-                                         CAN_API_ID_MAIN_FUNCTION_READ, CAN_E_SPI_FAILURE);
+            (void)Det_ReportRuntimeError(MODULE_ID_CAN, INSTANCE_ID_SINGLE, CAN_API_ID_MAIN_FUNCTION_READ,
+                                         CAN_E_SPI_FAILURE);
             break;
         }
 
@@ -740,8 +737,7 @@ uint8 Can_MainFunction_Read(void)
             Can_Stats.rxOverflowCount++;
             /* Overflow flags are sticky and must be cleared explicitly, or every later
              * cycle re-reports the same single event. */
-            (void)Can_Mcp_BitModify(MCP_REG_EFLG,
-                                    (uint8)(MCP_EFLG_RX0OVR | MCP_EFLG_RX1OVR), 0x00u);
+            (void)Can_Mcp_BitModify(MCP_REG_EFLG, (uint8)(MCP_EFLG_RX0OVR | MCP_EFLG_RX1OVR), 0x00u);
         }
     }
 

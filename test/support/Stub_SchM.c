@@ -19,7 +19,7 @@ static boolean Stub_SchMCreateFails;
 static uint32 Stub_SchMStackHighWater = 2048u;
 
 Std_ReturnType SchM_PlatformCreateTask(SchM_TaskType task, const char *name, uint32 stackBytes,
-                                      uint8 priority, uint8 core, uint32 periodMs)
+                                       uint8 priority, uint8 core, uint32 periodMs)
 {
     COMPILER_UNUSED(task);
     COMPILER_UNUSED(name);

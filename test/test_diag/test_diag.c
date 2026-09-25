@@ -30,7 +30,9 @@ void setUp(void)
     TEST_ASSERT_EQUAL(E_OK, Dem_Init());
 }
 
-void tearDown(void) {}
+void tearDown(void)
+{
+}
 
 /** Report @p count consecutive failures of @p event. */
 static void reportFailures(Dem_EventIdType event, uint8 instance, uint16 count)
@@ -119,10 +121,10 @@ static void test_Dem_AlternatingResultsDoNotConfirm(void)
 
     for (cycle = 0u; cycle < 20u; cycle++)
     {
-        TEST_ASSERT_EQUAL(E_OK, Dem_SetEventStatus(DEM_EVENT_PACK_NO_RESPONSE,
-                                                   INSTANCE_ID_BATTERY_1, DEM_EVENT_STATUS_FAILED));
-        TEST_ASSERT_EQUAL(E_OK, Dem_SetEventStatus(DEM_EVENT_PACK_NO_RESPONSE,
-                                                   INSTANCE_ID_BATTERY_1, DEM_EVENT_STATUS_PASSED));
+        TEST_ASSERT_EQUAL(E_OK, Dem_SetEventStatus(DEM_EVENT_PACK_NO_RESPONSE, INSTANCE_ID_BATTERY_1,
+                                                   DEM_EVENT_STATUS_FAILED));
+        TEST_ASSERT_EQUAL(E_OK, Dem_SetEventStatus(DEM_EVENT_PACK_NO_RESPONSE, INSTANCE_ID_BATTERY_1,
+                                                   DEM_EVENT_STATUS_PASSED));
     }
 
     TEST_ASSERT_FALSE_MESSAGE(Dem_IsEventConfirmed(DEM_EVENT_PACK_NO_RESPONSE),
@@ -141,8 +143,7 @@ static void test_Dem_ConfirmedEventSurvivesPass(void)
     TEST_ASSERT_TRUE(Dem_IsEventConfirmed(DEM_EVENT_CAN_BUS_OFF));
 
     TEST_ASSERT_EQUAL(E_OK,
-                      Dem_SetEventStatus(DEM_EVENT_CAN_BUS_OFF, INSTANCE_ID_SINGLE,
-                                         DEM_EVENT_STATUS_PASSED));
+                      Dem_SetEventStatus(DEM_EVENT_CAN_BUS_OFF, INSTANCE_ID_SINGLE, DEM_EVENT_STATUS_PASSED));
 
     TEST_ASSERT_TRUE_MESSAGE(Dem_IsEventConfirmed(DEM_EVENT_CAN_BUS_OFF),
                              "a confirmed fault was erased by one passing test");
@@ -167,8 +168,8 @@ static void test_Dem_SnapshotCapturedOnceAtConfirmation(void)
         const uint32 firstUptime = snapshot.uptimeMs;
         uint8 cycle;
 
-        TEST_ASSERT_EQUAL(E_OK, Dem_SetEventStatus(DEM_EVENT_SD_MOUNT_FAILED, INSTANCE_ID_SINGLE,
-                                                   DEM_EVENT_STATUS_PASSED));
+        TEST_ASSERT_EQUAL(
+            E_OK, Dem_SetEventStatus(DEM_EVENT_SD_MOUNT_FAILED, INSTANCE_ID_SINGLE, DEM_EVENT_STATUS_PASSED));
         for (cycle = 0u; cycle < (uint8)(DEM_HEALING_CYCLE_COUNT + 1u); cycle++)
         {
             Dem_StartOperationCycle();
@@ -196,8 +197,8 @@ static void test_Dem_HealsAfterCleanCycles(void)
     reportFailures(DEM_EVENT_PACK_NO_RESPONSE, INSTANCE_ID_BATTERY_3, 3u);
     TEST_ASSERT_TRUE(Dem_IsEventConfirmed(DEM_EVENT_PACK_NO_RESPONSE));
 
-    TEST_ASSERT_EQUAL(E_OK, Dem_SetEventStatus(DEM_EVENT_PACK_NO_RESPONSE, INSTANCE_ID_BATTERY_3,
-                                               DEM_EVENT_STATUS_PASSED));
+    TEST_ASSERT_EQUAL(
+        E_OK, Dem_SetEventStatus(DEM_EVENT_PACK_NO_RESPONSE, INSTANCE_ID_BATTERY_3, DEM_EVENT_STATUS_PASSED));
 
     /* The first cycle boundary closes the cycle in which the fault failed. That cycle is not a
      * clean one, so it resets healing rather than advancing it -- otherwise a fault that failed
@@ -294,8 +295,8 @@ static void test_Dem_ParameterChecking(void)
     Dem_EventRecordType record;
 
     TEST_ASSERT_EQUAL(E_NOT_OK, Dem_SetEventStatus(DEM_EVENT_NONE, 0u, DEM_EVENT_STATUS_FAILED));
-    TEST_ASSERT_EQUAL(E_NOT_OK, Dem_SetEventStatus((Dem_EventIdType)(DEM_EVENT_COUNT + 1u), 0u,
-                                                   DEM_EVENT_STATUS_FAILED));
+    TEST_ASSERT_EQUAL(
+        E_NOT_OK, Dem_SetEventStatus((Dem_EventIdType)(DEM_EVENT_COUNT + 1u), 0u, DEM_EVENT_STATUS_FAILED));
     TEST_ASSERT_EQUAL(E_NOT_OK, Dem_GetEventStatus(DEM_EVENT_NONE, &status));
     TEST_ASSERT_EQUAL(E_NOT_OK, Dem_GetEventStatus(DEM_EVENT_CAN_BUS_OFF, NULL_PTR));
     TEST_ASSERT_EQUAL(E_NOT_OK, Dem_GetEventRecord(DEM_EVENT_CAN_BUS_OFF, NULL_PTR));
@@ -303,8 +304,7 @@ static void test_Dem_ParameterChecking(void)
     TEST_ASSERT_EQUAL_UINT16(0u, Dem_GetConfirmedDtcs(NULL_PTR, 4u));
 
     /* An out-of-range status value is rejected rather than silently treated as a failure. */
-    TEST_ASSERT_EQUAL(E_NOT_OK,
-                      Dem_SetEventStatus(DEM_EVENT_CAN_BUS_OFF, 0u, (Dem_EventStatusType)99));
+    TEST_ASSERT_EQUAL(E_NOT_OK, Dem_SetEventStatus(DEM_EVENT_CAN_BUS_OFF, 0u, (Dem_EventStatusType)99));
 
     TEST_ASSERT_EQUAL(E_OK, Dem_GetEventRecord(DEM_EVENT_CAN_BUS_OFF, &record));
     TEST_ASSERT_EQUAL_HEX32(0x0C0210uL, record.dtc);
@@ -327,8 +327,7 @@ static void runSupervisionCycles(uint16 cycles, boolean feedScheduler)
         {
             if (feedScheduler != FALSE)
             {
-                TEST_ASSERT_EQUAL(E_OK,
-                                  WdgM_CheckpointReached(WDGM_SE_SCHEDULER, WDGM_CP_ENTRY));
+                TEST_ASSERT_EQUAL(E_OK, WdgM_CheckpointReached(WDGM_SE_SCHEDULER, WDGM_CP_ENTRY));
                 TEST_ASSERT_EQUAL(E_OK, WdgM_CheckpointReached(WDGM_SE_SCHEDULER, WDGM_CP_EXIT));
             }
             Stub_Gpt_AdvanceMs(10u);
@@ -392,8 +391,7 @@ static void test_WdgM_PetsTheHardwareWatchdog(void)
             uint16 tick;
             for (tick = 0u; tick < 100u; tick++)
             {
-                TEST_ASSERT_EQUAL(E_OK,
-                                  WdgM_CheckpointReached(WDGM_SE_SCHEDULER, WDGM_CP_ENTRY));
+                TEST_ASSERT_EQUAL(E_OK, WdgM_CheckpointReached(WDGM_SE_SCHEDULER, WDGM_CP_ENTRY));
                 TEST_ASSERT_EQUAL(E_OK, WdgM_CheckpointReached(WDGM_SE_SCHEDULER, WDGM_CP_EXIT));
                 Stub_Gpt_AdvanceMs(10u);
             }
@@ -643,17 +641,13 @@ static void test_WdgM_ParameterChecking(void)
     TEST_ASSERT_EQUAL(E_OK, WdgM_Init());
 
     TEST_ASSERT_EQUAL(E_NOT_OK,
-                      WdgM_CheckpointReached((WdgM_SupervisedEntityIdType)WDGM_SE_COUNT,
-                                             WDGM_CP_ENTRY));
-    TEST_ASSERT_EQUAL(E_NOT_OK,
-                      WdgM_CheckpointReached(WDGM_SE_SCHEDULER,
-                                             (WdgM_CheckpointIdType)WDGM_CP_COUNT_PER_ENTITY));
-    TEST_ASSERT_EQUAL(E_NOT_OK,
-                      WdgM_GetLocalStatus((WdgM_SupervisedEntityIdType)WDGM_SE_COUNT, &entity));
+                      WdgM_CheckpointReached((WdgM_SupervisedEntityIdType)WDGM_SE_COUNT, WDGM_CP_ENTRY));
+    TEST_ASSERT_EQUAL(
+        E_NOT_OK, WdgM_CheckpointReached(WDGM_SE_SCHEDULER, (WdgM_CheckpointIdType)WDGM_CP_COUNT_PER_ENTITY));
+    TEST_ASSERT_EQUAL(E_NOT_OK, WdgM_GetLocalStatus((WdgM_SupervisedEntityIdType)WDGM_SE_COUNT, &entity));
     TEST_ASSERT_EQUAL(E_NOT_OK, WdgM_GetLocalStatus(WDGM_SE_SCHEDULER, NULL_PTR));
     TEST_ASSERT_EQUAL(E_NOT_OK, WdgM_GetStatistics(NULL_PTR));
-    TEST_ASSERT_EQUAL(E_NOT_OK,
-                      WdgM_DeactivateEntity((WdgM_SupervisedEntityIdType)WDGM_SE_COUNT));
+    TEST_ASSERT_EQUAL(E_NOT_OK, WdgM_DeactivateEntity((WdgM_SupervisedEntityIdType)WDGM_SE_COUNT));
     TEST_ASSERT_EQUAL(E_NOT_OK, WdgM_ActivateEntity((WdgM_SupervisedEntityIdType)WDGM_SE_COUNT));
 }
 

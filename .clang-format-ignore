@@ -1,0 +1,10 @@
+# Files clang-format must not touch.
+#
+# Copyright (c) 2024-2026 Abdullah Shabbir. All rights reserved.
+#
+# These are emitted by tools/crc_reference.py and tools/rs485_reference.py, and CI regenerates them and
+# fails on any difference. Formatting them would put the committed copy permanently out of step with what
+# the generator produces, so the two gates would contradict each other and one would have to be disabled.
+# The generators own their output's layout.
+test/support/Crc_TestVectors.h
+test/support/Rs485_TestVectors.h

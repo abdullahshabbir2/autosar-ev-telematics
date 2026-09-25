@@ -67,10 +67,10 @@ extern "C" {
  *  against the code by grep.
  *================================================================================================*/
 
-#define CRC8_INITIAL_VALUE 0xFFu       /**< SAE J1850, poly 0x1D, final XOR 0xFF.  */
-#define CRC8H2F_INITIAL_VALUE 0xFFu    /**< poly 0x2F, final XOR 0xFF.             */
-#define CRC16_INITIAL_VALUE 0xFFFFu    /**< CCITT-FALSE, poly 0x1021, no final XOR.*/
-#define CRC16ARC_INITIAL_VALUE 0x0000u /**< ARC, reflected poly 0x8005.            */
+#define CRC8_INITIAL_VALUE 0xFFu           /**< SAE J1850, poly 0x1D, final XOR 0xFF.  */
+#define CRC8H2F_INITIAL_VALUE 0xFFu        /**< poly 0x2F, final XOR 0xFF.             */
+#define CRC16_INITIAL_VALUE 0xFFFFu        /**< CCITT-FALSE, poly 0x1021, no final XOR.*/
+#define CRC16ARC_INITIAL_VALUE 0x0000u     /**< ARC, reflected poly 0x8005.            */
 #define CRC32_INITIAL_VALUE 0xFFFFFFFFuL   /**< Ethernet, reflected poly 0x04C11DB7. */
 #define CRC32P4_INITIAL_VALUE 0xFFFFFFFFuL /**< reflected poly 0xF4ACFB13.           */
 
@@ -99,8 +99,7 @@ uint8 Crc_CalculateCRC8(const uint8 *dataPtr, uint32 length, uint8 startValue, b
  * @brief Compute a CRC-8 with polynomial 0x2F ("H2F") over a byte range.
  * @copydetails Crc_CalculateCRC8
  */
-uint8 Crc_CalculateCRC8H2F(const uint8 *dataPtr, uint32 length, uint8 startValue,
-                           boolean isFirstCall);
+uint8 Crc_CalculateCRC8H2F(const uint8 *dataPtr, uint32 length, uint8 startValue, boolean isFirstCall);
 
 /**
  * @brief Compute a CRC-16/CCITT-FALSE over a byte range.
@@ -110,15 +109,13 @@ uint8 Crc_CalculateCRC8H2F(const uint8 *dataPtr, uint32 length, uint8 startValue
  *
  * @copydetails Crc_CalculateCRC8
  */
-uint16 Crc_CalculateCRC16(const uint8 *dataPtr, uint32 length, uint16 startValue,
-                          boolean isFirstCall);
+uint16 Crc_CalculateCRC16(const uint8 *dataPtr, uint32 length, uint16 startValue, boolean isFirstCall);
 
 /**
  * @brief Compute a CRC-16/ARC (reflected, zero-initialised) over a byte range.
  * @copydetails Crc_CalculateCRC8
  */
-uint16 Crc_CalculateCRC16ARC(const uint8 *dataPtr, uint32 length, uint16 startValue,
-                             boolean isFirstCall);
+uint16 Crc_CalculateCRC16ARC(const uint8 *dataPtr, uint32 length, uint16 startValue, boolean isFirstCall);
 
 /**
  * @brief Compute a CRC-32 (IEEE 802.3) over a byte range.
@@ -126,8 +123,7 @@ uint16 Crc_CalculateCRC16ARC(const uint8 *dataPtr, uint32 length, uint16 startVa
  * Used for SD record integrity and NvM block integrity.
  * @copydetails Crc_CalculateCRC8
  */
-uint32 Crc_CalculateCRC32(const uint8 *dataPtr, uint32 length, uint32 startValue,
-                          boolean isFirstCall);
+uint32 Crc_CalculateCRC32(const uint8 *dataPtr, uint32 length, uint32 startValue, boolean isFirstCall);
 
 /**
  * @brief Compute a CRC-32/P4 (polynomial 0xF4ACFB13) over a byte range.
@@ -136,8 +132,7 @@ uint32 Crc_CalculateCRC32(const uint8 *dataPtr, uint32 length, uint32 startValue
  * Hamming distance stays at 6 where the Ethernet polynomial degrades to 4.
  * @copydetails Crc_CalculateCRC8
  */
-uint32 Crc_CalculateCRC32P4(const uint8 *dataPtr, uint32 length, uint32 startValue,
-                            boolean isFirstCall);
+uint32 Crc_CalculateCRC32P4(const uint8 *dataPtr, uint32 length, uint32 startValue, boolean isFirstCall);
 
 /**
  * @brief Return this module's version information.

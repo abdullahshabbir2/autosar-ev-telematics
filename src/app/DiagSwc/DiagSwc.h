@@ -88,23 +88,23 @@ extern "C" {
  *  identifier is a way to misconfigure a vehicle remotely.
  *================================================================================================*/
 
-#define DIAGSWC_DID_FIRMWARE_VERSION 0xF189u   /**< Read-only: firmware version string. */
-#define DIAGSWC_DID_DEVICE_ID 0xF18Au          /**< Read-only: device identifier.       */
-#define DIAGSWC_DID_ODOMETER 0xFD01u           /**< Read-only: lifetime distance, mm.   */
-#define DIAGSWC_DID_TRIP 0xFD02u               /**< Read-only: trip distance, mm.       */
-#define DIAGSWC_DID_HEALTH_SUMMARY 0xFD03u     /**< Read-only: the health counters.     */
-#define DIAGSWC_DID_RESET_REASON 0xFD04u       /**< Read-only: last reset cause.        */
-#define DIAGSWC_DID_TYRE_DIAMETER 0xFD10u      /**< Writable: tyre diameter, milli-inch. */
-#define DIAGSWC_DID_GEAR_RATIO 0xFD11u         /**< Writable: gear ratio x 1000.        */
-#define DIAGSWC_DID_VBATT_TRIM 0xFD12u         /**< Writable: voltage offset trim, mV.  */
-#define DIAGSWC_DID_LOG_LEVEL 0xFD13u          /**< Writable: runtime log level.        */
+#define DIAGSWC_DID_FIRMWARE_VERSION 0xF189u /**< Read-only: firmware version string. */
+#define DIAGSWC_DID_DEVICE_ID 0xF18Au        /**< Read-only: device identifier.       */
+#define DIAGSWC_DID_ODOMETER 0xFD01u         /**< Read-only: lifetime distance, mm.   */
+#define DIAGSWC_DID_TRIP 0xFD02u             /**< Read-only: trip distance, mm.       */
+#define DIAGSWC_DID_HEALTH_SUMMARY 0xFD03u   /**< Read-only: the health counters.     */
+#define DIAGSWC_DID_RESET_REASON 0xFD04u     /**< Read-only: last reset cause.        */
+#define DIAGSWC_DID_TYRE_DIAMETER 0xFD10u    /**< Writable: tyre diameter, milli-inch. */
+#define DIAGSWC_DID_GEAR_RATIO 0xFD11u       /**< Writable: gear ratio x 1000.        */
+#define DIAGSWC_DID_VBATT_TRIM 0xFD12u       /**< Writable: voltage offset trim, mV.  */
+#define DIAGSWC_DID_LOG_LEVEL 0xFD13u        /**< Writable: runtime log level.        */
 
 /*==================================================================================================
  *  Routine identifiers
  *================================================================================================*/
 
-#define DIAGSWC_ROUTINE_RESET_TRIP 0x0201u     /**< Zero the trip counter.              */
-#define DIAGSWC_ROUTINE_SELF_TEST_LEDS 0x0202u /**< Run the indicator self-test.        */
+#define DIAGSWC_ROUTINE_RESET_TRIP 0x0201u       /**< Zero the trip counter.              */
+#define DIAGSWC_ROUTINE_SELF_TEST_LEDS 0x0202u   /**< Run the indicator self-test.        */
 #define DIAGSWC_ROUTINE_REDISCOVER_PACKS 0x0203u /**< Re-run battery pack discovery.    */
 
 /*==================================================================================================
@@ -114,12 +114,12 @@ extern "C" {
 /** Diagnostic activity counters. */
 typedef struct
 {
-    uint32 requestsReceived;   /**< Requests seen on the diagnostic topic.        */
-    uint32 requestsServed;     /**< Requests answered positively.                 */
-    uint32 requestsRejected;   /**< Requests answered with a negative response.   */
-    uint32 persistCount;       /**< Times the DTC record has been written to NvM. */
-    uint32 persistFailures;    /**< Writes that failed.                           */
-    uint16 restoredDtcCount;   /**< DTCs restored from NvM at startup.            */
+    uint32 requestsReceived; /**< Requests seen on the diagnostic topic.        */
+    uint32 requestsServed;   /**< Requests answered positively.                 */
+    uint32 requestsRejected; /**< Requests answered with a negative response.   */
+    uint32 persistCount;     /**< Times the DTC record has been written to NvM. */
+    uint32 persistFailures;  /**< Writes that failed.                           */
+    uint16 restoredDtcCount; /**< DTCs restored from NvM at startup.            */
 } DiagSwc_StatusType;
 
 /*==================================================================================================
@@ -165,9 +165,8 @@ CHECK_RETURN Std_ReturnType DiagSwc_Persist(void);
  * @return E_OK if a response was produced, which includes a negative one -- a rejected request is still
  *         a request that was handled. E_NOT_OK only if no response would fit.
  */
-CHECK_RETURN Std_ReturnType DiagSwc_HandleRequest(const uint8 *request, uint16 requestLen,
-                                                  uint8 *response, uint16 responseCap,
-                                                  uint16 *responseLen);
+CHECK_RETURN Std_ReturnType DiagSwc_HandleRequest(const uint8 *request, uint16 requestLen, uint8 *response,
+                                                  uint16 responseCap, uint16 *responseLen);
 
 /**
  * @brief Supply Dem with the snapshot data it captures on confirmation.

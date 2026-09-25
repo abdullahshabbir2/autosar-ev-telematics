@@ -65,9 +65,8 @@
  * allowance. Derived rather than tabulated so that changing the baud rate cannot leave a
  * stale timeout behind.
  */
-#define RS485IF_RESPONSE_TIMEOUT_MS(bytes)                                              \
-    ((((uint32)(bytes) * RS485IF_BITS_PER_CHAR * 2000uL) / UART_BAUD_RS485) +           \
-     RS485IF_PROCESSING_ALLOWANCE_MS)
+#define RS485IF_RESPONSE_TIMEOUT_MS(bytes) \
+    ((((uint32)(bytes) * RS485IF_BITS_PER_CHAR * 2000uL) / UART_BAUD_RS485) + RS485IF_PROCESSING_ALLOWANCE_MS)
 
 /**
  * @brief Transceiver turnaround delay, in microseconds.

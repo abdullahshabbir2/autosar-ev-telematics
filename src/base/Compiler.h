@@ -144,8 +144,8 @@
 #define P2CONST(ptrtype, memclass, ptrclass) const ptrtype *
 #define CONSTP2VAR(ptrtype, memclass, ptrclass) ptrtype *const
 #define CONSTP2CONST(ptrtype, memclass, ptrclass) const ptrtype *const
-#define P2FUNC(rettype, ptrclass, fctname) rettype (*fctname)
-#define CONSTP2FUNC(rettype, ptrclass, fctname) rettype (*const fctname)
+#define P2FUNC(rettype, ptrclass, fctname) rettype(*fctname)
+#define CONSTP2FUNC(rettype, ptrclass, fctname) rettype(*const fctname)
 
 #define CONST(consttype, memclass) const consttype
 #define VAR(vartype, memclass) vartype

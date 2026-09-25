@@ -95,10 +95,10 @@ typedef enum
 /** A received or transmitted frame. */
 typedef struct
 {
-    Can_IdType id;           /**< Identifier, with ::CAN_ID_EXTENDED_FLAG if 29-bit. */
-    uint8 dlc;               /**< Payload length, 0 .. ::CAN_MAX_DLC.                */
-    uint8 sdu[CAN_MAX_DLC];  /**< Payload.                                           */
-    uint32 timestamp;        /**< Gpt_GetMonotonicMs() at reception.                 */
+    Can_IdType id;          /**< Identifier, with ::CAN_ID_EXTENDED_FLAG if 29-bit. */
+    uint8 dlc;              /**< Payload length, 0 .. ::CAN_MAX_DLC.                */
+    uint8 sdu[CAN_MAX_DLC]; /**< Payload.                                           */
+    uint32 timestamp;       /**< Gpt_GetMonotonicMs() at reception.                 */
 } Can_PduType;
 
 /** Controller error and throughput counters. */

@@ -222,8 +222,7 @@ static void test_Net_PublishOverSession(void)
 
     TnBringSessionUpOverWifi();
 
-    TEST_ASSERT_EQUAL(E_OK,
-                      NetIf_Publish("odo/test/record", (const uint8 *)"payload", 7u, FALSE));
+    TEST_ASSERT_EQUAL(E_OK, NetIf_Publish("odo/test/record", (const uint8 *)"payload", 7u, FALSE));
 
     TEST_ASSERT_EQUAL_UINT32(1u, Stub_Net_GetPublishCount());
     TEST_ASSERT_EQUAL(E_OK, NetIf_GetStatus(&status));
@@ -238,8 +237,7 @@ static void test_Net_FailedPublishIsReported(void)
     TnBringSessionUpOverWifi();
 
     Stub_Net_FailNextPublishes(1u);
-    TEST_ASSERT_NOT_EQUAL(E_OK,
-                          NetIf_Publish("odo/test/record", (const uint8 *)"payload", 7u, FALSE));
+    TEST_ASSERT_NOT_EQUAL(E_OK, NetIf_Publish("odo/test/record", (const uint8 *)"payload", 7u, FALSE));
 
     TEST_ASSERT_EQUAL(E_OK, NetIf_GetStatus(&status));
     TEST_ASSERT_EQUAL_UINT32(1u, status.publishFailures);
@@ -532,8 +530,7 @@ static void test_Net_RejectsBadArguments(void)
     /* An over-long payload is refused rather than truncated: a truncated record would arrive at the
      * consumer as a short line it would have to guess about. */
     (void)memset(huge, (int)'x', sizeof(huge));
-    TEST_ASSERT_NOT_EQUAL(E_OK,
-                          NetIf_Publish("odo/test/record", huge, (uint16)sizeof(huge), FALSE));
+    TEST_ASSERT_NOT_EQUAL(E_OK, NetIf_Publish("odo/test/record", huge, (uint16)sizeof(huge), FALSE));
 }
 
 /*==================================================================================================

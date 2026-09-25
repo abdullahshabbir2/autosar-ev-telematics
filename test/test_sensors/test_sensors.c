@@ -79,8 +79,8 @@ void tearDown(void)
  *================================================================================================*/
 
 /** Build a drive-state frame with the given signals, little endian as the v1 code implemented. */
-static void makeDriveStateFrame(Can_PduType *pdu, uint16 rpm, uint8 direction, uint8 speedMode,
-                                uint8 fault, boolean lowPower)
+static void makeDriveStateFrame(Can_PduType *pdu, uint16 rpm, uint8 direction, uint8 speedMode, uint8 fault,
+                                boolean lowPower)
 {
     (void)memset(pdu, 0, sizeof(*pdu));
     pdu->id = CAN_ID_MCU_DRIVE_STATE | CAN_ID_EXTENDED_FLAG;
@@ -240,16 +240,16 @@ static void queueWritePadding(uint16 bytes)
 /** Script the SPI exchange a successful Can_Init() performs. */
 static void scriptCanInit(void)
 {
-    queueWritePadding(1u);              /* RESET                        */
-    queueWritePadding(4u);              /* BIT MODIFY CANCTRL -> config */
-    queueRegisterRead(0x80u);           /* CANSTAT: config reached      */
-    queueWritePadding(3u * 3u);         /* CNF1..CNF3                   */
-    queueWritePadding(6u * 2u);         /* RXM0, RXM1                   */
-    queueWritePadding(6u * 6u);         /* RXF0..RXF5                   */
-    queueWritePadding(3u * 2u);         /* RXB0CTRL, RXB1CTRL           */
-    queueWritePadding(3u * 2u);         /* CANINTE, CANINTF             */
-    queueWritePadding(4u);              /* BIT MODIFY CANCTRL -> normal */
-    queueRegisterRead(0x00u);           /* CANSTAT: normal reached      */
+    queueWritePadding(1u);      /* RESET                        */
+    queueWritePadding(4u);      /* BIT MODIFY CANCTRL -> config */
+    queueRegisterRead(0x80u);   /* CANSTAT: config reached      */
+    queueWritePadding(3u * 3u); /* CNF1..CNF3                   */
+    queueWritePadding(6u * 2u); /* RXM0, RXM1                   */
+    queueWritePadding(6u * 6u); /* RXF0..RXF5                   */
+    queueWritePadding(3u * 2u); /* RXB0CTRL, RXB1CTRL           */
+    queueWritePadding(3u * 2u); /* CANINTE, CANINTF             */
+    queueWritePadding(4u);      /* BIT MODIFY CANCTRL -> normal */
+    queueRegisterRead(0x00u);   /* CANSTAT: normal reached      */
 }
 
 /** Deliver one frame to the driver through the SPI stub, then decode it. */
@@ -313,8 +313,7 @@ static void test_CanIf_SignalsGoStale(void)
     TEST_ASSERT_EQUAL(E_OK, CanIf_GetMcuData(&data));
     TEST_ASSERT_TRUE(data.driveStateValid);
     TEST_ASSERT_FALSE(data.currentVoltageValid);
-    TEST_ASSERT_FALSE_MESSAGE(CanIf_IsMcuDataFresh(),
-                              "one half of the signal set was reported as fresh");
+    TEST_ASSERT_FALSE_MESSAGE(CanIf_IsMcuDataFresh(), "one half of the signal set was reported as fresh");
 
     /* Now the other half: fresh. */
     makeCurrentVoltageFrame(&cv, 1000u, 250u);
@@ -436,11 +435,11 @@ static void test_Gnss_CoordinateRejectsMalformed(void)
     sint32 value = 0;
 
     TEST_ASSERT_EQUAL(E_NOT_OK, GnssIf_ParseCoordinate("", 'N', &value));
-    TEST_ASSERT_EQUAL(E_NOT_OK, GnssIf_ParseCoordinate("123", 'N', &value));     /* no '.'     */
-    TEST_ASSERT_EQUAL(E_NOT_OK, GnssIf_ParseCoordinate("12.34", 'N', &value));   /* no degrees */
-    TEST_ASSERT_EQUAL(E_NOT_OK, GnssIf_ParseCoordinate("48O7.038", 'N', &value));/* letter O   */
-    TEST_ASSERT_EQUAL(E_NOT_OK, GnssIf_ParseCoordinate("4807.038", 'X', &value));/* hemisphere */
-    TEST_ASSERT_EQUAL(E_NOT_OK, GnssIf_ParseCoordinate("99999.000", 'N', &value));/* > 180 deg */
+    TEST_ASSERT_EQUAL(E_NOT_OK, GnssIf_ParseCoordinate("123", 'N', &value));       /* no '.'     */
+    TEST_ASSERT_EQUAL(E_NOT_OK, GnssIf_ParseCoordinate("12.34", 'N', &value));     /* no degrees */
+    TEST_ASSERT_EQUAL(E_NOT_OK, GnssIf_ParseCoordinate("48O7.038", 'N', &value));  /* letter O   */
+    TEST_ASSERT_EQUAL(E_NOT_OK, GnssIf_ParseCoordinate("4807.038", 'X', &value));  /* hemisphere */
+    TEST_ASSERT_EQUAL(E_NOT_OK, GnssIf_ParseCoordinate("99999.000", 'N', &value)); /* > 180 deg */
     TEST_ASSERT_EQUAL(E_NOT_OK, GnssIf_ParseCoordinate(NULL_PTR, 'N', &value));
     TEST_ASSERT_EQUAL(E_NOT_OK, GnssIf_ParseCoordinate("4807.038", 'N', NULL_PTR));
 }

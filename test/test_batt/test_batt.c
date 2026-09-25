@@ -55,7 +55,10 @@
 
 /** Serial numbers given to the four slots. Arbitrary but distinct, so a misrouted frame shows up. */
 static const uint32 TbSerials[RS485IF_PACK_COUNT] = {
-    0x11110001uL, 0x22220002uL, 0x33330003uL, 0x44440004uL,
+    0x11110001uL,
+    0x22220002uL,
+    0x33330003uL,
+    0x44440004uL,
 };
 
 static void TbWriteU16(uint8 *at, uint16 value)
@@ -104,9 +107,9 @@ static void TbBuildPackResponse(uint8 *frame, uint32 serial, uint16 voltage, sin
     /* Offsets follow Rs485If_ParsePackData. */
     TbWriteU16(&p[0], voltage);
     TbWriteU32(&p[6], (uint32)current);
-    TbWriteU16(&p[10], (uint16)temperature);  /* pack temperature      */
-    TbWriteU16(&p[12], (uint16)temperature);  /* highest sensor        */
-    TbWriteU16(&p[14], (uint16)temperature);  /* lowest sensor         */
+    TbWriteU16(&p[10], (uint16)temperature); /* pack temperature      */
+    TbWriteU16(&p[12], (uint16)temperature); /* highest sensor        */
+    TbWriteU16(&p[14], (uint16)temperature); /* lowest sensor         */
     p[16] = stateOfCharge;
     p[17] = stateOfHealth;
 
@@ -250,8 +253,7 @@ static void TbQueueRound(const TbPackScript *script)
         {
             uint8 frame[RS485IF_CELL_RESPONSE_SIZE];
 
-            TbBuildCellResponse(frame, TbSerials[slot], s->cellBase, s->weakIndex, s->sag,
-                                s->temperature);
+            TbBuildCellResponse(frame, TbSerials[slot], s->cellBase, s->weakIndex, s->sag, s->temperature);
             Stub_Uart_QueueTxResponse(TB_BUS, frame, RS485IF_CELL_RESPONSE_SIZE);
         }
         else
@@ -465,7 +467,7 @@ static void test_Batt_WorstImbalanceIdentifiesPack(void)
     TEST_ASSERT_EQUAL(E_OK, Rs485If_DiscoverPacks());
 
     script[0].sag = 40u;
-    script[1].sag = 250u;  /* the worst */
+    script[1].sag = 250u; /* the worst */
     script[2].sag = 90u;
     script[3].sag = 15u;
 
@@ -663,8 +665,7 @@ static void test_Batt_AccessorsRejectBadArguments(void)
     BattSwc_PackHealthType health;
 
     TEST_ASSERT_NOT_EQUAL(E_OK, BattSwc_GetPackHealth(0u, &health));
-    TEST_ASSERT_NOT_EQUAL(E_OK,
-                          BattSwc_GetPackHealth((Rs485If_SlotType)(RS485IF_PACK_COUNT + 1u), &health));
+    TEST_ASSERT_NOT_EQUAL(E_OK, BattSwc_GetPackHealth((Rs485If_SlotType)(RS485IF_PACK_COUNT + 1u), &health));
     TEST_ASSERT_NOT_EQUAL(E_OK, BattSwc_GetPackHealth(1u, NULL_PTR));
     TEST_ASSERT_NOT_EQUAL(E_OK, BattSwc_GetAggregate(NULL_PTR));
 }

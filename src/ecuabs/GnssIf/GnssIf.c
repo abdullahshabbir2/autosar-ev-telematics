@@ -147,8 +147,7 @@ STATIC Std_ReturnType GnssIf_FieldToU32(const GnssIf_FieldType *field, uint32 *r
  * fraction is accumulated digit by digit and padded or truncated to the requested scale, so
  * "12.3" at scale 3 yields 12300 exactly.
  */
-STATIC Std_ReturnType GnssIf_FieldToScaled(const GnssIf_FieldType *field, uint8 scaleDigits,
-                                           sint32 *result)
+STATIC Std_ReturnType GnssIf_FieldToScaled(const GnssIf_FieldType *field, uint8 scaleDigits, sint32 *result)
 {
     uint32 integerPart = 0u;
     uint32 fractionPart = 0u;
@@ -250,8 +249,8 @@ Std_ReturnType GnssIf_VerifyChecksum(const char *sentence)
     uint8 high;
     uint8 low;
 
-    DET_CHECK_RETURN(sentence != NULL_PTR, MODULE_ID_GNSSIF, INSTANCE_ID_SINGLE,
-                     GNSSIF_API_ID_PARSE_SENTENCE, GNSSIF_E_PARAM_POINTER, E_NOT_OK);
+    DET_CHECK_RETURN(sentence != NULL_PTR, MODULE_ID_GNSSIF, INSTANCE_ID_SINGLE, GNSSIF_API_ID_PARSE_SENTENCE,
+                     GNSSIF_E_PARAM_POINTER, E_NOT_OK);
 
     if (sentence[0] != '$')
     {
@@ -299,9 +298,8 @@ Std_ReturnType GnssIf_ParseCoordinate(const char *field, char hemisphere, sint32
     uint32 minuteScale = 1u;
     uint16 minutesStart;
 
-    DET_CHECK_RETURN((field != NULL_PTR) && (result != NULL_PTR), MODULE_ID_GNSSIF,
-                     INSTANCE_ID_SINGLE, GNSSIF_API_ID_PARSE_SENTENCE, GNSSIF_E_PARAM_POINTER,
-                     E_NOT_OK);
+    DET_CHECK_RETURN((field != NULL_PTR) && (result != NULL_PTR), MODULE_ID_GNSSIF, INSTANCE_ID_SINGLE,
+                     GNSSIF_API_ID_PARSE_SENTENCE, GNSSIF_E_PARAM_POINTER, E_NOT_OK);
 
     length = (uint16)strlen(field);
     if (length < 4u)
@@ -434,8 +432,8 @@ STATIC uint32 GnssIf_ToUnixTime(uint32 ddmmyy, uint32 hhmmss)
     uint32 days;
     uint32 y;
 
-    if ((month < 1uL) || (month > 12uL) || (day < 1uL) || (day > 31uL) || (hour > 23uL) ||
-        (minute > 59uL) || (second > 60uL))
+    if ((month < 1uL) || (month > 12uL) || (day < 1uL) || (day > 31uL) || (hour > 23uL) || (minute > 59uL)
+        || (second > 60uL))
     {
         return 0u;
     }
@@ -451,10 +449,8 @@ STATIC uint32 GnssIf_ToUnixTime(uint32 ddmmyy, uint32 hhmmss)
     days += daysBeforeMonth[month - 1uL];
     if (month > 2uL)
     {
-        const boolean leap = (((year % 4uL) == 0uL) &&
-                              (((year % 100uL) != 0uL) || ((year % 400uL) == 0uL)))
-                                 ? TRUE
-                                 : FALSE;
+        const boolean leap =
+            (((year % 4uL) == 0uL) && (((year % 100uL) != 0uL) || ((year % 400uL) == 0uL))) ? TRUE : FALSE;
         if (leap != FALSE)
         {
             days += 1uL;
@@ -485,9 +481,8 @@ Std_ReturnType GnssIf_ParseSentence(const char *sentence, GnssIf_PositionType *p
     Std_ReturnType checksum;
     char scratch[16];
 
-    DET_CHECK_RETURN((sentence != NULL_PTR) && (position != NULL_PTR), MODULE_ID_GNSSIF,
-                     INSTANCE_ID_SINGLE, GNSSIF_API_ID_PARSE_SENTENCE, GNSSIF_E_PARAM_POINTER,
-                     E_NOT_OK);
+    DET_CHECK_RETURN((sentence != NULL_PTR) && (position != NULL_PTR), MODULE_ID_GNSSIF, INSTANCE_ID_SINGLE,
+                     GNSSIF_API_ID_PARSE_SENTENCE, GNSSIF_E_PARAM_POINTER, E_NOT_OK);
 
     checksum = GnssIf_VerifyChecksum(sentence);
     if (checksum != E_OK)
@@ -561,8 +556,8 @@ Std_ReturnType GnssIf_ParseSentence(const char *sentence, GnssIf_PositionType *p
             uint32 date = 0u;
             sint32 timeScaled = 0;
 
-            if ((GnssIf_FieldToU32(&fields[9], &date) == E_OK) &&
-                (GnssIf_FieldToScaled(&fields[1], 0u, &timeScaled) == E_OK))
+            if ((GnssIf_FieldToU32(&fields[9], &date) == E_OK)
+                && (GnssIf_FieldToScaled(&fields[1], 0u, &timeScaled) == E_OK))
             {
                 position->fixUnixTime = GnssIf_ToUnixTime(date, (uint32)timeScaled);
             }
@@ -701,8 +696,8 @@ boolean GnssIf_IsTransitionPlausible(const GnssIf_PositionType *from, const Gnss
      *     millimetres = count x METRES_PER_DEGREE / 1e4
      * The longitude degree is treated as a full meridional degree, which is generous away from the
      * equator and again errs toward accepting a genuine fix. */
-    distanceMm = (((uint64)(uint32)dLat + (uint64)(uint32)dLon) * (uint64)GNSSIF_METRES_PER_DEGREE) /
-                 10000uLL;
+    distanceMm =
+        (((uint64)(uint32)dLat + (uint64)(uint32)dLon) * (uint64)GNSSIF_METRES_PER_DEGREE) / 10000uLL;
 
     allowedMm = ((uint64)GNSSIF_MAX_SPEED_MM_PER_SEC * (uint64)deltaMs) / 1000uLL;
 
@@ -789,15 +784,13 @@ STATIC boolean GnssIf_ConsumeSentence(void)
 
     {
         const uint32 now = Gpt_GetMonotonicMs();
-        const uint32 deltaMs = (GnssIf_Position.valid != FALSE)
-                                   ? Gpt_ElapsedSince(GnssIf_Position.fixTimestampMs)
-                                   : 0u;
+        const uint32 deltaMs =
+            (GnssIf_Position.valid != FALSE) ? Gpt_ElapsedSince(GnssIf_Position.fixTimestampMs) : 0u;
 
         if (GnssIf_IsTransitionPlausible(&GnssIf_Position, &candidate, deltaMs) == FALSE)
         {
             GnssIf_Stats.rejectedJumps++;
-            (void)Det_ReportRuntimeError(MODULE_ID_GNSSIF, INSTANCE_ID_SINGLE,
-                                         GNSSIF_API_ID_PARSE_SENTENCE,
+            (void)Det_ReportRuntimeError(MODULE_ID_GNSSIF, INSTANCE_ID_SINGLE, GNSSIF_API_ID_PARSE_SENTENCE,
                                          GNSSIF_E_IMPLAUSIBLE_JUMP);
             return FALSE;
         }
@@ -892,8 +885,8 @@ uint8 GnssIf_MainFunction(void)
     {
         if (GnssIf_CyclesWithoutFix >= (uint16)GNSSIF_NO_FIX_REPORT_THRESHOLD)
         {
-            STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_GNSS_NO_FIX, INSTANCE_ID_SINGLE,
-                                           DEM_EVENT_STATUS_PASSED));
+            STD_DISCARD(
+                Dem_SetEventStatus(DEM_EVENT_GNSS_NO_FIX, INSTANCE_ID_SINGLE, DEM_EVENT_STATUS_PASSED));
         }
         GnssIf_CyclesWithoutFix = 0u;
     }
@@ -905,8 +898,8 @@ uint8 GnssIf_MainFunction(void)
         }
         if (GnssIf_CyclesWithoutFix == (uint16)GNSSIF_NO_FIX_REPORT_THRESHOLD)
         {
-            STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_GNSS_NO_FIX, INSTANCE_ID_SINGLE,
-                                           DEM_EVENT_STATUS_FAILED));
+            STD_DISCARD(
+                Dem_SetEventStatus(DEM_EVENT_GNSS_NO_FIX, INSTANCE_ID_SINGLE, DEM_EVENT_STATUS_FAILED));
         }
     }
 
@@ -915,8 +908,8 @@ uint8 GnssIf_MainFunction(void)
 
 Std_ReturnType GnssIf_GetPosition(GnssIf_PositionType *position)
 {
-    DET_CHECK_RETURN(position != NULL_PTR, MODULE_ID_GNSSIF, INSTANCE_ID_SINGLE,
-                     GNSSIF_API_ID_GET_POSITION, GNSSIF_E_PARAM_POINTER, E_NOT_OK);
+    DET_CHECK_RETURN(position != NULL_PTR, MODULE_ID_GNSSIF, INSTANCE_ID_SINGLE, GNSSIF_API_ID_GET_POSITION,
+                     GNSSIF_E_PARAM_POINTER, E_NOT_OK);
 
     *position = GnssIf_Position;
     return E_OK;
@@ -928,14 +921,13 @@ boolean GnssIf_IsFixFresh(void)
     {
         return FALSE;
     }
-    return (Gpt_HasElapsed(GnssIf_Position.fixTimestampMs, GNSSIF_FIX_TIMEOUT_MS) == FALSE) ? TRUE
-                                                                                           : FALSE;
+    return (Gpt_HasElapsed(GnssIf_Position.fixTimestampMs, GNSSIF_FIX_TIMEOUT_MS) == FALSE) ? TRUE : FALSE;
 }
 
 Std_ReturnType GnssIf_GetStatistics(GnssIf_StatisticsType *stats)
 {
-    DET_CHECK_RETURN(stats != NULL_PTR, MODULE_ID_GNSSIF, INSTANCE_ID_SINGLE,
-                     GNSSIF_API_ID_MAIN_FUNCTION, GNSSIF_E_PARAM_POINTER, E_NOT_OK);
+    DET_CHECK_RETURN(stats != NULL_PTR, MODULE_ID_GNSSIF, INSTANCE_ID_SINGLE, GNSSIF_API_ID_MAIN_FUNCTION,
+                     GNSSIF_E_PARAM_POINTER, E_NOT_OK);
 
     *stats = GnssIf_Stats;
     return E_OK;

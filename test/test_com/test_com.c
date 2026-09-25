@@ -29,7 +29,9 @@ void setUp(void)
     TEST_ASSERT_EQUAL(E_OK, Com_Init());
 }
 
-void tearDown(void) {}
+void tearDown(void)
+{
+}
 
 /** Count the separators in a NUL-terminated string. */
 static uint16 countFields(const char *text)
@@ -102,8 +104,7 @@ static void test_ChunkPlan_EmptyFileYieldsNoChunks(void)
     TEST_ASSERT_EQUAL_UINT32(0u, plan.lastChunkSize);
 
     /* And asking for chunk 0 of a zero-chunk plan is refused rather than returning something. */
-    TEST_ASSERT_EQUAL(E_NOT_FOUND,
-                      Com_GetChunkExtent(&plan, 0u, COM_TRANSFER_CHUNK_SIZE, &offset, &length));
+    TEST_ASSERT_EQUAL(E_NOT_FOUND, Com_GetChunkExtent(&plan, 0u, COM_TRANSFER_CHUNK_SIZE, &offset, &length));
 }
 
 /** @test TS-COM-002 A file smaller than one chunk yields exactly one short chunk. */
@@ -119,13 +120,11 @@ static void test_ChunkPlan_SmallFileYieldsOneChunk(void)
     TEST_ASSERT_EQUAL_UINT32(0u, plan.fullChunkCount);
     TEST_ASSERT_EQUAL_UINT32(100u, plan.lastChunkSize);
 
-    TEST_ASSERT_EQUAL(E_OK,
-                      Com_GetChunkExtent(&plan, 0u, COM_TRANSFER_CHUNK_SIZE, &offset, &length));
+    TEST_ASSERT_EQUAL(E_OK, Com_GetChunkExtent(&plan, 0u, COM_TRANSFER_CHUNK_SIZE, &offset, &length));
     TEST_ASSERT_EQUAL_UINT32(0u, offset);
     TEST_ASSERT_EQUAL_UINT32(100u, length);
 
-    TEST_ASSERT_EQUAL(E_NOT_FOUND,
-                      Com_GetChunkExtent(&plan, 1u, COM_TRANSFER_CHUNK_SIZE, &offset, &length));
+    TEST_ASSERT_EQUAL(E_NOT_FOUND, Com_GetChunkExtent(&plan, 1u, COM_TRANSFER_CHUNK_SIZE, &offset, &length));
 }
 
 /**
@@ -141,21 +140,18 @@ static void test_ChunkPlan_ExactMultipleHasNoTail(void)
     uint32 length = 0u;
 
     TEST_ASSERT_EQUAL(E_OK,
-                      Com_ComputeChunkPlan(COM_TRANSFER_CHUNK_SIZE * 3u, COM_TRANSFER_CHUNK_SIZE,
-                                           &plan));
+                      Com_ComputeChunkPlan(COM_TRANSFER_CHUNK_SIZE * 3u, COM_TRANSFER_CHUNK_SIZE, &plan));
 
     TEST_ASSERT_EQUAL_UINT32(3u, plan.chunkCount);
     TEST_ASSERT_EQUAL_UINT32(3u, plan.fullChunkCount);
     TEST_ASSERT_EQUAL_UINT32(0u, plan.lastChunkSize);
 
     /* Every chunk, including the last, is a full one. */
-    TEST_ASSERT_EQUAL(E_OK,
-                      Com_GetChunkExtent(&plan, 2u, COM_TRANSFER_CHUNK_SIZE, &offset, &length));
+    TEST_ASSERT_EQUAL(E_OK, Com_GetChunkExtent(&plan, 2u, COM_TRANSFER_CHUNK_SIZE, &offset, &length));
     TEST_ASSERT_EQUAL_UINT32(COM_TRANSFER_CHUNK_SIZE * 2u, offset);
     TEST_ASSERT_EQUAL_UINT32(COM_TRANSFER_CHUNK_SIZE, length);
 
-    TEST_ASSERT_EQUAL(E_NOT_FOUND,
-                      Com_GetChunkExtent(&plan, 3u, COM_TRANSFER_CHUNK_SIZE, &offset, &length));
+    TEST_ASSERT_EQUAL(E_NOT_FOUND, Com_GetChunkExtent(&plan, 3u, COM_TRANSFER_CHUNK_SIZE, &offset, &length));
 }
 
 /** @test TS-COM-004 Chunk extents tile the file exactly, with no gap and no overlap. */
@@ -178,11 +174,10 @@ static void test_ChunkPlan_ExtentsTileTheFile(void)
             uint32 offset = 0u;
             uint32 length = 0u;
 
-            TEST_ASSERT_EQUAL(
-                E_OK, Com_GetChunkExtent(&plan, index, COM_TRANSFER_CHUNK_SIZE, &offset, &length));
+            TEST_ASSERT_EQUAL(E_OK,
+                              Com_GetChunkExtent(&plan, index, COM_TRANSFER_CHUNK_SIZE, &offset, &length));
 
-            TEST_ASSERT_EQUAL_UINT32_MESSAGE(expectedOffset, offset,
-                                             "chunk offsets are not contiguous");
+            TEST_ASSERT_EQUAL_UINT32_MESSAGE(expectedOffset, offset, "chunk offsets are not contiguous");
             TEST_ASSERT_GREATER_THAN_UINT32(0u, length);
             TEST_ASSERT_LESS_OR_EQUAL_UINT32(COM_TRANSFER_CHUNK_SIZE, length);
 
@@ -190,8 +185,7 @@ static void test_ChunkPlan_ExtentsTileTheFile(void)
             expectedOffset += length;
         }
 
-        TEST_ASSERT_EQUAL_UINT32_MESSAGE(sizes[s], covered,
-                                         "the chunks do not cover the file exactly");
+        TEST_ASSERT_EQUAL_UINT32_MESSAGE(sizes[s], covered, "the chunks do not cover the file exactly");
     }
 }
 
@@ -224,10 +218,8 @@ static void test_Backfill_ParsesValidDates(void)
     uint8 count = 0u;
     uint8 dropped = 0u;
 
-    TEST_ASSERT_EQUAL(E_OK, Com_ParseBackfillRequest((const uint8 *)payload,
-                                                     (uint16)strlen(payload), dates,
-                                                     (uint8)STD_ARRAY_SIZE(dates), &count,
-                                                     &dropped));
+    TEST_ASSERT_EQUAL(E_OK, Com_ParseBackfillRequest((const uint8 *)payload, (uint16)strlen(payload), dates,
+                                                     (uint8)STD_ARRAY_SIZE(dates), &count, &dropped));
 
     TEST_ASSERT_EQUAL_UINT8(3u, count);
     TEST_ASSERT_EQUAL_UINT8(0u, dropped);
@@ -275,8 +267,7 @@ static void test_Backfill_BoundsAnOversizedRequest(void)
     payload[offset] = '\0';
 
     TEST_ASSERT_EQUAL(E_OK, Com_ParseBackfillRequest((const uint8 *)payload, offset, dates,
-                                                     (uint8)STD_ARRAY_SIZE(dates), &count,
-                                                     &dropped));
+                                                     (uint8)STD_ARRAY_SIZE(dates), &count, &dropped));
 
     /* Exactly the array's capacity is filled, and the rest is reported rather than silently lost. */
     TEST_ASSERT_EQUAL_UINT8((uint8)COM_MAX_BACKFILL_DATES, count);
@@ -302,9 +293,8 @@ static void test_Backfill_RejectsInvalidDates(void)
         const char *payload = "20240230,20240431,20241301,20240100,2024031,2024march";
 
         TEST_ASSERT_EQUAL(E_NOT_FOUND,
-                          Com_ParseBackfillRequest((const uint8 *)payload, (uint16)strlen(payload),
-                                                   dates, (uint8)STD_ARRAY_SIZE(dates), &count,
-                                                   NULL_PTR));
+                          Com_ParseBackfillRequest((const uint8 *)payload, (uint16)strlen(payload), dates,
+                                                   (uint8)STD_ARRAY_SIZE(dates), &count, NULL_PTR));
         TEST_ASSERT_EQUAL_UINT8(0u, count);
     }
 
@@ -326,21 +316,18 @@ static void test_Backfill_MixedRequest(void)
     Com_BackfillDateType dates[COM_MAX_BACKFILL_DATES];
     uint8 count = 0u;
 
-    TEST_ASSERT_EQUAL(E_OK, Com_ParseBackfillRequest((const uint8 *)payload,
-                                                     (uint16)strlen(payload), dates,
-                                                     (uint8)STD_ARRAY_SIZE(dates), &count,
-                                                     NULL_PTR));
+    TEST_ASSERT_EQUAL(E_OK, Com_ParseBackfillRequest((const uint8 *)payload, (uint16)strlen(payload), dates,
+                                                     (uint8)STD_ARRAY_SIZE(dates), &count, NULL_PTR));
 
     TEST_ASSERT_EQUAL_UINT8(2u, count);
     TEST_ASSERT_EQUAL_STRING("20240315", dates[0].date);
     TEST_ASSERT_EQUAL_STRING("20240316", dates[1].date);
 
-    TEST_ASSERT_EQUAL(E_NOT_OK, Com_ParseBackfillRequest(NULL_PTR, 10u, dates, 4u, &count,
-                                                         NULL_PTR));
-    TEST_ASSERT_EQUAL(E_NOT_OK, Com_ParseBackfillRequest((const uint8 *)payload, 10u, NULL_PTR, 4u,
-                                                         &count, NULL_PTR));
-    TEST_ASSERT_EQUAL(E_NOT_OK, Com_ParseBackfillRequest((const uint8 *)payload, 10u, dates, 0u,
-                                                         &count, NULL_PTR));
+    TEST_ASSERT_EQUAL(E_NOT_OK, Com_ParseBackfillRequest(NULL_PTR, 10u, dates, 4u, &count, NULL_PTR));
+    TEST_ASSERT_EQUAL(E_NOT_OK,
+                      Com_ParseBackfillRequest((const uint8 *)payload, 10u, NULL_PTR, 4u, &count, NULL_PTR));
+    TEST_ASSERT_EQUAL(E_NOT_OK,
+                      Com_ParseBackfillRequest((const uint8 *)payload, 10u, dates, 0u, &count, NULL_PTR));
 }
 
 /** @test TS-COM-009b File names are formed only from valid dates. */
@@ -441,8 +428,7 @@ static void test_Record_HeaderAndRecordFieldCountsMatch(void)
     TEST_ASSERT_EQUAL(E_OK, Com_FormatCsvHeader(header, (uint16)sizeof(header), &headerLen));
 
     makeRecord(&rec, packs, &position, TRUE, TRUE);
-    TEST_ASSERT_EQUAL(E_OK,
-                      Com_SerialiseCsvRecord(&rec, record, (uint16)sizeof(record), &recordLen));
+    TEST_ASSERT_EQUAL(E_OK, Com_SerialiseCsvRecord(&rec, record, (uint16)sizeof(record), &recordLen));
 
     /* A mismatch here is the single most consequential CSV defect: every downstream column shifts,
      * and the data looks plausible while meaning something else entirely. */
@@ -464,8 +450,7 @@ static void test_Record_SerialisesValues(void)
     char field[32];
 
     makeRecord(&rec, packs, &position, TRUE, TRUE);
-    TEST_ASSERT_EQUAL(E_OK,
-                      Com_SerialiseCsvRecord(&rec, buffer, (uint16)sizeof(buffer), &written));
+    TEST_ASSERT_EQUAL(E_OK, Com_SerialiseCsvRecord(&rec, buffer, (uint16)sizeof(buffer), &written));
 
     extractField(buffer, 0u, field, (uint16)sizeof(field));
     TEST_ASSERT_EQUAL_STRING("42", field);
@@ -509,8 +494,7 @@ static void test_Record_InvalidFieldsAreBlankNotZero(void)
     position.valid = FALSE;
     rec.auxVoltageValid = FALSE;
 
-    TEST_ASSERT_EQUAL(E_OK,
-                      Com_SerialiseCsvRecord(&rec, buffer, (uint16)sizeof(buffer), &written));
+    TEST_ASSERT_EQUAL(E_OK, Com_SerialiseCsvRecord(&rec, buffer, (uint16)sizeof(buffer), &written));
 
     /* Auxiliary voltage, RPM and latitude must all be empty, not "0". */
     extractField(buffer, 4u, field, (uint16)sizeof(field));
@@ -551,8 +535,7 @@ static void test_Record_UnknownTimeIsBlank(void)
     makeRecord(&rec, packs, &position, TRUE, TRUE);
     rec.unixTime = 0u;
 
-    TEST_ASSERT_EQUAL(E_OK,
-                      Com_SerialiseCsvRecord(&rec, buffer, (uint16)sizeof(buffer), &written));
+    TEST_ASSERT_EQUAL(E_OK, Com_SerialiseCsvRecord(&rec, buffer, (uint16)sizeof(buffer), &written));
 
     extractField(buffer, 1u, field, (uint16)sizeof(field));
     TEST_ASSERT_EQUAL_STRING_MESSAGE("", field, "an unknown timestamp would plot as 1970");
@@ -580,8 +563,7 @@ static void test_Record_TruncationIsReported(void)
 
     makeRecord(&rec, packs, &position, TRUE, TRUE);
 
-    TEST_ASSERT_EQUAL(E_NO_SPACE,
-                      Com_SerialiseCsvRecord(&rec, small, (uint16)sizeof(small), &written));
+    TEST_ASSERT_EQUAL(E_NO_SPACE, Com_SerialiseCsvRecord(&rec, small, (uint16)sizeof(small), &written));
 
     /* Still a valid C string, and the reported length is its real length -- so the caller can log
      * the truncation with an accurate size rather than guessing. */
@@ -650,8 +632,7 @@ static void test_Record_ConfiguredBufferIsSufficient(void)
         packs[p].cells.statusFlags2 = 0xFFFFFFFFuL;
     }
 
-    TEST_ASSERT_EQUAL_MESSAGE(E_OK,
-                              Com_SerialiseCsvRecord(&rec, buffer, (uint16)sizeof(buffer), &written),
+    TEST_ASSERT_EQUAL_MESSAGE(E_OK, Com_SerialiseCsvRecord(&rec, buffer, (uint16)sizeof(buffer), &written),
                               "COM_RECORD_BUFFER_SIZE is too small for a worst-case record");
 
     /* And there is genuine headroom, not a value tuned to exactly fit. */
@@ -673,8 +654,7 @@ static void test_Record_SignedExtremes(void)
     /* The most negative sint32. Negating it directly is undefined, so the formatter must not. */
     packs[0].pack.current = -2147483647L - 1L;
 
-    TEST_ASSERT_EQUAL(E_OK,
-                      Com_SerialiseCsvRecord(&rec, buffer, (uint16)sizeof(buffer), &written));
+    TEST_ASSERT_EQUAL(E_OK, Com_SerialiseCsvRecord(&rec, buffer, (uint16)sizeof(buffer), &written));
 
     /* Pack 1's current is field 26: 23 vehicle fields, then V, V_HI, V_LO, then I. */
     extractField(buffer, 26u, field, (uint16)sizeof(field));

@@ -91,40 +91,40 @@ void Log_GetVersionInfo(Std_VersionInfoType *versioninfo);
  *  function call with a variadic argument list.
  *================================================================================================*/
 
-#define LOG_ERROR(module, ...)                          \
-    do                                                  \
-    {                                                   \
-        if (Log_GetLevel() >= LOG_LEVEL_ERROR)          \
-        {                                               \
+#define LOG_ERROR(module, ...)                                 \
+    do                                                         \
+    {                                                          \
+        if (Log_GetLevel() >= LOG_LEVEL_ERROR)                 \
+        {                                                      \
             Log_Print(LOG_LEVEL_ERROR, (module), __VA_ARGS__); \
-        }                                               \
+        }                                                      \
     } while (0)
 
-#define LOG_WARN(module, ...)                           \
-    do                                                  \
-    {                                                   \
-        if (Log_GetLevel() >= LOG_LEVEL_WARN)           \
-        {                                               \
+#define LOG_WARN(module, ...)                                 \
+    do                                                        \
+    {                                                         \
+        if (Log_GetLevel() >= LOG_LEVEL_WARN)                 \
+        {                                                     \
             Log_Print(LOG_LEVEL_WARN, (module), __VA_ARGS__); \
-        }                                               \
+        }                                                     \
     } while (0)
 
-#define LOG_INFO(module, ...)                           \
-    do                                                  \
-    {                                                   \
-        if (Log_GetLevel() >= LOG_LEVEL_INFO)           \
-        {                                               \
+#define LOG_INFO(module, ...)                                 \
+    do                                                        \
+    {                                                         \
+        if (Log_GetLevel() >= LOG_LEVEL_INFO)                 \
+        {                                                     \
             Log_Print(LOG_LEVEL_INFO, (module), __VA_ARGS__); \
-        }                                               \
+        }                                                     \
     } while (0)
 
-#define LOG_DEBUG(module, ...)                          \
-    do                                                  \
-    {                                                   \
-        if (Log_GetLevel() >= LOG_LEVEL_DEBUG)          \
-        {                                               \
+#define LOG_DEBUG(module, ...)                                 \
+    do                                                         \
+    {                                                          \
+        if (Log_GetLevel() >= LOG_LEVEL_DEBUG)                 \
+        {                                                      \
             Log_Print(LOG_LEVEL_DEBUG, (module), __VA_ARGS__); \
-        }                                               \
+        }                                                      \
     } while (0)
 
 #ifdef __cplusplus

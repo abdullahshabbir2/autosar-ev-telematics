@@ -100,7 +100,7 @@ static Std_ReturnType TimeAbs_RtcReadRegisters(uint8 startRegister, uint8 *buffe
         return E_NOT_OK;
     }
 
-    if (Wire.requestFrom((uint8_t)DS3231_I2C_ADDRESS, (uint8_t)count, (uint8_t) true) != (size_t)count)
+    if (Wire.requestFrom((uint8_t)DS3231_I2C_ADDRESS, (uint8_t)count, (uint8_t)true) != (size_t)count)
     {
         return E_NOT_OK;
     }
@@ -242,8 +242,8 @@ extern "C" Std_ReturnType TimeAbs_PlatformRtcRead(uint32 *unixTime)
     /* One 0xFF from the BCD converter means the register held something that is not a decimal number, which on
      * this device means the bus returned rubbish. Checked as a group so that no single malformed field can slip
      * through into the calendar conversion. */
-    if ((dateTime.second == 0xFFu) || (dateTime.minute == 0xFFu) || (dateTime.hour == 0xFFu) ||
-        (dateTime.day == 0xFFu) || (dateTime.month == 0xFFu) || (dateTime.year == (2000u + 0xFFu)))
+    if ((dateTime.second == 0xFFu) || (dateTime.minute == 0xFFu) || (dateTime.hour == 0xFFu)
+        || (dateTime.day == 0xFFu) || (dateTime.month == 0xFFu) || (dateTime.year == (2000u + 0xFFu)))
     {
         return E_NOT_OK;
     }

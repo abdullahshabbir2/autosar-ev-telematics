@@ -114,8 +114,7 @@ extern "C" Std_ReturnType Wdg_SetMode(Wdg_ModeType mode)
 #if (WDG_ALLOW_DISABLE == STD_OFF)
         /* Refused at compile-time configuration level, so no code path -- including a future one -- can
          * quietly remove the protection. */
-        (void)Det_ReportError(MODULE_ID_WDG, INSTANCE_ID_SINGLE, WDG_API_ID_SET_MODE,
-                              WDG_E_DISABLE_REJECTED);
+        (void)Det_ReportError(MODULE_ID_WDG, INSTANCE_ID_SINGLE, WDG_API_ID_SET_MODE, WDG_E_DISABLE_REJECTED);
         return E_NOT_OK;
 #else
         /* Permitted only so an OTA flash write -- which holds the flash controller for tens of seconds and
@@ -123,8 +122,7 @@ extern "C" Std_ReturnType Wdg_SetMode(Wdg_ModeType mode)
          * mode afterwards; WdgM asserts that it did. */
         if (esp_task_wdt_delete(NULL) == ESP_ERR_INVALID_STATE)
         {
-            (void)Det_ReportError(MODULE_ID_WDG, INSTANCE_ID_SINGLE, WDG_API_ID_SET_MODE,
-                                  WDG_E_DRIVER_STATE);
+            (void)Det_ReportError(MODULE_ID_WDG, INSTANCE_ID_SINGLE, WDG_API_ID_SET_MODE, WDG_E_DRIVER_STATE);
             return E_NOT_OK;
         }
 
@@ -186,8 +184,7 @@ extern "C" Std_ReturnType Wdg_UnsubscribeCurrentTask(void)
 
     if (esp_task_wdt_delete(NULL) != ESP_OK)
     {
-        (void)Det_ReportError(MODULE_ID_WDG, INSTANCE_ID_SINGLE, WDG_API_ID_UNSUBSCRIBE,
-                              WDG_E_DRIVER_STATE);
+        (void)Det_ReportError(MODULE_ID_WDG, INSTANCE_ID_SINGLE, WDG_API_ID_UNSUBSCRIBE, WDG_E_DRIVER_STATE);
         return E_NOT_OK;
     }
 

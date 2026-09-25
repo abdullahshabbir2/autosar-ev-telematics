@@ -397,8 +397,8 @@ extern "C" Std_ReturnType FsAbs_PlatformFindNextLog(const char *after, char *buf
             {
                 const char *const name = entry.name();
 
-                if ((entry.isDirectory() == false) && (name != NULL_PTR) && (strlen(name) >= 12u) &&
-                    (strstr(name, ".csv") != NULL_PTR) && (strcmp(name, after) > 0))
+                if ((entry.isDirectory() == false) && (name != NULL_PTR) && (strlen(name) >= 12u)
+                    && (strstr(name, ".csv") != NULL_PTR) && (strcmp(name, after) > 0))
                 {
                     if ((found == FALSE) || (strcmp(name, best) < 0))
                     {
@@ -478,8 +478,8 @@ extern "C" Std_ReturnType FsAbs_PlatformFindOldestLog(char *buffer, uint16 size)
                  *
                  * The length check is what makes the comparison safe: it rejects anything that is not exactly a
                  * log name, so a stray file cannot win the comparison by sorting low. */
-                if ((entry.isDirectory() == false) && (name != NULL_PTR) &&
-                    (strlen(name) >= 12u) && (strstr(name, ".csv") != NULL_PTR))
+                if ((entry.isDirectory() == false) && (name != NULL_PTR) && (strlen(name) >= 12u)
+                    && (strstr(name, ".csv") != NULL_PTR))
                 {
                     if ((found == FALSE) || (strcmp(name, oldest) < 0))
                     {

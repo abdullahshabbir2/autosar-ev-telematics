@@ -30,9 +30,9 @@
  *  Periods
  *================================================================================================*/
 
-#define SCHM_PERIOD_SCHEDULER_MS ECU_SCHEDULER_TICK_MS      /* 10 ms   */
-#define SCHM_PERIOD_ACQUISITION_MS ECU_ACQUISITION_PERIOD_MS /* 3000 ms */
-#define SCHM_PERIOD_STORAGE_MS ECU_ACQUISITION_PERIOD_MS     /* 3000 ms */
+#define SCHM_PERIOD_SCHEDULER_MS ECU_SCHEDULER_TICK_MS         /* 10 ms   */
+#define SCHM_PERIOD_ACQUISITION_MS ECU_ACQUISITION_PERIOD_MS   /* 3000 ms */
+#define SCHM_PERIOD_STORAGE_MS ECU_ACQUISITION_PERIOD_MS       /* 3000 ms */
 #define SCHM_PERIOD_CONNECTIVITY_MS ECU_CONNECTIVITY_PERIOD_MS /* 1000 ms */
 
 /*==================================================================================================

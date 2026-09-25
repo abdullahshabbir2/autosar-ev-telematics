@@ -83,12 +83,12 @@ typedef enum
 /** Per-instance open parameters. */
 typedef struct
 {
-    uint32 baudRate;                /**< Bits per second.                            */
-    Uart_FrameFormatType frame;     /**< Character framing.                          */
-    uint8 rxPin;                    /**< GPIO for RX, or ::PIN_NOT_CONNECTED.        */
-    uint8 txPin;                    /**< GPIO for TX, or ::PIN_NOT_CONNECTED.        */
-    uint16 rxBufferSize;            /**< Driver receive buffer, bytes.               */
-    boolean invertRx;               /**< TRUE if the line is logically inverted.     */
+    uint32 baudRate;            /**< Bits per second.                            */
+    Uart_FrameFormatType frame; /**< Character framing.                          */
+    uint8 rxPin;                /**< GPIO for RX, or ::PIN_NOT_CONNECTED.        */
+    uint8 txPin;                /**< GPIO for TX, or ::PIN_NOT_CONNECTED.        */
+    uint16 rxBufferSize;        /**< Driver receive buffer, bytes.               */
+    boolean invertRx;           /**< TRUE if the line is logically inverted.     */
 } Uart_ConfigType;
 
 /** Per-instance error and throughput counters, published as diagnostic data. */
@@ -132,8 +132,7 @@ boolean Uart_IsOpen(Uart_InstanceType instance);
  *         not take them all (nothing is queued in that case, so a partial frame is
  *         never emitted); E_NOT_OK on a parameter or state error.
  */
-CHECK_RETURN Std_ReturnType Uart_Write(Uart_InstanceType instance, const uint8 *data,
-                                       uint16 length);
+CHECK_RETURN Std_ReturnType Uart_Write(Uart_InstanceType instance, const uint8 *data, uint16 length);
 
 /**
  * @brief Read up to @p maxLength bytes from @p instance without blocking.
@@ -198,8 +197,7 @@ CHECK_RETURN Std_ReturnType Uart_DrainTx(Uart_InstanceType instance, uint32 time
  * @param[in]  instance Instance to report on.
  * @param[out] stats    Destination. E_NOT_OK if NULL_PTR or the instance is unknown.
  */
-CHECK_RETURN Std_ReturnType Uart_GetStatistics(Uart_InstanceType instance,
-                                               Uart_StatisticsType *stats);
+CHECK_RETURN Std_ReturnType Uart_GetStatistics(Uart_InstanceType instance, Uart_StatisticsType *stats);
 
 /**
  * @brief Return this module's version information.

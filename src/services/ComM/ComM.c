@@ -115,8 +115,8 @@ Std_ReturnType ComM_Init(void)
 
 Std_ReturnType ComM_RequestMode(ComM_ModeType mode)
 {
-    DET_CHECK_RETURN(ComM_Initialised != FALSE, MODULE_ID_COMM, INSTANCE_ID_SINGLE,
-                     COMM_API_ID_REQUEST_MODE, COMM_E_UNINIT, E_NOT_OK);
+    DET_CHECK_RETURN(ComM_Initialised != FALSE, MODULE_ID_COMM, INSTANCE_ID_SINGLE, COMM_API_ID_REQUEST_MODE,
+                     COMM_E_UNINIT, E_NOT_OK);
     DET_CHECK_RETURN(mode <= COMM_FULL_COMMUNICATION, MODULE_ID_COMM, INSTANCE_ID_SINGLE,
                      COMM_API_ID_REQUEST_MODE, COMM_E_PARAM_MODE, E_NOT_OK);
 
@@ -192,8 +192,7 @@ void ComM_MainFunction(void)
         ComM_Status.timeWithoutBearerMs = 0u;
         ComM_AttemptStartedMs = Gpt_GetMonotonicMs();
 
-        STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_NO_BACKHAUL, INSTANCE_ID_SINGLE,
-                                       DEM_EVENT_STATUS_PASSED));
+        STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_NO_BACKHAUL, INSTANCE_ID_SINGLE, DEM_EVENT_STATUS_PASSED));
 
 #if (COMM_PREFER_WIFI == STD_ON)
         if (ComM_Status.preferredBearer != NETIF_BEARER_WIFI)
@@ -248,8 +247,8 @@ void ComM_MainFunction(void)
      * against the bearer. */
     ComM_Status.timeWithoutBearerMs = Gpt_ElapsedSince(ComM_LastBearerUpMs);
 
-    if (Gpt_HasElapsed(ComM_AttemptStartedMs,
-                       NETIF_LINK_TIMEOUT_MS + NETIF_SESSION_TIMEOUT_MS + 5000uL) != FALSE)
+    if (Gpt_HasElapsed(ComM_AttemptStartedMs, NETIF_LINK_TIMEOUT_MS + NETIF_SESSION_TIMEOUT_MS + 5000uL)
+        != FALSE)
     {
         const NetIf_BearerType failed = ComM_Status.preferredBearer;
         NetIf_BearerType next;
@@ -274,15 +273,14 @@ void ComM_MainFunction(void)
 
     if (Gpt_HasElapsed(ComM_LastBearerUpMs, COMM_NO_BEARER_REPORT_MS) != FALSE)
     {
-        STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_NO_BACKHAUL, INSTANCE_ID_SINGLE,
-                                       DEM_EVENT_STATUS_FAILED));
+        STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_NO_BACKHAUL, INSTANCE_ID_SINGLE, DEM_EVENT_STATUS_FAILED));
     }
 }
 
 Std_ReturnType ComM_GetStatus(ComM_StatusType *status)
 {
-    DET_CHECK_RETURN(status != NULL_PTR, MODULE_ID_COMM, INSTANCE_ID_SINGLE,
-                     COMM_API_ID_GET_STATE, COMM_E_PARAM_POINTER, E_NOT_OK);
+    DET_CHECK_RETURN(status != NULL_PTR, MODULE_ID_COMM, INSTANCE_ID_SINGLE, COMM_API_ID_GET_STATE,
+                     COMM_E_PARAM_POINTER, E_NOT_OK);
 
     *status = ComM_Status;
     return E_OK;

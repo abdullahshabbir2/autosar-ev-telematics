@@ -46,41 +46,41 @@
 #define DEM_EVENT_NONE ((Dem_EventIdType)0u)
 
 /*---------------------------- Battery pack communication --------------------*/
-#define DEM_EVENT_PACK_NO_RESPONSE ((Dem_EventIdType)1u)  /**< A pack stopped answering.    */
-#define DEM_EVENT_PACK_CRC_FAILURE ((Dem_EventIdType)2u)  /**< Frame check failures rising. */
-#define DEM_EVENT_PACK_MISSING ((Dem_EventIdType)3u)      /**< No pack found at startup.    */
+#define DEM_EVENT_PACK_NO_RESPONSE ((Dem_EventIdType)1u) /**< A pack stopped answering.    */
+#define DEM_EVENT_PACK_CRC_FAILURE ((Dem_EventIdType)2u) /**< Frame check failures rising. */
+#define DEM_EVENT_PACK_MISSING ((Dem_EventIdType)3u)     /**< No pack found at startup.    */
 
 /*-------------------------------- Vehicle CAN -------------------------------*/
-#define DEM_EVENT_CAN_INIT_FAILED ((Dem_EventIdType)4u)   /**< Controller would not start.  */
-#define DEM_EVENT_CAN_BUS_OFF ((Dem_EventIdType)5u)       /**< Controller went bus-off.     */
-#define DEM_EVENT_CAN_TIMEOUT ((Dem_EventIdType)6u)       /**< Expected frames stopped.     */
+#define DEM_EVENT_CAN_INIT_FAILED ((Dem_EventIdType)4u) /**< Controller would not start.  */
+#define DEM_EVENT_CAN_BUS_OFF ((Dem_EventIdType)5u)     /**< Controller went bus-off.     */
+#define DEM_EVENT_CAN_TIMEOUT ((Dem_EventIdType)6u)     /**< Expected frames stopped.     */
 
 /*--------------------------------- Backhaul ---------------------------------*/
-#define DEM_EVENT_WIFI_UNAVAILABLE ((Dem_EventIdType)7u)  /**< No access point reachable.   */
-#define DEM_EVENT_GPRS_UNAVAILABLE ((Dem_EventIdType)8u)  /**< Modem could not attach.      */
-#define DEM_EVENT_BROKER_UNREACHABLE ((Dem_EventIdType)9u)/**< Broker refused or timed out. */
-#define DEM_EVENT_NO_BACKHAUL ((Dem_EventIdType)10u)      /**< Neither bearer available.    */
+#define DEM_EVENT_WIFI_UNAVAILABLE ((Dem_EventIdType)7u)   /**< No access point reachable.   */
+#define DEM_EVENT_GPRS_UNAVAILABLE ((Dem_EventIdType)8u)   /**< Modem could not attach.      */
+#define DEM_EVENT_BROKER_UNREACHABLE ((Dem_EventIdType)9u) /**< Broker refused or timed out. */
+#define DEM_EVENT_NO_BACKHAUL ((Dem_EventIdType)10u)       /**< Neither bearer available.    */
 
 /*---------------------------------- Storage ---------------------------------*/
-#define DEM_EVENT_SD_MOUNT_FAILED ((Dem_EventIdType)11u)  /**< Card absent or unreadable.   */
-#define DEM_EVENT_SD_WRITE_FAILED ((Dem_EventIdType)12u)  /**< Writes failing repeatedly.   */
-#define DEM_EVENT_SD_SPACE_LOW ((Dem_EventIdType)13u)     /**< Free space below the limit.  */
-#define DEM_EVENT_NVM_INTEGRITY ((Dem_EventIdType)14u)    /**< A stored block failed its CRC.*/
-#define DEM_EVENT_FLASH_WEAR ((Dem_EventIdType)15u)       /**< Erase count near endurance.  */
+#define DEM_EVENT_SD_MOUNT_FAILED ((Dem_EventIdType)11u) /**< Card absent or unreadable.   */
+#define DEM_EVENT_SD_WRITE_FAILED ((Dem_EventIdType)12u) /**< Writes failing repeatedly.   */
+#define DEM_EVENT_SD_SPACE_LOW ((Dem_EventIdType)13u)    /**< Free space below the limit.  */
+#define DEM_EVENT_NVM_INTEGRITY ((Dem_EventIdType)14u)   /**< A stored block failed its CRC.*/
+#define DEM_EVENT_FLASH_WEAR ((Dem_EventIdType)15u)      /**< Erase count near endurance.  */
 
 /*---------------------------------- Sensors ---------------------------------*/
-#define DEM_EVENT_GNSS_NO_FIX ((Dem_EventIdType)16u)      /**< No position for too long.    */
-#define DEM_EVENT_RTC_INVALID ((Dem_EventIdType)17u)      /**< Clock implausible or absent. */
-#define DEM_EVENT_VBATT_LOW ((Dem_EventIdType)18u)        /**< Auxiliary supply low.        */
-#define DEM_EVENT_VBATT_SENSE_FAULT ((Dem_EventIdType)19u)/**< Analogue channel unreadable. */
+#define DEM_EVENT_GNSS_NO_FIX ((Dem_EventIdType)16u)       /**< No position for too long.    */
+#define DEM_EVENT_RTC_INVALID ((Dem_EventIdType)17u)       /**< Clock implausible or absent. */
+#define DEM_EVENT_VBATT_LOW ((Dem_EventIdType)18u)         /**< Auxiliary supply low.        */
+#define DEM_EVENT_VBATT_SENSE_FAULT ((Dem_EventIdType)19u) /**< Analogue channel unreadable. */
 
 /*--------------------------------- Internal ---------------------------------*/
-#define DEM_EVENT_WDGM_DEADLINE ((Dem_EventIdType)20u)    /**< A runnable missed its deadline.*/
-#define DEM_EVENT_WDGM_ALIVE ((Dem_EventIdType)21u)       /**< A runnable stopped checking in.*/
-#define DEM_EVENT_TASK_OVERRUN ((Dem_EventIdType)22u)     /**< A task exceeded its budget.  */
-#define DEM_EVENT_CRASH_LOOP ((Dem_EventIdType)23u)       /**< Repeated resets detected.    */
-#define DEM_EVENT_HEAP_LOW ((Dem_EventIdType)24u)         /**< Free heap below the limit.   */
-#define DEM_EVENT_OTA_FAILED ((Dem_EventIdType)25u)       /**< Firmware update rejected.    */
+#define DEM_EVENT_WDGM_DEADLINE ((Dem_EventIdType)20u) /**< A runnable missed its deadline.*/
+#define DEM_EVENT_WDGM_ALIVE ((Dem_EventIdType)21u)    /**< A runnable stopped checking in.*/
+#define DEM_EVENT_TASK_OVERRUN ((Dem_EventIdType)22u)  /**< A task exceeded its budget.  */
+#define DEM_EVENT_CRASH_LOOP ((Dem_EventIdType)23u)    /**< Repeated resets detected.    */
+#define DEM_EVENT_HEAP_LOW ((Dem_EventIdType)24u)      /**< Free heap below the limit.   */
+#define DEM_EVENT_OTA_FAILED ((Dem_EventIdType)25u)    /**< Firmware update rejected.    */
 
 /** Number of configured events, excluding ::DEM_EVENT_NONE. */
 #define DEM_EVENT_COUNT 25u

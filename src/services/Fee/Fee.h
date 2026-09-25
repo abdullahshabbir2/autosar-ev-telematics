@@ -143,16 +143,16 @@ typedef uint16 Fee_BlockIdType;
 /** Health and wear information, published as diagnostic data. */
 typedef struct
 {
-    uint32 writeCount;          /**< Records committed since Init.                     */
-    uint32 gcCount;             /**< Garbage collection passes performed.              */
-    uint32 crcFailureCount;     /**< Records rejected by their payload CRC.            */
-    uint32 incompleteRecordCount;/**< Records found uncommitted -- interrupted writes.  */
-    uint32 mediaErrorCount;      /**< Flash driver failures encountered.               */
-    uint16 activeSector;         /**< Index of the sector currently being appended to.  */
-    uint16 activeSequence;       /**< Sequence number of the active sector.            */
-    uint32 bytesUsed;            /**< Bytes consumed in the active sector.              */
-    uint32 bytesFree;            /**< Bytes still appendable before GC is needed.       */
-    boolean layoutRecovered;     /**< TRUE if Init had to repair an interrupted GC.     */
+    uint32 writeCount;            /**< Records committed since Init.                     */
+    uint32 gcCount;               /**< Garbage collection passes performed.              */
+    uint32 crcFailureCount;       /**< Records rejected by their payload CRC.            */
+    uint32 incompleteRecordCount; /**< Records found uncommitted -- interrupted writes.  */
+    uint32 mediaErrorCount;       /**< Flash driver failures encountered.               */
+    uint16 activeSector;          /**< Index of the sector currently being appended to.  */
+    uint16 activeSequence;        /**< Sequence number of the active sector.            */
+    uint32 bytesUsed;             /**< Bytes consumed in the active sector.              */
+    uint32 bytesFree;             /**< Bytes still appendable before GC is needed.       */
+    boolean layoutRecovered;      /**< TRUE if Init had to repair an interrupted GC.     */
 } Fee_StatusType;
 
 /*==================================================================================================

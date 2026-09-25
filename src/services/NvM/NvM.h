@@ -75,24 +75,24 @@ typedef uint8 NvM_BlockIdType;
 /** Outcome of the most recent operation on a block (SWS_NvM_00470). */
 typedef enum
 {
-    NVM_REQ_OK = 0,              /**< Last operation succeeded.                         */
-    NVM_REQ_NOT_OK = 1,          /**< Last operation failed.                            */
-    NVM_REQ_PENDING = 2,         /**< A deferred write is queued.                       */
-    NVM_REQ_INTEGRITY_FAILED = 3,/**< Stored copy failed its CRC.                       */
-    NVM_REQ_BLOCK_SKIPPED = 4,   /**< Nothing to do: contents unchanged.                */
-    NVM_REQ_RESTORED_DEFAULTS = 5/**< Block was absent or damaged; defaults are in use.  */
+    NVM_REQ_OK = 0,               /**< Last operation succeeded.                         */
+    NVM_REQ_NOT_OK = 1,           /**< Last operation failed.                            */
+    NVM_REQ_PENDING = 2,          /**< A deferred write is queued.                       */
+    NVM_REQ_INTEGRITY_FAILED = 3, /**< Stored copy failed its CRC.                       */
+    NVM_REQ_BLOCK_SKIPPED = 4,    /**< Nothing to do: contents unchanged.                */
+    NVM_REQ_RESTORED_DEFAULTS = 5 /**< Block was absent or damaged; defaults are in use.  */
 } NvM_RequestResultType;
 
 /** Aggregate counters, published in the telemetry health record. */
 typedef struct
 {
-    uint32 writeCount;         /**< Blocks actually pushed to flash.             */
-    uint32 skippedWriteCount;  /**< Writes suppressed because nothing changed.    */
-    uint32 readCount;          /**< Blocks loaded from flash at start.            */
-    uint32 integrityFailures;  /**< Stored copies that failed their CRC.          */
-    uint32 defaultsApplied;    /**< Blocks that fell back to their default.       */
-    uint32 writeFailures;      /**< Writes the media rejected.                    */
-    uint8 dirtyBlockCount;     /**< Blocks currently awaiting a deferred write.   */
+    uint32 writeCount;        /**< Blocks actually pushed to flash.             */
+    uint32 skippedWriteCount; /**< Writes suppressed because nothing changed.    */
+    uint32 readCount;         /**< Blocks loaded from flash at start.            */
+    uint32 integrityFailures; /**< Stored copies that failed their CRC.          */
+    uint32 defaultsApplied;   /**< Blocks that fell back to their default.       */
+    uint32 writeFailures;     /**< Writes the media rejected.                    */
+    uint8 dirtyBlockCount;    /**< Blocks currently awaiting a deferred write.   */
 } NvM_StatisticsType;
 
 /*==================================================================================================

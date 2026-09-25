@@ -19,8 +19,12 @@
 #include "Crc_TestVectors.h"
 #include "unity.h"
 
-void setUp(void) {}
-void tearDown(void) {}
+void setUp(void)
+{
+}
+void tearDown(void)
+{
+}
 
 /*==================================================================================================
  *  TS-CRC-001 .. 006 : every profile reproduces every generated vector
@@ -120,18 +124,18 @@ static void test_AllProfiles_StreamingEqualsOneShot(void)
     {
         const uint32 tailLen = v->length - split;
 
-        const uint8 c8 = Crc_CalculateCRC8(&v->data[split], tailLen,
-                                           Crc_CalculateCRC8(v->data, split, 0u, TRUE), FALSE);
-        const uint8 c8h = Crc_CalculateCRC8H2F(
-            &v->data[split], tailLen, Crc_CalculateCRC8H2F(v->data, split, 0u, TRUE), FALSE);
-        const uint16 c16 = Crc_CalculateCRC16(&v->data[split], tailLen,
-                                              Crc_CalculateCRC16(v->data, split, 0u, TRUE), FALSE);
-        const uint16 c16a = Crc_CalculateCRC16ARC(
-            &v->data[split], tailLen, Crc_CalculateCRC16ARC(v->data, split, 0u, TRUE), FALSE);
-        const uint32 c32 = Crc_CalculateCRC32(&v->data[split], tailLen,
-                                              Crc_CalculateCRC32(v->data, split, 0u, TRUE), FALSE);
-        const uint32 c32p = Crc_CalculateCRC32P4(
-            &v->data[split], tailLen, Crc_CalculateCRC32P4(v->data, split, 0u, TRUE), FALSE);
+        const uint8 c8 =
+            Crc_CalculateCRC8(&v->data[split], tailLen, Crc_CalculateCRC8(v->data, split, 0u, TRUE), FALSE);
+        const uint8 c8h = Crc_CalculateCRC8H2F(&v->data[split], tailLen,
+                                               Crc_CalculateCRC8H2F(v->data, split, 0u, TRUE), FALSE);
+        const uint16 c16 =
+            Crc_CalculateCRC16(&v->data[split], tailLen, Crc_CalculateCRC16(v->data, split, 0u, TRUE), FALSE);
+        const uint16 c16a = Crc_CalculateCRC16ARC(&v->data[split], tailLen,
+                                                  Crc_CalculateCRC16ARC(v->data, split, 0u, TRUE), FALSE);
+        const uint32 c32 =
+            Crc_CalculateCRC32(&v->data[split], tailLen, Crc_CalculateCRC32(v->data, split, 0u, TRUE), FALSE);
+        const uint32 c32p = Crc_CalculateCRC32P4(&v->data[split], tailLen,
+                                                 Crc_CalculateCRC32P4(v->data, split, 0u, TRUE), FALSE);
 
         TEST_ASSERT_EQUAL_HEX8(v->expCrc8, c8);
         TEST_ASSERT_EQUAL_HEX8(v->expCrc8H2F, c8h);

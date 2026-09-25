@@ -55,10 +55,8 @@
 #define FEE_RH_CRC_COVERAGE 6u
 
 #if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L)
-_Static_assert((FEE_SECTOR_HEADER_SIZE % FEE_ALIGNMENT) == 0u,
-               "sector header must be write-aligned");
-_Static_assert((FEE_RECORD_HEADER_SIZE % FEE_ALIGNMENT) == 0u,
-               "record header must be write-aligned");
+_Static_assert((FEE_SECTOR_HEADER_SIZE % FEE_ALIGNMENT) == 0u, "sector header must be write-aligned");
+_Static_assert((FEE_RECORD_HEADER_SIZE % FEE_ALIGNMENT) == 0u, "record header must be write-aligned");
 _Static_assert(FEE_RH_OFF_STATE < FEE_RECORD_HEADER_SIZE, "state field must lie in the header");
 /* The commit byte must sit in its own aligned word, or writing it would rewrite neighbouring
  * header bytes -- which on NOR flash can only clear bits and would corrupt the CRC. */
@@ -92,9 +90,9 @@ STATIC const Fee_BlockConfigType Fee_BlockConfig[FEE_BLOCK_COUNT] = {
  *================================================================================================*/
 
 STATIC boolean Fee_Initialised = FALSE;
-STATIC uint8 Fee_ActiveSector;     /* 0 or 1                                    */
-STATIC uint16 Fee_ActiveSequence;  /* sequence number of the active sector       */
-STATIC uint32 Fee_WriteCursor;     /* offset within the active sector, aligned   */
+STATIC uint8 Fee_ActiveSector;    /* 0 or 1                                    */
+STATIC uint16 Fee_ActiveSequence; /* sequence number of the active sector       */
+STATIC uint32 Fee_WriteCursor;    /* offset within the active sector, aligned   */
 STATIC Fee_StatusType Fee_Status;
 
 /**
@@ -262,8 +260,7 @@ STATIC Std_ReturnType Fee_WriteSectorHeader(uint8 index, uint16 sequence)
     Fee_PutU32(&header[FEE_SH_OFF_MAGIC], FEE_SECTOR_MAGIC);
     Fee_PutU16(&header[FEE_SH_OFF_VERSION], (uint16)FEE_FORMAT_VERSION);
     Fee_PutU16(&header[FEE_SH_OFF_SEQUENCE], sequence);
-    Fee_PutU16(&header[FEE_SH_OFF_CRC],
-               Crc_CalculateCRC16(header, FEE_SH_CRC_COVERAGE, 0u, TRUE));
+    Fee_PutU16(&header[FEE_SH_OFF_CRC], Crc_CalculateCRC16(header, FEE_SH_CRC_COVERAGE, 0u, TRUE));
 
     if (Fls_Write(Fee_SectorBase(index), header, (Fls_LengthType)sizeof(header)) != E_OK)
     {
@@ -280,12 +277,12 @@ STATIC Std_ReturnType Fee_WriteSectorHeader(uint8 index, uint16 sequence)
 /** One parsed record header plus where it sits. */
 typedef struct
 {
-    uint32 offset;        /**< Offset of the record header within the sector.  */
-    Fee_BlockIdType id;   /**< Block identifier.                              */
-    uint16 length;        /**< Payload length.                                */
-    uint16 counter;       /**< Write counter.                                 */
-    uint32 payloadCrc;    /**< Stored payload CRC.                            */
-    uint8 state;          /**< Record state byte.                             */
+    uint32 offset;      /**< Offset of the record header within the sector.  */
+    Fee_BlockIdType id; /**< Block identifier.                              */
+    uint16 length;      /**< Payload length.                                */
+    uint16 counter;     /**< Write counter.                                 */
+    uint32 payloadCrc;  /**< Stored payload CRC.                            */
+    uint8 state;        /**< Record state byte.                             */
 } Fee_RecordType;
 
 /**
@@ -302,8 +299,7 @@ STATIC Std_ReturnType Fee_ParseRecordHeader(uint32 offset, Fee_RecordType *recor
     uint8 i;
     boolean allErased = TRUE;
 
-    if (Fls_Read(Fee_SectorBase(Fee_ActiveSector) + offset, header,
-                 (Fls_LengthType)sizeof(header)) != E_OK)
+    if (Fls_Read(Fee_SectorBase(Fee_ActiveSector) + offset, header, (Fls_LengthType)sizeof(header)) != E_OK)
     {
         Fee_Status.mediaErrorCount++;
         return E_NOT_OK;
@@ -434,8 +430,8 @@ STATIC Std_ReturnType Fee_FindNewestRecord(Fee_BlockIdType blockId, Fee_RecordTy
                 /* Invalidations compete on the same counter axis as writes, so a write that
                  * follows an invalidation revives the block and an invalidation that follows
                  * a write retires it. */
-                if ((sawInvalidation == FALSE) ||
-                    (Fee_CounterIsNewer(record.counter, invalidationCounter) != FALSE))
+                if ((sawInvalidation == FALSE)
+                    || (Fee_CounterIsNewer(record.counter, invalidationCounter) != FALSE))
                 {
                     sawInvalidation = TRUE;
                     invalidationCounter = record.counter;
@@ -445,20 +441,18 @@ STATIC Std_ReturnType Fee_FindNewestRecord(Fee_BlockIdType blockId, Fee_RecordTy
             {
                 sawBlock = TRUE;
 
-                if ((haveCandidate == FALSE) ||
-                    (Fee_CounterIsNewer(record.counter, found->counter) != FALSE))
+                if ((haveCandidate == FALSE) || (Fee_CounterIsNewer(record.counter, found->counter) != FALSE))
                 {
                     /* Verify the payload before accepting the record as the candidate. A
                      * newer record that fails its CRC must lose to an older one that passes
                      * -- that fallback is what makes a single corrupted write survivable. */
                     uint8 payload[FEE_MAX_BLOCK_LENGTH];
 
-                    if (Fls_Read(Fee_SectorBase(Fee_ActiveSector) + record.offset +
-                                     FEE_RECORD_HEADER_SIZE,
-                                 payload, (Fls_LengthType)record.length) == E_OK)
+                    if (Fls_Read(Fee_SectorBase(Fee_ActiveSector) + record.offset + FEE_RECORD_HEADER_SIZE,
+                                 payload, (Fls_LengthType)record.length)
+                        == E_OK)
                     {
-                        const uint32 crc =
-                            Crc_CalculateCRC32(payload, (uint32)record.length, 0u, TRUE);
+                        const uint32 crc = Crc_CalculateCRC32(payload, (uint32)record.length, 0u, TRUE);
 
                         if (crc == record.payloadCrc)
                         {
@@ -485,9 +479,8 @@ STATIC Std_ReturnType Fee_FindNewestRecord(Fee_BlockIdType blockId, Fee_RecordTy
         offset += Fee_RecordSpan(record.length);
     }
 
-    if ((sawInvalidation != FALSE) &&
-        ((haveCandidate == FALSE) ||
-         (Fee_CounterIsNewer(invalidationCounter, found->counter) != FALSE)))
+    if ((sawInvalidation != FALSE)
+        && ((haveCandidate == FALSE) || (Fee_CounterIsNewer(invalidationCounter, found->counter) != FALSE)))
     {
         return E_NOT_FOUND;
     }
@@ -538,8 +531,8 @@ STATIC uint16 Fee_HighestCounter(Fee_BlockIdType blockId)
  * intact, because nothing about the new record is visible to a reader until the commit byte
  * lands.
  */
-STATIC Std_ReturnType Fee_AppendRecord(Fee_BlockIdType blockId, const uint8 *payload,
-                                       uint16 length, uint16 counter, uint8 finalState)
+STATIC Std_ReturnType Fee_AppendRecord(Fee_BlockIdType blockId, const uint8 *payload, uint16 length,
+                                       uint16 counter, uint8 finalState)
 {
     uint8 header[FEE_RECORD_HEADER_SIZE];
     uint8 commit[FEE_ALIGNMENT];
@@ -561,11 +554,9 @@ STATIC Std_ReturnType Fee_AppendRecord(Fee_BlockIdType blockId, const uint8 *pay
     Fee_PutU16(&header[FEE_RH_OFF_BLOCK_ID], (uint16)blockId);
     Fee_PutU16(&header[FEE_RH_OFF_LENGTH], length);
     Fee_PutU16(&header[FEE_RH_OFF_COUNTER], counter);
-    Fee_PutU16(&header[FEE_RH_OFF_HEADER_CRC],
-               Crc_CalculateCRC16(header, FEE_RH_CRC_COVERAGE, 0u, TRUE));
+    Fee_PutU16(&header[FEE_RH_OFF_HEADER_CRC], Crc_CalculateCRC16(header, FEE_RH_CRC_COVERAGE, 0u, TRUE));
     Fee_PutU32(&header[FEE_RH_OFF_PAYLOAD_CRC],
-               (payload != NULL_PTR) ? Crc_CalculateCRC32(payload, (uint32)length, 0u, TRUE)
-                                     : 0uL);
+               (payload != NULL_PTR) ? Crc_CalculateCRC32(payload, (uint32)length, 0u, TRUE) : 0uL);
 
     if (Fls_Write(base, header, (Fls_LengthType)sizeof(header)) != E_OK)
     {
@@ -636,8 +627,8 @@ Std_ReturnType Fee_GarbageCollect(void)
     uint32 targetCursor = FEE_SECTOR_HEADER_SIZE;
     uint8 blockIndex;
 
-    DET_CHECK_RETURN(Fee_Initialised != FALSE, MODULE_ID_FEE, INSTANCE_ID_SINGLE, FEE_API_ID_GC,
-                     FEE_E_UNINIT, E_NOT_OK);
+    DET_CHECK_RETURN(Fee_Initialised != FALSE, MODULE_ID_FEE, INSTANCE_ID_SINGLE, FEE_API_ID_GC, FEE_E_UNINIT,
+                     E_NOT_OK);
 
     /* Step 1: a clean target. */
     if (Fls_Erase(Fee_SectorBase(target), (Fls_LengthType)FEE_SECTOR_SIZE) != E_OK)
@@ -665,7 +656,8 @@ Std_ReturnType Fee_GarbageCollect(void)
         }
 
         if (Fls_Read(Fee_SectorBase(source) + record.offset + FEE_RECORD_HEADER_SIZE, Fee_Staging,
-                     (Fls_LengthType)record.length) != E_OK)
+                     (Fls_LengthType)record.length)
+            != E_OK)
         {
             Fee_Status.mediaErrorCount++;
             continue;
@@ -677,8 +669,7 @@ Std_ReturnType Fee_GarbageCollect(void)
             /* Every block's newest record must fit in one empty sector, or the configuration
              * is over-committed. Checked at build time by the assertion below, so reaching
              * here means media damage rather than a sizing error. */
-            (void)Det_ReportError(MODULE_ID_FEE, INSTANCE_ID_SINGLE, FEE_API_ID_GC,
-                                  FEE_E_NO_SPACE);
+            (void)Det_ReportError(MODULE_ID_FEE, INSTANCE_ID_SINGLE, FEE_API_ID_GC, FEE_E_NO_SPACE);
             break;
         }
 
@@ -689,12 +680,10 @@ Std_ReturnType Fee_GarbageCollect(void)
         Fee_PutU16(&header[FEE_RH_OFF_BLOCK_ID], (uint16)blockId);
         Fee_PutU16(&header[FEE_RH_OFF_LENGTH], record.length);
         Fee_PutU16(&header[FEE_RH_OFF_COUNTER], record.counter);
-        Fee_PutU16(&header[FEE_RH_OFF_HEADER_CRC],
-                   Crc_CalculateCRC16(header, FEE_RH_CRC_COVERAGE, 0u, TRUE));
+        Fee_PutU16(&header[FEE_RH_OFF_HEADER_CRC], Crc_CalculateCRC16(header, FEE_RH_CRC_COVERAGE, 0u, TRUE));
         Fee_PutU32(&header[FEE_RH_OFF_PAYLOAD_CRC], record.payloadCrc);
 
-        if (Fls_Write(Fee_SectorBase(target) + targetCursor, header,
-                      (Fls_LengthType)sizeof(header)) != E_OK)
+        if (Fls_Write(Fee_SectorBase(target) + targetCursor, header, (Fls_LengthType)sizeof(header)) != E_OK)
         {
             Fee_Status.mediaErrorCount++;
             return E_NOT_OK;
@@ -717,7 +706,8 @@ Std_ReturnType Fee_GarbageCollect(void)
             (void)memset(padded, (int)FLS_ERASED_VALUE, sizeof(padded));
             (void)memcpy(padded, Fee_Staging, (size_t)record.length);
             if (Fls_Write(Fee_SectorBase(target) + targetCursor + FEE_RECORD_HEADER_SIZE, padded,
-                          (Fls_LengthType)paddedLength) != E_OK)
+                          (Fls_LengthType)paddedLength)
+                != E_OK)
             {
                 Fee_Status.mediaErrorCount++;
                 return E_NOT_OK;
@@ -730,7 +720,8 @@ Std_ReturnType Fee_GarbageCollect(void)
         }
         commit[0] = (uint8)FEE_RECORD_STATE_VALID;
         if (Fls_Write(Fee_SectorBase(target) + targetCursor + FEE_RH_OFF_STATE, commit,
-                      (Fls_LengthType)FEE_ALIGNMENT) != E_OK)
+                      (Fls_LengthType)FEE_ALIGNMENT)
+            != E_OK)
         {
             Fee_Status.mediaErrorCount++;
             return E_NOT_OK;
@@ -871,8 +862,8 @@ Std_ReturnType Fee_ReadBlock(Fee_BlockIdType blockId, uint8 *buffer, uint16 offs
                      FEE_E_UNINIT, E_NOT_OK);
     DET_CHECK_RETURN(buffer != NULL_PTR, MODULE_ID_FEE, INSTANCE_ID_SINGLE, FEE_API_ID_READ,
                      FEE_E_PARAM_POINTER, E_NOT_OK);
-    DET_CHECK_RETURN(Fee_LookupBlock(blockId, &configuredLength) != FALSE, MODULE_ID_FEE,
-                     INSTANCE_ID_SINGLE, FEE_API_ID_READ, FEE_E_INVALID_BLOCK_NO, E_NOT_OK);
+    DET_CHECK_RETURN(Fee_LookupBlock(blockId, &configuredLength) != FALSE, MODULE_ID_FEE, INSTANCE_ID_SINGLE,
+                     FEE_API_ID_READ, FEE_E_INVALID_BLOCK_NO, E_NOT_OK);
     DET_CHECK_RETURN(((uint32)offset + (uint32)length) <= (uint32)configuredLength, MODULE_ID_FEE,
                      INSTANCE_ID_SINGLE, FEE_API_ID_READ, FEE_E_INVALID_LENGTH, E_NOT_OK);
 
@@ -891,9 +882,9 @@ Std_ReturnType Fee_ReadBlock(Fee_BlockIdType blockId, uint8 *buffer, uint16 offs
         return E_NOT_OK;
     }
 
-    if (Fls_Read(Fee_SectorBase(Fee_ActiveSector) + record.offset + FEE_RECORD_HEADER_SIZE +
-                     (uint32)offset,
-                 buffer, (Fls_LengthType)length) != E_OK)
+    if (Fls_Read(Fee_SectorBase(Fee_ActiveSector) + record.offset + FEE_RECORD_HEADER_SIZE + (uint32)offset,
+                 buffer, (Fls_LengthType)length)
+        != E_OK)
     {
         Fee_Status.mediaErrorCount++;
         return E_NOT_OK;
@@ -929,8 +920,7 @@ Std_ReturnType Fee_WriteBlock(Fee_BlockIdType blockId, const uint8 *buffer)
 
     /* Collect early rather than at the moment the sector actually fills, so that a write of
      * the largest block never discovers there is nowhere to put it. */
-    if ((Fee_WriteCursor + Fee_RecordSpan(length) + FEE_GC_THRESHOLD_BYTES) >
-        (uint32)FEE_SECTOR_SIZE)
+    if ((Fee_WriteCursor + Fee_RecordSpan(length) + FEE_GC_THRESHOLD_BYTES) > (uint32)FEE_SECTOR_SIZE)
     {
         if (Fee_GarbageCollect() != E_OK)
         {
@@ -964,13 +954,12 @@ Std_ReturnType Fee_InvalidateBlock(Fee_BlockIdType blockId)
     uint16 length = 0u;
     uint16 counter;
 
-    DET_CHECK_RETURN(Fee_Initialised != FALSE, MODULE_ID_FEE, INSTANCE_ID_SINGLE,
-                     FEE_API_ID_INVALIDATE, FEE_E_UNINIT, E_NOT_OK);
+    DET_CHECK_RETURN(Fee_Initialised != FALSE, MODULE_ID_FEE, INSTANCE_ID_SINGLE, FEE_API_ID_INVALIDATE,
+                     FEE_E_UNINIT, E_NOT_OK);
     DET_CHECK_RETURN(Fee_LookupBlock(blockId, &length) != FALSE, MODULE_ID_FEE, INSTANCE_ID_SINGLE,
                      FEE_API_ID_INVALIDATE, FEE_E_INVALID_BLOCK_NO, E_NOT_OK);
 
-    if ((Fee_WriteCursor + Fee_RecordSpan(length) + FEE_GC_THRESHOLD_BYTES) >
-        (uint32)FEE_SECTOR_SIZE)
+    if ((Fee_WriteCursor + Fee_RecordSpan(length) + FEE_GC_THRESHOLD_BYTES) > (uint32)FEE_SECTOR_SIZE)
     {
         if (Fee_GarbageCollect() != E_OK)
         {
@@ -1004,9 +993,8 @@ Std_ReturnType Fee_GetStatus(Fee_StatusType *status)
     Fee_Status.activeSector = Fee_ActiveSector;
     Fee_Status.activeSequence = Fee_ActiveSequence;
     Fee_Status.bytesUsed = Fee_WriteCursor;
-    Fee_Status.bytesFree = (Fee_WriteCursor <= (uint32)FEE_SECTOR_SIZE)
-                               ? ((uint32)FEE_SECTOR_SIZE - Fee_WriteCursor)
-                               : 0u;
+    Fee_Status.bytesFree =
+        (Fee_WriteCursor <= (uint32)FEE_SECTOR_SIZE) ? ((uint32)FEE_SECTOR_SIZE - Fee_WriteCursor) : 0u;
 
     *status = Fee_Status;
     return E_OK;

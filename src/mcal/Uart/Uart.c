@@ -25,14 +25,14 @@
  */
 #define UART_POLL_INTERVAL_MS 1u
 
-Std_ReturnType Uart_ReadExact(Uart_InstanceType instance, uint8 *buffer, uint16 length,
-                              uint32 timeoutMs, uint16 *actualLength)
+Std_ReturnType Uart_ReadExact(Uart_InstanceType instance, uint8 *buffer, uint16 length, uint32 timeoutMs,
+                              uint16 *actualLength)
 {
     Gpt_TimestampType started;
     uint16 received = 0u;
 
-    DET_CHECK_RETURN(buffer != NULL_PTR, MODULE_ID_UART, instance, UART_API_ID_READ,
-                     UART_E_PARAM_POINTER, E_NOT_OK);
+    DET_CHECK_RETURN(buffer != NULL_PTR, MODULE_ID_UART, instance, UART_API_ID_READ, UART_E_PARAM_POINTER,
+                     E_NOT_OK);
     DET_CHECK_RETURN(actualLength != NULL_PTR, MODULE_ID_UART, instance, UART_API_ID_READ,
                      UART_E_PARAM_POINTER, E_NOT_OK);
 

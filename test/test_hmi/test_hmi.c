@@ -37,11 +37,8 @@
 
 /** The GPIO each indicator drives, so a test can assert on the pin rather than on the abstraction. */
 static const uint8 ThIndicatorPin[] = {
-    (uint8)IOHWAB_DIO_ACQUISITION,
-    (uint8)IOHWAB_DIO_STORAGE,
-    (uint8)IOHWAB_DIO_LINK,
-    (uint8)IOHWAB_DIO_CLOUD,
-    (uint8)IOHWAB_DIO_HEARTBEAT,
+    (uint8)IOHWAB_DIO_ACQUISITION, (uint8)IOHWAB_DIO_STORAGE,   (uint8)IOHWAB_DIO_LINK,
+    (uint8)IOHWAB_DIO_CLOUD,       (uint8)IOHWAB_DIO_HEARTBEAT,
 };
 
 #define TH_INDICATOR_COUNT ((uint8)(sizeof(ThIndicatorPin) / sizeof(ThIndicatorPin[0])))
@@ -81,9 +78,7 @@ static void ThTick(uint16 n)
 /** TRUE if @p indicator's GPIO is at its active level. */
 static boolean ThIsLit(IoHwAb_IndicatorType indicator)
 {
-    return (Stub_Dio_GetLevel(ThIndicatorPin[indicator]) == (uint8)IOHWAB_INDICATOR_ON_LEVEL)
-               ? TRUE
-               : FALSE;
+    return (Stub_Dio_GetLevel(ThIndicatorPin[indicator]) == (uint8)IOHWAB_INDICATOR_ON_LEVEL) ? TRUE : FALSE;
 }
 
 /*==================================================================================================
@@ -106,8 +101,7 @@ static void test_Hmi_EachIndicatorIsIndependent(void)
         uint8 other;
 
         TEST_ASSERT_EQUAL(E_OK, HmiSwc_Init());
-        TEST_ASSERT_EQUAL(E_OK,
-                          HmiSwc_SetPattern((IoHwAb_IndicatorType)target, HMI_PATTERN_SOLID));
+        TEST_ASSERT_EQUAL(E_OK, HmiSwc_SetPattern((IoHwAb_IndicatorType)target, HMI_PATTERN_SOLID));
         ThTick(1u);
 
         TEST_ASSERT_TRUE(ThIsLit((IoHwAb_IndicatorType)target));
@@ -163,11 +157,9 @@ static void test_Hmi_RejectsBadArguments(void)
     HmiSwc_IndicatorStateType state;
 
     TEST_ASSERT_NOT_EQUAL(E_OK,
-                          HmiSwc_SetPattern((IoHwAb_IndicatorType)TH_INDICATOR_COUNT,
-                                            HMI_PATTERN_SOLID));
+                          HmiSwc_SetPattern((IoHwAb_IndicatorType)TH_INDICATOR_COUNT, HMI_PATTERN_SOLID));
     TEST_ASSERT_NOT_EQUAL(E_OK, HmiSwc_Pulse((IoHwAb_IndicatorType)TH_INDICATOR_COUNT));
-    TEST_ASSERT_NOT_EQUAL(E_OK,
-                          HmiSwc_GetState((IoHwAb_IndicatorType)TH_INDICATOR_COUNT, &state));
+    TEST_ASSERT_NOT_EQUAL(E_OK, HmiSwc_GetState((IoHwAb_IndicatorType)TH_INDICATOR_COUNT, &state));
     TEST_ASSERT_NOT_EQUAL(E_OK, HmiSwc_GetState(IOHWAB_INDICATOR_LINK, NULL_PTR));
 }
 
@@ -237,10 +229,8 @@ static void test_Hmi_BlinkRatesMatchConfiguration(void)
     TEST_ASSERT_EQUAL(E_OK, HmiSwc_GetState(IOHWAB_INDICATOR_LINK, &slow));
     TEST_ASSERT_EQUAL(E_OK, HmiSwc_GetState(IOHWAB_INDICATOR_CLOUD, &fast));
 
-    TEST_ASSERT_UINT32_WITHIN(2u, (uint32)ticks / (uint32)HMI_SLOW_HALF_PERIOD_TICKS,
-                              slow.transitionCount);
-    TEST_ASSERT_UINT32_WITHIN(2u, (uint32)ticks / (uint32)HMI_FAST_HALF_PERIOD_TICKS,
-                              fast.transitionCount);
+    TEST_ASSERT_UINT32_WITHIN(2u, (uint32)ticks / (uint32)HMI_SLOW_HALF_PERIOD_TICKS, slow.transitionCount);
+    TEST_ASSERT_UINT32_WITHIN(2u, (uint32)ticks / (uint32)HMI_FAST_HALF_PERIOD_TICKS, fast.transitionCount);
 
     /* And the fast one is genuinely faster, which the two assertions above imply but which is the
      * property a reader of this test is actually looking for. */

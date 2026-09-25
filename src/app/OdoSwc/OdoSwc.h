@@ -103,15 +103,15 @@ typedef enum
 /** Everything the component knows, published to telemetry and diagnostics. */
 typedef struct
 {
-    uint64 totalDistanceMm;     /**< Lifetime distance, millimetres.                    */
-    uint64 tripDistanceMm;      /**< Distance since the trip was last reset.            */
-    uint32 speedMmPerSec;       /**< Instantaneous speed from the most recent sample.    */
-    uint16 lastRpm;             /**< Most recent accepted motor speed.                   */
-    uint32 acceptedSamples;     /**< Samples integrated.                                 */
-    uint32 rejectedRpmSamples;  /**< Samples discarded as implausible.                   */
-    uint32 gapCount;            /**< Intervals discarded as too long.                    */
-    uint32 persistCount;        /**< Times the value has been pushed to NvM.             */
-    uint64 unpersistedMm;       /**< Distance accumulated since the last successful push.*/
+    uint64 totalDistanceMm;    /**< Lifetime distance, millimetres.                    */
+    uint64 tripDistanceMm;     /**< Distance since the trip was last reset.            */
+    uint32 speedMmPerSec;      /**< Instantaneous speed from the most recent sample.    */
+    uint16 lastRpm;            /**< Most recent accepted motor speed.                   */
+    uint32 acceptedSamples;    /**< Samples integrated.                                 */
+    uint32 rejectedRpmSamples; /**< Samples discarded as implausible.                   */
+    uint32 gapCount;           /**< Intervals discarded as too long.                    */
+    uint32 persistCount;       /**< Times the value has been pushed to NvM.             */
+    uint64 unpersistedMm;      /**< Distance accumulated since the last successful push.*/
 } OdoSwc_StateType;
 
 /*==================================================================================================
@@ -140,8 +140,7 @@ CHECK_RETURN Std_ReturnType OdoSwc_Init(void);
  *         ::OdoSwc_Init. A rejected sample is a normal event, not a call failure, so the
  *         outcome is reported through @p result rather than through the return value.
  */
-CHECK_RETURN Std_ReturnType OdoSwc_ProcessSpeedSample(uint16 motorRpm,
-                                                      Gpt_TimestampType sampleTime,
+CHECK_RETURN Std_ReturnType OdoSwc_ProcessSpeedSample(uint16 motorRpm, Gpt_TimestampType sampleTime,
                                                       OdoSwc_SampleResultType *result);
 
 /**
@@ -178,8 +177,7 @@ CHECK_RETURN Std_ReturnType OdoSwc_ResetTrip(void);
  * @return E_OK on success; E_NOT_OK if either value is outside its plausible range, in which
  *         case the previous calibration stays in force.
  */
-CHECK_RETURN Std_ReturnType OdoSwc_SetCalibration(uint16 tyreDiameterMilliInch,
-                                                  uint16 gearRatioMilli);
+CHECK_RETURN Std_ReturnType OdoSwc_SetCalibration(uint16 tyreDiameterMilliInch, uint16 gearRatioMilli);
 
 /**
  * @brief The Q32 conversion factor currently in force, in millimetres per rpm-millisecond.

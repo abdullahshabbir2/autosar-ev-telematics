@@ -384,8 +384,8 @@ extern "C" Std_ReturnType Uart_Read(Uart_InstanceType instance, uint8 *buffer, u
 
 extern "C" uint16 Uart_BytesAvailable(Uart_InstanceType instance)
 {
-    if ((Uart_Initialised == FALSE) || (Uart_InstanceIsValid(instance) == FALSE) ||
-        (Uart_State[instance].isOpen == FALSE))
+    if ((Uart_Initialised == FALSE) || (Uart_InstanceIsValid(instance) == FALSE)
+        || (Uart_State[instance].isOpen == FALSE))
     {
         return 0u;
     }
@@ -477,8 +477,7 @@ extern "C" Std_ReturnType Uart_GetStatistics(Uart_InstanceType instance, Uart_St
     }
     if (stats == NULL_PTR)
     {
-        (void)Det_ReportError(MODULE_ID_UART, instance, UART_API_ID_BYTES_AVAILABLE,
-                              UART_E_PARAM_POINTER);
+        (void)Det_ReportError(MODULE_ID_UART, instance, UART_API_ID_BYTES_AVAILABLE, UART_E_PARAM_POINTER);
         return E_NOT_OK;
     }
 

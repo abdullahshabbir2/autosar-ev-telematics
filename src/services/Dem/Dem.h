@@ -82,22 +82,22 @@ typedef uint32 Dem_DtcType;
 /** What a module is reporting about an event (SWS_Dem_00169). */
 typedef enum
 {
-    DEM_EVENT_STATUS_PASSED = 0,      /**< The monitor ran and the condition is absent. */
-    DEM_EVENT_STATUS_FAILED = 1,      /**< The monitor ran and the condition is present.*/
-    DEM_EVENT_STATUS_PREPASSED = 2,   /**< Tentatively absent; debounce moves one step. */
-    DEM_EVENT_STATUS_PREFAILED = 3    /**< Tentatively present; debounce moves one step. */
+    DEM_EVENT_STATUS_PASSED = 0,    /**< The monitor ran and the condition is absent. */
+    DEM_EVENT_STATUS_FAILED = 1,    /**< The monitor ran and the condition is present.*/
+    DEM_EVENT_STATUS_PREPASSED = 2, /**< Tentatively absent; debounce moves one step. */
+    DEM_EVENT_STATUS_PREFAILED = 3  /**< Tentatively present; debounce moves one step. */
 } Dem_EventStatusType;
 
 /*---------------------- UDS status byte bit definitions ---------------------*/
 
-#define DEM_UDS_TEST_FAILED 0x01u                   /**< Currently failing.              */
-#define DEM_UDS_TEST_FAILED_THIS_CYCLE 0x02u        /**< Failed since this cycle began.  */
-#define DEM_UDS_PENDING_DTC 0x04u                   /**< Failing but not yet confirmed.  */
-#define DEM_UDS_CONFIRMED_DTC 0x08u                 /**< Debounce threshold reached.     */
-#define DEM_UDS_TEST_NOT_COMPLETED_SINCE_CLEAR 0x10u/**< Not retested since a clear.     */
-#define DEM_UDS_TEST_FAILED_SINCE_CLEAR 0x20u       /**< Has failed since the last clear.*/
-#define DEM_UDS_TEST_NOT_COMPLETED_THIS_CYCLE 0x40u /**< Not retested this cycle.        */
-#define DEM_UDS_WARNING_INDICATOR_REQUESTED 0x80u   /**< Driver should be warned.         */
+#define DEM_UDS_TEST_FAILED 0x01u                    /**< Currently failing.              */
+#define DEM_UDS_TEST_FAILED_THIS_CYCLE 0x02u         /**< Failed since this cycle began.  */
+#define DEM_UDS_PENDING_DTC 0x04u                    /**< Failing but not yet confirmed.  */
+#define DEM_UDS_CONFIRMED_DTC 0x08u                  /**< Debounce threshold reached.     */
+#define DEM_UDS_TEST_NOT_COMPLETED_SINCE_CLEAR 0x10u /**< Not retested since a clear.     */
+#define DEM_UDS_TEST_FAILED_SINCE_CLEAR 0x20u        /**< Has failed since the last clear.*/
+#define DEM_UDS_TEST_NOT_COMPLETED_THIS_CYCLE 0x40u  /**< Not retested this cycle.        */
+#define DEM_UDS_WARNING_INDICATOR_REQUESTED 0x80u    /**< Driver should be warned.         */
 
 /** Conditions captured when an event confirms, so an intermittent fault is diagnosable. */
 typedef struct
@@ -130,12 +130,12 @@ typedef struct
 /** Aggregate counters, published in the telemetry health record. */
 typedef struct
 {
-    uint16 confirmedCount;  /**< Events currently confirmed.                     */
-    uint16 pendingCount;    /**< Events failing but not yet confirmed.           */
-    uint32 totalReports;    /**< Calls to ::Dem_SetEventStatus.                   */
-    uint32 totalConfirmed;  /**< Confirmations since the last clear.              */
-    uint32 clearCount;      /**< Times the record has been cleared.               */
-    boolean warningActive;  /**< TRUE if any confirmed event requests a warning.  */
+    uint16 confirmedCount; /**< Events currently confirmed.                     */
+    uint16 pendingCount;   /**< Events failing but not yet confirmed.           */
+    uint32 totalReports;   /**< Calls to ::Dem_SetEventStatus.                   */
+    uint32 totalConfirmed; /**< Confirmations since the last clear.              */
+    uint32 clearCount;     /**< Times the record has been cleared.               */
+    boolean warningActive; /**< TRUE if any confirmed event requests a warning.  */
 } Dem_StatisticsType;
 
 /**
@@ -192,8 +192,7 @@ CHECK_RETURN Std_ReturnType Dem_GetEventStatus(Dem_EventIdType eventId, uint8 *u
  * @param[in]  eventId Configured event.
  * @param[out] record  Destination.
  */
-CHECK_RETURN Std_ReturnType Dem_GetEventRecord(Dem_EventIdType eventId,
-                                               Dem_EventRecordType *record);
+CHECK_RETURN Std_ReturnType Dem_GetEventRecord(Dem_EventIdType eventId, Dem_EventRecordType *record);
 
 /** TRUE if @p eventId is currently confirmed. */
 boolean Dem_IsEventConfirmed(Dem_EventIdType eventId);

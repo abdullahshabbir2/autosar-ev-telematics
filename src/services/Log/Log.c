@@ -90,8 +90,8 @@ void Log_SetLevel(Log_LevelType level)
 {
     /* Clamped to what this build can emit, so a diagnostic command asking for a level the build was
      * compiled without produces the highest available rather than silence. */
-    Log_Level = (level > (Log_LevelType)LOG_MAX_COMPILED_LEVEL) ? (Log_LevelType)LOG_MAX_COMPILED_LEVEL
-                                                               : level;
+    Log_Level =
+        (level > (Log_LevelType)LOG_MAX_COMPILED_LEVEL) ? (Log_LevelType)LOG_MAX_COMPILED_LEVEL : level;
 }
 
 Log_LevelType Log_GetLevel(void)
@@ -117,8 +117,7 @@ void Log_Print(Log_LevelType level, uint16 module, const char *format, ...)
 
 #if ((LOG_INCLUDE_TIMESTAMP == STD_ON) && (LOG_INCLUDE_MODULE_ID == STD_ON))
     prefixLength = snprintf(Log_Buffer, sizeof(Log_Buffer), "[%10lu][%c][%04X] ",
-                            (unsigned long)Gpt_GetMonotonicMs(), Log_LevelTag(level),
-                            (unsigned int)module);
+                            (unsigned long)Gpt_GetMonotonicMs(), Log_LevelTag(level), (unsigned int)module);
 #elif (LOG_INCLUDE_TIMESTAMP == STD_ON)
     prefixLength = snprintf(Log_Buffer, sizeof(Log_Buffer), "[%10lu][%c] ",
                             (unsigned long)Gpt_GetMonotonicMs(), Log_LevelTag(level));
@@ -136,8 +135,8 @@ void Log_Print(Log_LevelType level, uint16 module, const char *format, ...)
     }
 
     va_start(args, format);
-    bodyLength = vsnprintf(&Log_Buffer[prefixLength], sizeof(Log_Buffer) - (uint32)prefixLength,
-                           format, args);
+    bodyLength =
+        vsnprintf(&Log_Buffer[prefixLength], sizeof(Log_Buffer) - (uint32)prefixLength, format, args);
     va_end(args);
 
     if (bodyLength < 0)

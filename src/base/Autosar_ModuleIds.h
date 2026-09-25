@@ -39,25 +39,25 @@
  *  Module IDs -- Services (AUTOSAR-allocated)
  *================================================================================================*/
 
-#define MODULE_ID_CRC 201u   /**< Crc   -- CRC routines.                       */
-#define MODULE_ID_DET 15u    /**< Det   -- development error tracer.           */
-#define MODULE_ID_DEM 54u    /**< Dem   -- diagnostic event manager.           */
-#define MODULE_ID_NVM 20u    /**< NvM   -- NVRAM manager.                      */
-#define MODULE_ID_MEMIF 22u  /**< MemIf -- memory abstraction interface.       */
-#define MODULE_ID_FEE 21u    /**< Fee   -- flash EEPROM emulation.             */
-#define MODULE_ID_WDGM 13u   /**< WdgM  -- watchdog manager.                   */
-#define MODULE_ID_COMM 12u   /**< ComM  -- communication manager.              */
-#define MODULE_ID_ECUM 10u   /**< EcuM  -- ECU state manager.                  */
-#define MODULE_ID_BSWM 42u   /**< BswM  -- basic software mode manager.        */
-#define MODULE_ID_SCHM 130u  /**< SchM  -- BSW scheduler.                      */
-#define MODULE_ID_COM 50u    /**< Com   -- signal-based communication.         */
-#define MODULE_ID_RTE 2u     /**< Rte   -- runtime environment.                */
+#define MODULE_ID_CRC 201u  /**< Crc   -- CRC routines.                       */
+#define MODULE_ID_DET 15u   /**< Det   -- development error tracer.           */
+#define MODULE_ID_DEM 54u   /**< Dem   -- diagnostic event manager.           */
+#define MODULE_ID_NVM 20u   /**< NvM   -- NVRAM manager.                      */
+#define MODULE_ID_MEMIF 22u /**< MemIf -- memory abstraction interface.       */
+#define MODULE_ID_FEE 21u   /**< Fee   -- flash EEPROM emulation.             */
+#define MODULE_ID_WDGM 13u  /**< WdgM  -- watchdog manager.                   */
+#define MODULE_ID_COMM 12u  /**< ComM  -- communication manager.              */
+#define MODULE_ID_ECUM 10u  /**< EcuM  -- ECU state manager.                  */
+#define MODULE_ID_BSWM 42u  /**< BswM  -- basic software mode manager.        */
+#define MODULE_ID_SCHM 130u /**< SchM  -- BSW scheduler.                      */
+#define MODULE_ID_COM 50u   /**< Com   -- signal-based communication.         */
+#define MODULE_ID_RTE 2u    /**< Rte   -- runtime environment.                */
 
 /*==================================================================================================
  *  Module IDs -- Project-private
  *================================================================================================*/
 
-#define MODULE_ID_CANIF 60u    /**< CanIf -- CAN interface (AUTOSAR-allocated).   */
+#define MODULE_ID_CANIF 60u       /**< CanIf -- CAN interface (AUTOSAR-allocated).   */
 #define MODULE_ID_RS485IF 0x0401u /**< Rs485If -- battery bus transport.          */
 #define MODULE_ID_IOHWAB 0x0402u  /**< IoHwAb  -- I/O hardware abstraction.      */
 #define MODULE_ID_FSABS 0x0403u   /**< FsAbs   -- SD filesystem abstraction.     */
@@ -99,10 +99,10 @@
  *  declared in the module's own header next to the functions they identify.
  *================================================================================================*/
 
-#define API_ID_INIT 0x00u            /**< `<Mip>`_Init()            */
-#define API_ID_DEINIT 0x01u          /**< `<Mip>`_DeInit()          */
-#define API_ID_MAIN_FUNCTION 0x0Eu   /**< `<Mip>`_MainFunction()    */
-#define API_ID_GET_VERSION_INFO 0x0Fu/**< `<Mip>`_GetVersionInfo()  */
+#define API_ID_INIT 0x00u             /**< `<Mip>`_Init()            */
+#define API_ID_DEINIT 0x01u           /**< `<Mip>`_DeInit()          */
+#define API_ID_MAIN_FUNCTION 0x0Eu    /**< `<Mip>`_MainFunction()    */
+#define API_ID_GET_VERSION_INFO 0x0Fu /**< `<Mip>`_GetVersionInfo()  */
 
 /*==================================================================================================
  *  Common development error codes
@@ -112,10 +112,10 @@
  *  values and reused. Module-specific codes start at 0x20 in the module header.
  *================================================================================================*/
 
-#define E_UNINIT 0x0Du          /**< API called before `<Mip>`_Init().          */
+#define E_UNINIT 0x0Du              /**< API called before `<Mip>`_Init().          */
 #define E_ALREADY_INITIALIZED 0x0Eu /**< `<Mip>`_Init() called twice.           */
-#define E_PARAM_POINTER 0x10u   /**< A NULL_PTR was passed for an out param.  */
-#define E_PARAM_VALUE 0x11u     /**< A numeric argument was out of range.     */
-#define E_PARAM_CONFIG 0x12u    /**< The configuration set is inconsistent.   */
+#define E_PARAM_POINTER 0x10u       /**< A NULL_PTR was passed for an out param.  */
+#define E_PARAM_VALUE 0x11u         /**< A numeric argument was out of range.     */
+#define E_PARAM_CONFIG 0x12u        /**< The configuration set is inconsistent.   */
 
 #endif /* AUTOSAR_MODULEIDS_H */

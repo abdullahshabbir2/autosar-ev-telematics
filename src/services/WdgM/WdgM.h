@@ -89,55 +89,55 @@ typedef uint16 WdgM_CheckpointIdType;
 /** Per-entity supervision status (SWS_WdgM_00204). */
 typedef enum
 {
-    WDGM_LOCAL_STATUS_OK = 0,           /**< Behaving.                                 */
-    WDGM_LOCAL_STATUS_FAILED = 1,       /**< Violated, within the tolerance budget.    */
-    WDGM_LOCAL_STATUS_EXPIRED = 2,      /**< Tolerance exhausted; a reset will follow.  */
-    WDGM_LOCAL_STATUS_DEACTIVATED = 3   /**< Not supervised in the current mode.        */
+    WDGM_LOCAL_STATUS_OK = 0,         /**< Behaving.                                 */
+    WDGM_LOCAL_STATUS_FAILED = 1,     /**< Violated, within the tolerance budget.    */
+    WDGM_LOCAL_STATUS_EXPIRED = 2,    /**< Tolerance exhausted; a reset will follow.  */
+    WDGM_LOCAL_STATUS_DEACTIVATED = 3 /**< Not supervised in the current mode.        */
 } WdgM_LocalStatusType;
 
 /** Overall supervision status. */
 typedef enum
 {
-    WDGM_GLOBAL_STATUS_OK = 0,          /**< Every active entity is OK.                 */
-    WDGM_GLOBAL_STATUS_FAILED = 1,      /**< At least one entity has failed.            */
-    WDGM_GLOBAL_STATUS_EXPIRED = 2,     /**< At least one entity has expired.           */
-    WDGM_GLOBAL_STATUS_STOPPED = 3,     /**< Petting has stopped; a reset is imminent.  */
-    WDGM_GLOBAL_STATUS_DEACTIVATED = 4  /**< Supervision is not running.                */
+    WDGM_GLOBAL_STATUS_OK = 0,         /**< Every active entity is OK.                 */
+    WDGM_GLOBAL_STATUS_FAILED = 1,     /**< At least one entity has failed.            */
+    WDGM_GLOBAL_STATUS_EXPIRED = 2,    /**< At least one entity has expired.           */
+    WDGM_GLOBAL_STATUS_STOPPED = 3,    /**< Petting has stopped; a reset is imminent.  */
+    WDGM_GLOBAL_STATUS_DEACTIVATED = 4 /**< Supervision is not running.                */
 } WdgM_GlobalStatusType;
 
 /** Which rule an entity broke. */
 typedef enum
 {
-    WDGM_VIOLATION_NONE = 0,     /**< No violation.                                    */
-    WDGM_VIOLATION_ALIVE_LOW = 1,/**< Checked in too few times in a cycle.             */
-    WDGM_VIOLATION_ALIVE_HIGH = 2,/**< Checked in too many times in a cycle.           */
-    WDGM_VIOLATION_DEADLINE = 3, /**< Interval between check-ins exceeded the deadline.*/
-    WDGM_VIOLATION_FLOW = 4      /**< Checkpoints reached out of order.                */
+    WDGM_VIOLATION_NONE = 0,       /**< No violation.                                    */
+    WDGM_VIOLATION_ALIVE_LOW = 1,  /**< Checked in too few times in a cycle.             */
+    WDGM_VIOLATION_ALIVE_HIGH = 2, /**< Checked in too many times in a cycle.           */
+    WDGM_VIOLATION_DEADLINE = 3,   /**< Interval between check-ins exceeded the deadline.*/
+    WDGM_VIOLATION_FLOW = 4        /**< Checkpoints reached out of order.                */
 } WdgM_ViolationType;
 
 /** Everything WdgM holds about one supervised entity. */
 typedef struct
 {
-    WdgM_LocalStatusType localStatus;  /**< Current status.                            */
-    WdgM_ViolationType lastViolation;  /**< Most recent rule broken.                   */
-    uint16 aliveCounter;               /**< Check-ins in the current cycle.            */
-    uint16 failedCycles;               /**< Consecutive cycles with a violation.        */
-    uint32 totalCheckpoints;           /**< Lifetime check-ins.                         */
-    uint32 aliveViolations;            /**< Lifetime alive violations.                  */
-    uint32 deadlineViolations;         /**< Lifetime deadline violations.               */
-    uint32 flowViolations;             /**< Lifetime program-flow violations.           */
-    uint32 worstIntervalMs;            /**< Longest observed gap between check-ins.     */
-    uint32 lastCheckpointMs;           /**< When it last checked in.                    */
+    WdgM_LocalStatusType localStatus; /**< Current status.                            */
+    WdgM_ViolationType lastViolation; /**< Most recent rule broken.                   */
+    uint16 aliveCounter;              /**< Check-ins in the current cycle.            */
+    uint16 failedCycles;              /**< Consecutive cycles with a violation.        */
+    uint32 totalCheckpoints;          /**< Lifetime check-ins.                         */
+    uint32 aliveViolations;           /**< Lifetime alive violations.                  */
+    uint32 deadlineViolations;        /**< Lifetime deadline violations.               */
+    uint32 flowViolations;            /**< Lifetime program-flow violations.           */
+    uint32 worstIntervalMs;           /**< Longest observed gap between check-ins.     */
+    uint32 lastCheckpointMs;          /**< When it last checked in.                    */
 } WdgM_EntityStatusType;
 
 /** Aggregate supervision figures, published in the telemetry health record. */
 typedef struct
 {
-    WdgM_GlobalStatusType globalStatus; /**< Overall status.                            */
-    uint32 supervisionCycles;           /**< Cycles evaluated since Init.               */
-    uint32 triggerCount;                /**< Times the hardware watchdog was petted.    */
-    uint32 withheldCount;               /**< Cycles where petting was deliberately withheld. */
-    uint16 failedEntityCount;           /**< Entities currently not OK.                 */
+    WdgM_GlobalStatusType globalStatus;            /**< Overall status.                            */
+    uint32 supervisionCycles;                      /**< Cycles evaluated since Init.               */
+    uint32 triggerCount;                           /**< Times the hardware watchdog was petted.    */
+    uint32 withheldCount;                          /**< Cycles where petting was deliberately withheld. */
+    uint16 failedEntityCount;                      /**< Entities currently not OK.                 */
     WdgM_SupervisedEntityIdType firstFailedEntity; /**< The first entity that failed.   */
 } WdgM_StatisticsType;
 
@@ -175,7 +175,7 @@ CHECK_RETURN Std_ReturnType WdgM_ActivateSupervision(void);
  *         reported through the entity's status, not through this return value.
  */
 CHECK_RETURN Std_ReturnType WdgM_CheckpointReached(WdgM_SupervisedEntityIdType entityId,
-                                                  WdgM_CheckpointIdType checkpointId);
+                                                   WdgM_CheckpointIdType checkpointId);
 
 /**
  * @brief Evaluate every entity and pet or withhold the hardware watchdog.

@@ -584,8 +584,7 @@ static void TsBringUpDiag(void)
 }
 
 /** Issue one request and return the response length. */
-static Std_ReturnType TsRequest(const uint8 *request, uint16 requestLen, uint8 *response,
-                                uint16 *responseLen)
+static Std_ReturnType TsRequest(const uint8 *request, uint16 requestLen, uint8 *response, uint16 *responseLen)
 {
     return DiagSwc_HandleRequest(request, requestLen, response, (uint16)DIAGSWC_MAX_RESPONSE_SIZE,
                                  responseLen);
@@ -608,8 +607,7 @@ static void test_Uds_ReadDtcInformation(void)
 
     TEST_ASSERT_EQUAL(E_OK, TsRequest(request, (uint16)sizeof(request), response, &responseLen));
     TEST_ASSERT_TRUE(responseLen >= 1u);
-    TEST_ASSERT_EQUAL_UINT8(DIAGSWC_SID_READ_DTC_INFORMATION + DIAGSWC_POSITIVE_RESPONSE_OFFSET,
-                            response[0]);
+    TEST_ASSERT_EQUAL_UINT8(DIAGSWC_SID_READ_DTC_INFORMATION + DIAGSWC_POSITIVE_RESPONSE_OFFSET, response[0]);
 }
 
 /**
@@ -634,8 +632,7 @@ static void test_Uds_ConfirmedDtcAppearsInListing(void)
     /* Drive an event to confirmation. Dem debounces, so one report is not a fault. */
     for (i = 0u; i < 64u; i++)
     {
-        STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_CAN_TIMEOUT, INSTANCE_ID_SINGLE,
-                                       DEM_EVENT_STATUS_FAILED));
+        STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_CAN_TIMEOUT, INSTANCE_ID_SINGLE, DEM_EVENT_STATUS_FAILED));
     }
 
     TEST_ASSERT_EQUAL(E_OK, TsRequest(request, (uint16)sizeof(request), populated, &populatedLen));
@@ -659,13 +656,11 @@ static void test_Uds_ClearEmptiesTheListing(void)
 
     for (i = 0u; i < 64u; i++)
     {
-        STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_CAN_TIMEOUT, INSTANCE_ID_SINGLE,
-                                       DEM_EVENT_STATUS_FAILED));
+        STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_CAN_TIMEOUT, INSTANCE_ID_SINGLE, DEM_EVENT_STATUS_FAILED));
     }
     TEST_ASSERT_EQUAL(E_OK, TsRequest(readRequest, (uint16)sizeof(readRequest), response, &beforeLen));
 
-    TEST_ASSERT_EQUAL(E_OK,
-                      TsRequest(clearRequest, (uint16)sizeof(clearRequest), response, &clearLen));
+    TEST_ASSERT_EQUAL(E_OK, TsRequest(clearRequest, (uint16)sizeof(clearRequest), response, &clearLen));
     TEST_ASSERT_EQUAL_UINT8(DIAGSWC_SID_CLEAR_DIAGNOSTIC_INFO + DIAGSWC_POSITIVE_RESPONSE_OFFSET,
                             response[0]);
 
@@ -676,8 +671,7 @@ static void test_Uds_ClearEmptiesTheListing(void)
 /** TS-UDS-004: reading a known data identifier returns its value. */
 static void test_Uds_ReadDataByIdentifier(void)
 {
-    const uint8 request[] = {DIAGSWC_SID_READ_DATA_BY_ID,
-                             (uint8)(DIAGSWC_DID_FIRMWARE_VERSION >> 8u),
+    const uint8 request[] = {DIAGSWC_SID_READ_DATA_BY_ID, (uint8)(DIAGSWC_DID_FIRMWARE_VERSION >> 8u),
                              (uint8)(DIAGSWC_DID_FIRMWARE_VERSION & 0xFFu)};
     uint8 response[DIAGSWC_MAX_RESPONSE_SIZE];
     uint16 responseLen = 0u;
@@ -685,8 +679,7 @@ static void test_Uds_ReadDataByIdentifier(void)
     TsBringUpDiag();
 
     TEST_ASSERT_EQUAL(E_OK, TsRequest(request, (uint16)sizeof(request), response, &responseLen));
-    TEST_ASSERT_EQUAL_UINT8(DIAGSWC_SID_READ_DATA_BY_ID + DIAGSWC_POSITIVE_RESPONSE_OFFSET,
-                            response[0]);
+    TEST_ASSERT_EQUAL_UINT8(DIAGSWC_SID_READ_DATA_BY_ID + DIAGSWC_POSITIVE_RESPONSE_OFFSET, response[0]);
 
     /* The echoed identifier, then at least one byte of value. */
     TEST_ASSERT_TRUE(responseLen > 3u);
@@ -808,10 +801,9 @@ static void test_Uds_OversizedRequestIsRefused(void)
  */
 static void test_Uds_WriteCalibrationIdentifier(void)
 {
-    const uint8 request[] = {DIAGSWC_SID_WRITE_DATA_BY_ID,
-                             (uint8)(DIAGSWC_DID_TYRE_DIAMETER >> 8u),
-                             (uint8)(DIAGSWC_DID_TYRE_DIAMETER & 0xFFu),
-                             0x52u, 0x08u}; /* 21000 milli-inch, big endian */
+    const uint8 request[] = {DIAGSWC_SID_WRITE_DATA_BY_ID, (uint8)(DIAGSWC_DID_TYRE_DIAMETER >> 8u),
+                             (uint8)(DIAGSWC_DID_TYRE_DIAMETER & 0xFFu), 0x52u,
+                             0x08u}; /* 21000 milli-inch, big endian */
     uint8 response[DIAGSWC_MAX_RESPONSE_SIZE];
     uint16 responseLen = 0u;
     NvM_CalibrationType calibration;
@@ -819,8 +811,7 @@ static void test_Uds_WriteCalibrationIdentifier(void)
     TsBringUpDiag();
 
     TEST_ASSERT_EQUAL(E_OK, TsRequest(request, (uint16)sizeof(request), response, &responseLen));
-    TEST_ASSERT_EQUAL_UINT8(DIAGSWC_SID_WRITE_DATA_BY_ID + DIAGSWC_POSITIVE_RESPONSE_OFFSET,
-                            response[0]);
+    TEST_ASSERT_EQUAL_UINT8(DIAGSWC_SID_WRITE_DATA_BY_ID + DIAGSWC_POSITIVE_RESPONSE_OFFSET, response[0]);
 
     TEST_ASSERT_EQUAL(E_OK, NvM_ReadBlock(NVM_BLOCK_CALIBRATION, &calibration));
     TEST_ASSERT_EQUAL_UINT16(21000u, calibration.tyreDiameterMilliInch);
@@ -832,7 +823,10 @@ static void test_Uds_WriteToReadOnlyIdentifierIsRefused(void)
     const uint8 request[] = {DIAGSWC_SID_WRITE_DATA_BY_ID,
                              (uint8)(DIAGSWC_DID_ODOMETER >> 8u),
                              (uint8)(DIAGSWC_DID_ODOMETER & 0xFFu),
-                             0x00u, 0x00u, 0x00u, 0x00u};
+                             0x00u,
+                             0x00u,
+                             0x00u,
+                             0x00u};
     uint8 response[DIAGSWC_MAX_RESPONSE_SIZE];
     uint16 responseLen = 0u;
 

@@ -118,8 +118,8 @@ static void TtBringUp(uint32 rtcTime)
 }
 
 /** Assert a broken-down time field by field, so a failure names which field is wrong. */
-static void TtAssertDateTime(const TimeAbs_DateTimeType *dt, uint16 year, uint8 month, uint8 day,
-                             uint8 hour, uint8 minute, uint8 second)
+static void TtAssertDateTime(const TimeAbs_DateTimeType *dt, uint16 year, uint8 month, uint8 day, uint8 hour,
+                             uint8 minute, uint8 second)
 {
     TEST_ASSERT_EQUAL_UINT16(year, dt->year);
     TEST_ASSERT_EQUAL_UINT8(month, dt->month);

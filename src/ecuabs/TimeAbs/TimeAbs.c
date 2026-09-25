@@ -44,8 +44,7 @@ STATIC uint32 TimeAbs_EpochOffsetSec;
  *================================================================================================*/
 
 /** Days in each month of a non-leap year. */
-STATIC const uint8 TimeAbs_MonthDays[12] = {31u, 28u, 31u, 30u, 31u, 30u,
-                                            31u, 31u, 30u, 31u, 30u, 31u};
+STATIC const uint8 TimeAbs_MonthDays[12] = {31u, 28u, 31u, 30u, 31u, 30u, 31u, 31u, 30u, 31u, 30u, 31u};
 
 STATIC boolean TimeAbs_IsLeapYear(uint16 year)
 {
@@ -67,8 +66,8 @@ STATIC uint8 TimeAbs_DaysInMonth(uint16 year, uint8 month)
 
 boolean TimeAbs_IsPlausible(uint32 unixTime)
 {
-    return ((unixTime >= (uint32)TIMEABS_MIN_PLAUSIBLE_UNIX) &&
-            (unixTime <= (uint32)TIMEABS_MAX_PLAUSIBLE_UNIX))
+    return ((unixTime >= (uint32)TIMEABS_MIN_PLAUSIBLE_UNIX)
+            && (unixTime <= (uint32)TIMEABS_MAX_PLAUSIBLE_UNIX))
                ? TRUE
                : FALSE;
 }
@@ -80,8 +79,8 @@ Std_ReturnType TimeAbs_ToDateTime(uint32 unixTime, TimeAbs_DateTimeType *dateTim
     uint16 year = 1970u;
     uint8 month = 1u;
 
-    DET_CHECK_RETURN(dateTime != NULL_PTR, MODULE_ID_TIMEABS, INSTANCE_ID_SINGLE,
-                     TIMEABS_API_ID_FORMAT, TIMEABS_E_PARAM_POINTER, E_NOT_OK);
+    DET_CHECK_RETURN(dateTime != NULL_PTR, MODULE_ID_TIMEABS, INSTANCE_ID_SINGLE, TIMEABS_API_ID_FORMAT,
+                     TIMEABS_E_PARAM_POINTER, E_NOT_OK);
 
     days = unixTime / 86400uL;
     secondsOfDay = unixTime % 86400uL;
@@ -129,12 +128,12 @@ Std_ReturnType TimeAbs_FromDateTime(const TimeAbs_DateTimeType *dateTime, uint32
     uint16 y;
     uint8 m;
 
-    DET_CHECK_RETURN((dateTime != NULL_PTR) && (unixTime != NULL_PTR), MODULE_ID_TIMEABS,
-                     INSTANCE_ID_SINGLE, TIMEABS_API_ID_FORMAT, TIMEABS_E_PARAM_POINTER, E_NOT_OK);
+    DET_CHECK_RETURN((dateTime != NULL_PTR) && (unixTime != NULL_PTR), MODULE_ID_TIMEABS, INSTANCE_ID_SINGLE,
+                     TIMEABS_API_ID_FORMAT, TIMEABS_E_PARAM_POINTER, E_NOT_OK);
 
-    if ((dateTime->year < 1970u) || (dateTime->month < 1u) || (dateTime->month > 12u) ||
-        (dateTime->day < 1u) || (dateTime->day > TimeAbs_DaysInMonth(dateTime->year, dateTime->month)) ||
-        (dateTime->hour > 23u) || (dateTime->minute > 59u) || (dateTime->second > 59u))
+    if ((dateTime->year < 1970u) || (dateTime->month < 1u) || (dateTime->month > 12u) || (dateTime->day < 1u)
+        || (dateTime->day > TimeAbs_DaysInMonth(dateTime->year, dateTime->month)) || (dateTime->hour > 23u)
+        || (dateTime->minute > 59u) || (dateTime->second > 59u))
     {
         return E_NOT_OK;
     }
@@ -149,8 +148,8 @@ Std_ReturnType TimeAbs_FromDateTime(const TimeAbs_DateTimeType *dateTime, uint32
     }
     days += (uint32)(dateTime->day - 1u);
 
-    *unixTime = (days * 86400uL) + ((uint32)dateTime->hour * 3600uL) +
-                ((uint32)dateTime->minute * 60uL) + (uint32)dateTime->second;
+    *unixTime = (days * 86400uL) + ((uint32)dateTime->hour * 3600uL) + ((uint32)dateTime->minute * 60uL)
+                + (uint32)dateTime->second;
 
     return E_OK;
 }
@@ -175,16 +174,14 @@ Std_ReturnType TimeAbs_Init(void)
 
     if (TimeAbs_PlatformRtcInit() != E_OK)
     {
-        STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_RTC_INVALID, INSTANCE_ID_SINGLE,
-                                       DEM_EVENT_STATUS_FAILED));
+        STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_RTC_INVALID, INSTANCE_ID_SINGLE, DEM_EVENT_STATUS_FAILED));
         return E_NOT_OK;
     }
     TimeAbs_Status.rtcPresent = TRUE;
 
     if (TimeAbs_PlatformRtcRead(&rtcTime) != E_OK)
     {
-        STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_RTC_INVALID, INSTANCE_ID_SINGLE,
-                                       DEM_EVENT_STATUS_FAILED));
+        STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_RTC_INVALID, INSTANCE_ID_SINGLE, DEM_EVENT_STATUS_FAILED));
         return E_NOT_OK;
     }
 
@@ -196,16 +193,14 @@ Std_ReturnType TimeAbs_Init(void)
          * into records, which then sorted to the beginning of the dataset. */
         (void)Det_ReportRuntimeError(MODULE_ID_TIMEABS, INSTANCE_ID_SINGLE, TIMEABS_API_ID_INIT,
                                      TIMEABS_E_TIME_IMPLAUSIBLE);
-        STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_RTC_INVALID, INSTANCE_ID_SINGLE,
-                                       DEM_EVENT_STATUS_FAILED));
+        STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_RTC_INVALID, INSTANCE_ID_SINGLE, DEM_EVENT_STATUS_FAILED));
         return E_NOT_OK;
     }
 
     TimeAbs_EpochOffsetSec = rtcTime - (Gpt_GetMonotonicMs() / 1000u);
     TimeAbs_Status.source = TIMEABS_SOURCE_RTC;
     TimeAbs_Status.valid = TRUE;
-    STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_RTC_INVALID, INSTANCE_ID_SINGLE,
-                                   DEM_EVENT_STATUS_PASSED));
+    STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_RTC_INVALID, INSTANCE_ID_SINGLE, DEM_EVENT_STATUS_PASSED));
 
     return E_OK;
 }
@@ -265,20 +260,19 @@ Std_ReturnType TimeAbs_SetUnixTime(uint32 unixTime)
 
     /* Only written back to the RTC when the disagreement is worth it. A DS3231 drifts under a minute a
      * year, so writing on every small difference would wear its registers for nothing. */
-    if ((TimeAbs_Status.rtcPresent != FALSE) &&
-        ((TimeAbs_Status.lastCorrectionSec > (sint32)TIMEABS_RTC_DRIFT_TOLERANCE_S) ||
-         (TimeAbs_Status.lastCorrectionSec < -(sint32)TIMEABS_RTC_DRIFT_TOLERANCE_S) ||
-         (previous == 0u)))
+    if ((TimeAbs_Status.rtcPresent != FALSE)
+        && ((TimeAbs_Status.lastCorrectionSec > (sint32)TIMEABS_RTC_DRIFT_TOLERANCE_S)
+            || (TimeAbs_Status.lastCorrectionSec < -(sint32)TIMEABS_RTC_DRIFT_TOLERANCE_S)
+            || (previous == 0u)))
     {
         if (TimeAbs_PlatformRtcWrite(unixTime) != E_OK)
         {
-            (void)Det_ReportRuntimeError(MODULE_ID_TIMEABS, INSTANCE_ID_SINGLE,
-                                         TIMEABS_API_ID_SET_TIME, TIMEABS_E_RTC_ABSENT);
+            (void)Det_ReportRuntimeError(MODULE_ID_TIMEABS, INSTANCE_ID_SINGLE, TIMEABS_API_ID_SET_TIME,
+                                         TIMEABS_E_RTC_ABSENT);
         }
     }
 
-    STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_RTC_INVALID, INSTANCE_ID_SINGLE,
-                                   DEM_EVENT_STATUS_PASSED));
+    STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_RTC_INVALID, INSTANCE_ID_SINGLE, DEM_EVENT_STATUS_PASSED));
     return E_OK;
 }
 
@@ -286,8 +280,8 @@ Std_ReturnType TimeAbs_Synchronise(void)
 {
     uint32 ntpTime = 0u;
 
-    DET_CHECK_RETURN(TimeAbs_Initialised != FALSE, MODULE_ID_TIMEABS, INSTANCE_ID_SINGLE,
-                     TIMEABS_API_ID_SYNC, TIMEABS_E_UNINIT, E_NOT_OK);
+    DET_CHECK_RETURN(TimeAbs_Initialised != FALSE, MODULE_ID_TIMEABS, INSTANCE_ID_SINGLE, TIMEABS_API_ID_SYNC,
+                     TIMEABS_E_UNINIT, E_NOT_OK);
 
     if (TimeAbs_PlatformNtpFetch(&ntpTime, TIMEABS_SYNC_TIMEOUT_MS) != E_OK)
     {
@@ -304,8 +298,8 @@ Std_ReturnType TimeAbs_FormatDateStamp(char *buffer, uint16 size)
     uint32 now = 0u;
     boolean valid = FALSE;
 
-    DET_CHECK_RETURN(buffer != NULL_PTR, MODULE_ID_TIMEABS, INSTANCE_ID_SINGLE,
-                     TIMEABS_API_ID_FORMAT, TIMEABS_E_PARAM_POINTER, E_NOT_OK);
+    DET_CHECK_RETURN(buffer != NULL_PTR, MODULE_ID_TIMEABS, INSTANCE_ID_SINGLE, TIMEABS_API_ID_FORMAT,
+                     TIMEABS_E_PARAM_POINTER, E_NOT_OK);
 
     if (size < 9u)
     {
@@ -344,8 +338,8 @@ Std_ReturnType TimeAbs_FormatDateStamp(char *buffer, uint16 size)
 
 Std_ReturnType TimeAbs_GetStatus(TimeAbs_StatusType *status)
 {
-    DET_CHECK_RETURN(status != NULL_PTR, MODULE_ID_TIMEABS, INSTANCE_ID_SINGLE,
-                     TIMEABS_API_ID_GET_UNIX_TIME, TIMEABS_E_PARAM_POINTER, E_NOT_OK);
+    DET_CHECK_RETURN(status != NULL_PTR, MODULE_ID_TIMEABS, INSTANCE_ID_SINGLE, TIMEABS_API_ID_GET_UNIX_TIME,
+                     TIMEABS_E_PARAM_POINTER, E_NOT_OK);
 
     *status = TimeAbs_Status;
     return E_OK;

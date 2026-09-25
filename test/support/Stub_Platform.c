@@ -227,8 +227,7 @@ Std_ReturnType FsAbs_PlatformAppend(const char *path, const uint8 *data, uint32 
     return E_OK;
 }
 
-Std_ReturnType FsAbs_PlatformRead(const char *path, uint32 offset, uint8 *buffer, uint32 size,
-                                 uint32 *read)
+Std_ReturnType FsAbs_PlatformRead(const char *path, uint32 offset, uint8 *buffer, uint32 size, uint32 *read)
 {
     const Stub_FsFileType *file = Stub_FsFind(path);
     uint32 available;
@@ -533,7 +532,7 @@ sint8 NetIf_PlatformGsmRssi(void)
 }
 
 Std_ReturnType NetIf_PlatformMqttConnect(const char *host, uint16 port, const char *clientId,
-                                        uint16 keepAliveS)
+                                         uint16 keepAliveS)
 {
     COMPILER_UNUSED(host);
     COMPILER_UNUSED(port);
@@ -542,8 +541,8 @@ Std_ReturnType NetIf_PlatformMqttConnect(const char *host, uint16 port, const ch
 
     Stub_ConnectAttempts++;
 
-    if ((Stub_BrokerAvailable == FALSE) ||
-        ((NetIf_PlatformWifiIsUp() == FALSE) && (NetIf_PlatformGsmIsUp() == FALSE)))
+    if ((Stub_BrokerAvailable == FALSE)
+        || ((NetIf_PlatformWifiIsUp() == FALSE) && (NetIf_PlatformGsmIsUp() == FALSE)))
     {
         return E_TIMEOUT;
     }
@@ -563,7 +562,7 @@ boolean NetIf_PlatformMqttIsConnected(void)
 }
 
 Std_ReturnType NetIf_PlatformMqttPublish(const char *topic, const uint8 *payload, uint16 payloadLen,
-                                        uint8 qos, boolean retain)
+                                         uint8 qos, boolean retain)
 {
     COMPILER_UNUSED(qos);
     COMPILER_UNUSED(retain);
@@ -612,7 +611,7 @@ Std_ReturnType NetIf_PlatformMqttLoop(void)
 }
 
 void NetIf_PlatformMqttSetCallback(void (*callback)(const char *topic, const uint8 *payload,
-                                                  uint16 payloadLen))
+                                                    uint16 payloadLen))
 {
     Stub_MqttCallback = callback;
 }

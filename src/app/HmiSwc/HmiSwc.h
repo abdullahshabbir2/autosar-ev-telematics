@@ -106,8 +106,7 @@ CHECK_RETURN Std_ReturnType HmiSwc_Init(void);
  * Idempotent: setting the pattern an indicator already has does not disturb its blink phase, so a
  * caller may call this every cycle without producing an irregular blink.
  */
-CHECK_RETURN Std_ReturnType HmiSwc_SetPattern(IoHwAb_IndicatorType indicator,
-                                              HmiSwc_PatternType pattern);
+CHECK_RETURN Std_ReturnType HmiSwc_SetPattern(IoHwAb_IndicatorType indicator, HmiSwc_PatternType pattern);
 
 /**
  * @brief Flash @p indicator once, then return to its previous pattern.
@@ -131,8 +130,7 @@ void HmiSwc_MainFunction(void);
  * @param[in]  indicator Which indicator to read.
  * @param[out] state     Destination.
  */
-CHECK_RETURN Std_ReturnType HmiSwc_GetState(IoHwAb_IndicatorType indicator,
-                                            HmiSwc_IndicatorStateType *state);
+CHECK_RETURN Std_ReturnType HmiSwc_GetState(IoHwAb_IndicatorType indicator, HmiSwc_IndicatorStateType *state);
 
 /**
  * @brief Drive every indicator solid for ::HMI_SELFTEST_MS, then return them all to off.

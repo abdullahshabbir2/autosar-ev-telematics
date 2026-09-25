@@ -140,9 +140,8 @@ void Mcu_PerformReset(void)
     /* An unexpected reset must be loud. Silently returning would let the test continue
      * executing code that on the target would never have run, and the resulting failure
      * would point somewhere unrelated. */
-    (void)fprintf(stderr,
-                  "\nStub_Mcal: Mcu_PerformReset() called without Stub_Mcu_ArmResetCapture().\n"
-                  "           Wrap the call under test in setjmp(*Stub_Mcu_GetResetJmpBuf()).\n");
+    (void)fprintf(stderr, "\nStub_Mcal: Mcu_PerformReset() called without Stub_Mcu_ArmResetCapture().\n"
+                          "           Wrap the call under test in setjmp(*Stub_Mcu_GetResetJmpBuf()).\n");
     abort();
 }
 
@@ -380,9 +379,8 @@ Std_ReturnType Adc_ReadChannelRaw(Adc_ChannelType channel, Adc_ValueType *value)
      * silently reading whatever the steady value happened to be. */
     if (Stub_AdcSequenceLen > 0u)
     {
-        const uint8 index = (Stub_AdcSequenceNext < Stub_AdcSequenceLen)
-                                ? Stub_AdcSequenceNext
-                                : (uint8)(Stub_AdcSequenceLen - 1u);
+        const uint8 index = (Stub_AdcSequenceNext < Stub_AdcSequenceLen) ? Stub_AdcSequenceNext
+                                                                         : (uint8)(Stub_AdcSequenceLen - 1u);
 
         *value = Stub_AdcSequence[index];
         if (Stub_AdcSequenceNext < Stub_AdcSequenceLen)
@@ -571,8 +569,7 @@ Std_ReturnType Uart_Write(Uart_InstanceType instance, const uint8 *data, uint16 
     {
         const uint16 replyLen = u->scriptLen[u->scriptNext];
 
-        if ((replyLen > 0u) &&
-            (((uint32)u->rxLen + (uint32)replyLen) <= (uint32)STUB_UART_BUFFER_SIZE))
+        if ((replyLen > 0u) && (((uint32)u->rxLen + (uint32)replyLen) <= (uint32)STUB_UART_BUFFER_SIZE))
         {
             (void)memcpy(&u->rx[u->rxLen], u->script[u->scriptNext], replyLen);
             u->rxLen = (uint16)(u->rxLen + replyLen);
@@ -580,8 +577,8 @@ Std_ReturnType Uart_Write(Uart_InstanceType instance, const uint8 *data, uint16 
         }
         u->scriptNext++;
     }
-    else if ((u->responseArmed != FALSE) &&
-             (((uint32)u->rxLen + (uint32)u->responseLen) <= (uint32)STUB_UART_BUFFER_SIZE))
+    else if ((u->responseArmed != FALSE)
+             && (((uint32)u->rxLen + (uint32)u->responseLen) <= (uint32)STUB_UART_BUFFER_SIZE))
     {
         (void)memcpy(&u->rx[u->rxLen], u->response, u->responseLen);
         u->rxLen = (uint16)(u->rxLen + u->responseLen);
@@ -599,8 +596,7 @@ Std_ReturnType Uart_Write(Uart_InstanceType instance, const uint8 *data, uint16 
     return E_OK;
 }
 
-Std_ReturnType Uart_Read(Uart_InstanceType instance, uint8 *buffer, uint16 maxLength,
-                         uint16 *actualLength)
+Std_ReturnType Uart_Read(Uart_InstanceType instance, uint8 *buffer, uint16 maxLength, uint16 *actualLength)
 {
     Stub_UartInstanceType *u;
     uint16 available;
@@ -864,8 +860,7 @@ Spi_DeviceType Spi_GetOwner(void)
     return Stub_SpiOwner;
 }
 
-static Std_ReturnType Stub_SpiShift(Spi_DeviceType device, const uint8 *txData, uint8 *rxData,
-                                    uint16 length)
+static Std_ReturnType Stub_SpiShift(Spi_DeviceType device, const uint8 *txData, uint8 *rxData, uint16 length)
 {
     uint16 i;
 
@@ -891,8 +886,7 @@ static Std_ReturnType Stub_SpiShift(Spi_DeviceType device, const uint8 *txData, 
         {
             /* Past the end of the scripted response the bus reads as all-ones, which is
              * what a real bus with no driver on MISO produces. */
-            rxData[i] = (Stub_SpiRxPos < Stub_SpiRxLen) ? Stub_SpiRx[Stub_SpiRxPos]
-                                                       : (uint8)SPI_DUMMY_BYTE;
+            rxData[i] = (Stub_SpiRxPos < Stub_SpiRxLen) ? Stub_SpiRx[Stub_SpiRxPos] : (uint8)SPI_DUMMY_BYTE;
         }
         if (Stub_SpiRxPos < Stub_SpiRxLen)
         {
@@ -905,8 +899,7 @@ static Std_ReturnType Stub_SpiShift(Spi_DeviceType device, const uint8 *txData, 
     return E_OK;
 }
 
-Std_ReturnType Spi_Transfer(Spi_DeviceType device, const uint8 *txData, uint8 *rxData,
-                            uint16 length)
+Std_ReturnType Spi_Transfer(Spi_DeviceType device, const uint8 *txData, uint8 *rxData, uint16 length)
 {
     return Stub_SpiShift(device, txData, rxData, length);
 }
@@ -951,8 +944,7 @@ void Spi_GetVersionInfo(Std_VersionInfoType *versioninfo)
 
 void Stub_Spi_QueueRxBytes(const uint8 *data, uint16 length)
 {
-    if ((data == NULL_PTR) || (((uint32)Stub_SpiRxLen + (uint32)length) >
-                               (uint32)STUB_UART_BUFFER_SIZE))
+    if ((data == NULL_PTR) || (((uint32)Stub_SpiRxLen + (uint32)length) > (uint32)STUB_UART_BUFFER_SIZE))
     {
         return;
     }
@@ -1176,8 +1168,8 @@ Std_ReturnType Fls_Write(Fls_AddressType address, const uint8 *buffer, Fls_Lengt
 
 Std_ReturnType Fls_Erase(Fls_AddressType address, Fls_LengthType length)
 {
-    if ((Stub_FlsRangeOk(address, length) == FALSE) ||
-        ((address % FLS_SECTOR_SIZE) != 0u) || ((length % FLS_SECTOR_SIZE) != 0u))
+    if ((Stub_FlsRangeOk(address, length) == FALSE) || ((address % FLS_SECTOR_SIZE) != 0u)
+        || ((length % FLS_SECTOR_SIZE) != 0u))
     {
         Stub_FlsJob = FLS_JOB_FAILED;
         return E_NOT_OK;
@@ -1355,8 +1347,7 @@ void Stub_Mcal_ResetAll(void)
     Stub_HeapMinFree = 150000uL;
     Stub_HeapLargest = 96000uL;
     {
-        static const uint8 defaultId[MCU_DEVICE_ID_LENGTH] = {0x24u, 0x6Fu, 0x28u,
-                                                              0xAAu, 0xBBu, 0xCCu};
+        static const uint8 defaultId[MCU_DEVICE_ID_LENGTH] = {0x24u, 0x6Fu, 0x28u, 0xAAu, 0xBBu, 0xCCu};
         (void)memcpy(Stub_DeviceId, defaultId, sizeof(Stub_DeviceId));
     }
 

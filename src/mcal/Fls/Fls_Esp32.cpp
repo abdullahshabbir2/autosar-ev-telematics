@@ -68,8 +68,8 @@ static Std_ReturnType Fls_CheckRange(Fls_AddressType address, Fls_LengthType len
     /* The addition is checked for overflow before the range comparison. address + length wrapping past
      * 2^32 would otherwise produce a small sum that passes the bound and a write that starts inside the
      * partition and runs off its end. */
-    if ((address > (Fls_AddressType)FLS_PARTITION_SIZE) ||
-        (length > ((Fls_LengthType)FLS_PARTITION_SIZE - address)))
+    if ((address > (Fls_AddressType)FLS_PARTITION_SIZE)
+        || (length > ((Fls_LengthType)FLS_PARTITION_SIZE - address)))
     {
         (void)Det_ReportError(MODULE_ID_FLS, INSTANCE_ID_SINGLE, apiId, FLS_E_PARAM_ADDRESS);
         return E_NOT_OK;
@@ -86,9 +86,8 @@ extern "C" Std_ReturnType Fls_Init(void)
 {
     (void)memset(&Fls_Stats, 0, sizeof(Fls_Stats));
 
-    Fls_Partition = esp_partition_find_first(ESP_PARTITION_TYPE_DATA,
-                                             (esp_partition_subtype_t)FLS_PARTITION_SUBTYPE,
-                                             FLS_PARTITION_NAME);
+    Fls_Partition = esp_partition_find_first(
+        ESP_PARTITION_TYPE_DATA, (esp_partition_subtype_t)FLS_PARTITION_SUBTYPE, FLS_PARTITION_NAME);
     if (Fls_Partition == NULL)
     {
         /* A missing partition is a build configuration fault, not a runtime one: the image was flashed with a
@@ -140,8 +139,7 @@ extern "C" Std_ReturnType Fls_Read(Fls_AddressType address, uint8 *buffer, Fls_L
 
     if (esp_partition_read(Fls_Partition, (size_t)address, buffer, (size_t)length) != ESP_OK)
     {
-        (void)Det_ReportRuntimeError(MODULE_ID_FLS, INSTANCE_ID_SINGLE, FLS_API_ID_READ,
-                                     FLS_E_READ_FAILED);
+        (void)Det_ReportRuntimeError(MODULE_ID_FLS, INSTANCE_ID_SINGLE, FLS_API_ID_READ, FLS_E_READ_FAILED);
         Fls_JobResult = FLS_JOB_FAILED;
         status = E_NOT_OK;
     }
@@ -171,8 +169,8 @@ extern "C" Std_ReturnType Fls_Write(Fls_AddressType address, const uint8 *buffer
     /* Alignment is checked here rather than fixed up. Padding a misaligned write inside the driver would
      * program bytes the caller did not ask for, and in an append-only log those extra bytes are the next
      * record's header. Fee pads its records to this boundary itself, so a misaligned call is a defect. */
-    if (((address % (Fls_AddressType)FLS_WRITE_ALIGNMENT) != 0u) ||
-        ((length % (Fls_LengthType)FLS_WRITE_ALIGNMENT) != 0u))
+    if (((address % (Fls_AddressType)FLS_WRITE_ALIGNMENT) != 0u)
+        || ((length % (Fls_LengthType)FLS_WRITE_ALIGNMENT) != 0u))
     {
         (void)Det_ReportError(MODULE_ID_FLS, INSTANCE_ID_SINGLE, FLS_API_ID_WRITE, FLS_E_UNALIGNED);
         return E_NOT_OK;
@@ -181,8 +179,7 @@ extern "C" Std_ReturnType Fls_Write(Fls_AddressType address, const uint8 *buffer
     if (esp_partition_write(Fls_Partition, (size_t)address, buffer, (size_t)length) != ESP_OK)
     {
         Fls_Stats.writeFailures++;
-        (void)Det_ReportRuntimeError(MODULE_ID_FLS, INSTANCE_ID_SINGLE, FLS_API_ID_WRITE,
-                                     FLS_E_WRITE_FAILED);
+        (void)Det_ReportRuntimeError(MODULE_ID_FLS, INSTANCE_ID_SINGLE, FLS_API_ID_WRITE, FLS_E_WRITE_FAILED);
         Fls_JobResult = FLS_JOB_FAILED;
         return E_NOT_OK;
     }
@@ -244,8 +241,8 @@ extern "C" Std_ReturnType Fls_Erase(Fls_AddressType address, Fls_LengthType leng
     /* Sector alignment is not negotiable: flash erases a whole sector whatever the caller asks for, so an
      * unaligned erase destroys data outside the requested range. Silently rounding down to a sector boundary
      * would be worse than refusing, because the caller would believe its range had been cleared. */
-    if (((address % (Fls_AddressType)FLS_SECTOR_SIZE) != 0u) ||
-        ((length % (Fls_LengthType)FLS_SECTOR_SIZE) != 0u))
+    if (((address % (Fls_AddressType)FLS_SECTOR_SIZE) != 0u)
+        || ((length % (Fls_LengthType)FLS_SECTOR_SIZE) != 0u))
     {
         (void)Det_ReportError(MODULE_ID_FLS, INSTANCE_ID_SINGLE, FLS_API_ID_ERASE, FLS_E_UNALIGNED);
         return E_NOT_OK;
@@ -253,8 +250,7 @@ extern "C" Std_ReturnType Fls_Erase(Fls_AddressType address, Fls_LengthType leng
 
     if (esp_partition_erase_range(Fls_Partition, (size_t)address, (size_t)length) != ESP_OK)
     {
-        (void)Det_ReportRuntimeError(MODULE_ID_FLS, INSTANCE_ID_SINGLE, FLS_API_ID_ERASE,
-                                     FLS_E_ERASE_FAILED);
+        (void)Det_ReportRuntimeError(MODULE_ID_FLS, INSTANCE_ID_SINGLE, FLS_API_ID_ERASE, FLS_E_ERASE_FAILED);
         Fls_JobResult = FLS_JOB_FAILED;
         return E_NOT_OK;
     }

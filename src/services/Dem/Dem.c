@@ -23,10 +23,10 @@
 
 typedef struct
 {
-    Dem_DtcType dtcBase;     /**< Code with a zero instance byte.                   */
-    uint8 failureThreshold;  /**< Consecutive failures needed to confirm.            */
-    boolean persistent;      /**< TRUE to carry the status across a power cycle.      */
-    boolean warningIndicator;/**< TRUE if a confirmation should warn the driver.      */
+    Dem_DtcType dtcBase;      /**< Code with a zero instance byte.                   */
+    uint8 failureThreshold;   /**< Consecutive failures needed to confirm.            */
+    boolean persistent;       /**< TRUE to carry the status across a power cycle.      */
+    boolean warningIndicator; /**< TRUE if a confirmation should warn the driver.      */
 } Dem_EventDescriptorType;
 
 STATIC const Dem_EventDescriptorType Dem_Descriptors[DEM_EVENT_COUNT] = {
@@ -38,9 +38,9 @@ STATIC const Dem_EventDescriptorType Dem_Descriptors[DEM_EVENT_COUNT] = {
 
     /* Vehicle CAN. Init failure and bus-off confirm on the first report: both are unambiguous
      * hardware states, not noisy measurements, so debouncing them only delays the report. */
-    {0x0C0200uL, 1u, TRUE, FALSE},  /* DEM_EVENT_CAN_INIT_FAILED      */
-    {0x0C0210uL, 1u, TRUE, FALSE},  /* DEM_EVENT_CAN_BUS_OFF          */
-    {0x0C0220uL, 5u, TRUE, FALSE},  /* DEM_EVENT_CAN_TIMEOUT          */
+    {0x0C0200uL, 1u, TRUE, FALSE}, /* DEM_EVENT_CAN_INIT_FAILED      */
+    {0x0C0210uL, 1u, TRUE, FALSE}, /* DEM_EVENT_CAN_BUS_OFF          */
+    {0x0C0220uL, 5u, TRUE, FALSE}, /* DEM_EVENT_CAN_TIMEOUT          */
 
     /* Backhaul. Thresholds are deliberately high: a vehicle spends much of its life out of
      * coverage, and that is not a fault of the ECU. Only losing *both* bearers for a sustained
@@ -52,11 +52,11 @@ STATIC const Dem_EventDescriptorType Dem_Descriptors[DEM_EVENT_COUNT] = {
 
     /* Storage. The SD card is the store-and-forward buffer, so losing it means data loss
      * whenever the backhaul is also down -- it warns the driver. */
-    {0x0D0100uL, 1u, TRUE, TRUE},   /* DEM_EVENT_SD_MOUNT_FAILED      */
-    {0x0D0110uL, 5u, TRUE, TRUE},   /* DEM_EVENT_SD_WRITE_FAILED      */
-    {0x0D0120uL, 1u, TRUE, FALSE},  /* DEM_EVENT_SD_SPACE_LOW         */
-    {0x0D0130uL, 1u, TRUE, FALSE},  /* DEM_EVENT_NVM_INTEGRITY        */
-    {0x0D0140uL, 1u, TRUE, FALSE},  /* DEM_EVENT_FLASH_WEAR           */
+    {0x0D0100uL, 1u, TRUE, TRUE},  /* DEM_EVENT_SD_MOUNT_FAILED      */
+    {0x0D0110uL, 5u, TRUE, TRUE},  /* DEM_EVENT_SD_WRITE_FAILED      */
+    {0x0D0120uL, 1u, TRUE, FALSE}, /* DEM_EVENT_SD_SPACE_LOW         */
+    {0x0D0130uL, 1u, TRUE, FALSE}, /* DEM_EVENT_NVM_INTEGRITY        */
+    {0x0D0140uL, 1u, TRUE, FALSE}, /* DEM_EVENT_FLASH_WEAR           */
 
     /* Sensors. A GNSS receiver legitimately has no fix indoors or in a tunnel, so the threshold
      * is high and the status is not persisted. */
@@ -194,18 +194,17 @@ void Dem_SetSnapshotProvider(Dem_SnapshotProviderType provider)
     Dem_SnapshotProvider = provider;
 }
 
-Std_ReturnType Dem_SetEventStatus(Dem_EventIdType eventId, uint8 instanceId,
-                                  Dem_EventStatusType status)
+Std_ReturnType Dem_SetEventStatus(Dem_EventIdType eventId, uint8 instanceId, Dem_EventStatusType status)
 {
     uint16 index;
     Dem_EventRecordType *record;
     const Dem_EventDescriptorType *descriptor;
     boolean wasConfirmed;
 
-    DET_CHECK_RETURN(Dem_Initialised != FALSE, MODULE_ID_DEM, instanceId,
-                     DEM_API_ID_SET_EVENT_STATUS, DEM_E_UNINIT, E_NOT_OK);
-    DET_CHECK_RETURN(Dem_EventValid(eventId) != FALSE, MODULE_ID_DEM, instanceId,
-                     DEM_API_ID_SET_EVENT_STATUS, DEM_E_PARAM_EVENT_ID, E_NOT_OK);
+    DET_CHECK_RETURN(Dem_Initialised != FALSE, MODULE_ID_DEM, instanceId, DEM_API_ID_SET_EVENT_STATUS,
+                     DEM_E_UNINIT, E_NOT_OK);
+    DET_CHECK_RETURN(Dem_EventValid(eventId) != FALSE, MODULE_ID_DEM, instanceId, DEM_API_ID_SET_EVENT_STATUS,
+                     DEM_E_PARAM_EVENT_ID, E_NOT_OK);
 
     index = (uint16)(eventId - 1u);
     record = &Dem_Records[index];
@@ -216,15 +215,15 @@ Std_ReturnType Dem_SetEventStatus(Dem_EventIdType eventId, uint8 instanceId,
     record->instanceId = instanceId;
 
     /* The monitor has run, whatever it found. */
-    record->udsStatus &= (uint8)(~(uint8)(DEM_UDS_TEST_NOT_COMPLETED_SINCE_CLEAR |
-                                          DEM_UDS_TEST_NOT_COMPLETED_THIS_CYCLE));
+    record->udsStatus &=
+        (uint8)(~(uint8)(DEM_UDS_TEST_NOT_COMPLETED_SINCE_CLEAR | DEM_UDS_TEST_NOT_COMPLETED_THIS_CYCLE));
 
     switch (status)
     {
     case DEM_EVENT_STATUS_FAILED:
     case DEM_EVENT_STATUS_PREFAILED:
-        record->udsStatus |= (uint8)(DEM_UDS_TEST_FAILED | DEM_UDS_TEST_FAILED_THIS_CYCLE |
-                                     DEM_UDS_TEST_FAILED_SINCE_CLEAR);
+        record->udsStatus |=
+            (uint8)(DEM_UDS_TEST_FAILED | DEM_UDS_TEST_FAILED_THIS_CYCLE | DEM_UDS_TEST_FAILED_SINCE_CLEAR);
         record->lastFailedUptimeMs = Gpt_GetMonotonicMs();
         if (record->occurrenceCount < 0xFFFFu)
         {
@@ -288,8 +287,7 @@ Std_ReturnType Dem_SetEventStatus(Dem_EventIdType eventId, uint8 instanceId,
         break;
 
     default:
-        (void)Det_ReportError(MODULE_ID_DEM, instanceId, DEM_API_ID_SET_EVENT_STATUS,
-                              DEM_E_PARAM_STATUS);
+        (void)Det_ReportError(MODULE_ID_DEM, instanceId, DEM_API_ID_SET_EVENT_STATUS, DEM_E_PARAM_STATUS);
         return E_NOT_OK;
     }
 
@@ -301,8 +299,8 @@ Std_ReturnType Dem_GetEventStatus(Dem_EventIdType eventId, uint8 *udsStatus)
 {
     DET_CHECK_RETURN(Dem_EventValid(eventId) != FALSE, MODULE_ID_DEM, INSTANCE_ID_SINGLE,
                      DEM_API_ID_GET_EVENT_STATUS, DEM_E_PARAM_EVENT_ID, E_NOT_OK);
-    DET_CHECK_RETURN(udsStatus != NULL_PTR, MODULE_ID_DEM, INSTANCE_ID_SINGLE,
-                     DEM_API_ID_GET_EVENT_STATUS, DEM_E_PARAM_POINTER, E_NOT_OK);
+    DET_CHECK_RETURN(udsStatus != NULL_PTR, MODULE_ID_DEM, INSTANCE_ID_SINGLE, DEM_API_ID_GET_EVENT_STATUS,
+                     DEM_E_PARAM_POINTER, E_NOT_OK);
 
     *udsStatus = Dem_Records[eventId - 1u].udsStatus;
     return E_OK;
@@ -353,8 +351,7 @@ uint16 Dem_GetConfirmedDtcs(Dem_DtcType *buffer, uint16 maxCount)
     {
         if ((Dem_Records[i].udsStatus & DEM_UDS_CONFIRMED_DTC) != 0u)
         {
-            buffer[written] =
-                (Dem_Records[i].dtc & 0x00FFFF00uL) | (uint32)Dem_Records[i].instanceId;
+            buffer[written] = (Dem_Records[i].dtc & 0x00FFFF00uL) | (uint32)Dem_Records[i].instanceId;
             written++;
         }
     }
@@ -365,8 +362,8 @@ Std_ReturnType Dem_GetSnapshot(Dem_EventIdType eventId, Dem_SnapshotType *snapsh
 {
     DET_CHECK_RETURN(Dem_EventValid(eventId) != FALSE, MODULE_ID_DEM, INSTANCE_ID_SINGLE,
                      DEM_API_ID_GET_DTC_INFO, DEM_E_PARAM_EVENT_ID, E_NOT_OK);
-    DET_CHECK_RETURN(snapshot != NULL_PTR, MODULE_ID_DEM, INSTANCE_ID_SINGLE,
-                     DEM_API_ID_GET_DTC_INFO, DEM_E_PARAM_POINTER, E_NOT_OK);
+    DET_CHECK_RETURN(snapshot != NULL_PTR, MODULE_ID_DEM, INSTANCE_ID_SINGLE, DEM_API_ID_GET_DTC_INFO,
+                     DEM_E_PARAM_POINTER, E_NOT_OK);
 
     if (Dem_Records[eventId - 1u].snapshotStored == FALSE)
     {
@@ -382,14 +379,13 @@ Std_ReturnType Dem_ClearDtc(Dem_DtcType dtc)
     boolean cleared = FALSE;
     uint16 i;
 
-    DET_CHECK_RETURN(Dem_Initialised != FALSE, MODULE_ID_DEM, INSTANCE_ID_SINGLE,
-                     DEM_API_ID_CLEAR_DTC, DEM_E_UNINIT, E_NOT_OK);
+    DET_CHECK_RETURN(Dem_Initialised != FALSE, MODULE_ID_DEM, INSTANCE_ID_SINGLE, DEM_API_ID_CLEAR_DTC,
+                     DEM_E_UNINIT, E_NOT_OK);
 
     for (i = 0u; i < (uint16)DEM_EVENT_COUNT; i++)
     {
         const boolean matches =
-            ((dtc == 0x00FFFFFFuL) ||
-             ((Dem_Descriptors[i].dtcBase & 0x00FFFF00uL) == (dtc & 0x00FFFF00uL)))
+            ((dtc == 0x00FFFFFFuL) || ((Dem_Descriptors[i].dtcBase & 0x00FFFF00uL) == (dtc & 0x00FFFF00uL)))
                 ? TRUE
                 : FALSE;
 
@@ -399,8 +395,8 @@ Std_ReturnType Dem_ClearDtc(Dem_DtcType dtc)
             Dem_Records[i].dtc = Dem_Descriptors[i].dtcBase;
             /* Back to "never tested": after a clear, a tool must be able to tell a monitor that
              * has since run and passed from one that has not run at all. */
-            Dem_Records[i].udsStatus = (uint8)(DEM_UDS_TEST_NOT_COMPLETED_SINCE_CLEAR |
-                                               DEM_UDS_TEST_NOT_COMPLETED_THIS_CYCLE);
+            Dem_Records[i].udsStatus =
+                (uint8)(DEM_UDS_TEST_NOT_COMPLETED_SINCE_CLEAR | DEM_UDS_TEST_NOT_COMPLETED_THIS_CYCLE);
             cleared = TRUE;
         }
     }
@@ -480,8 +476,8 @@ void Dem_MainFunction(void)
 
 Std_ReturnType Dem_GetStatistics(Dem_StatisticsType *stats)
 {
-    DET_CHECK_RETURN(stats != NULL_PTR, MODULE_ID_DEM, INSTANCE_ID_SINGLE,
-                     DEM_API_ID_MAIN_FUNCTION, DEM_E_PARAM_POINTER, E_NOT_OK);
+    DET_CHECK_RETURN(stats != NULL_PTR, MODULE_ID_DEM, INSTANCE_ID_SINGLE, DEM_API_ID_MAIN_FUNCTION,
+                     DEM_E_PARAM_POINTER, E_NOT_OK);
 
     Dem_RecountStatus();
     *stats = Dem_Stats;

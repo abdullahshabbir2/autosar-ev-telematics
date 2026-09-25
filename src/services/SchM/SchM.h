@@ -65,22 +65,22 @@ extern "C" {
 /** Logical task. Values index the configuration table. */
 typedef enum
 {
-    SCHM_TASK_SCHEDULER = 0,    /**< 10 ms tick: supervision, CAN, GNSS.       */
-    SCHM_TASK_ACQUISITION = 1,  /**< Acquisition period: sensors and odometry. */
-    SCHM_TASK_STORAGE = 2,      /**< Acquisition period: record and storage.   */
-    SCHM_TASK_CONNECTIVITY = 3  /**< 1 s: bearer and telemetry.                */
+    SCHM_TASK_SCHEDULER = 0,   /**< 10 ms tick: supervision, CAN, GNSS.       */
+    SCHM_TASK_ACQUISITION = 1, /**< Acquisition period: sensors and odometry. */
+    SCHM_TASK_STORAGE = 2,     /**< Acquisition period: record and storage.   */
+    SCHM_TASK_CONNECTIVITY = 3 /**< 1 s: bearer and telemetry.                */
 } SchM_TaskType;
 
 /** Per-task execution figures, published in the health record. */
 typedef struct
 {
-    uint32 activations;       /**< Times the task's loop body has run.            */
-    uint32 overruns;          /**< Activations that exceeded the task's budget.    */
-    uint32 worstCaseUs;       /**< Longest observed body execution, microseconds.  */
-    uint32 lastCaseUs;        /**< Most recent body execution, microseconds.       */
-    uint32 worstRunnableUs;   /**< Longest observed single runnable, microseconds.  */
-    uint8 worstRunnableIndex; /**< Which runnable that was.                        */
-    uint32 stackHighWaterMark;/**< Smallest observed free stack, bytes.            */
+    uint32 activations;        /**< Times the task's loop body has run.            */
+    uint32 overruns;           /**< Activations that exceeded the task's budget.    */
+    uint32 worstCaseUs;        /**< Longest observed body execution, microseconds.  */
+    uint32 lastCaseUs;         /**< Most recent body execution, microseconds.       */
+    uint32 worstRunnableUs;    /**< Longest observed single runnable, microseconds.  */
+    uint8 worstRunnableIndex;  /**< Which runnable that was.                        */
+    uint32 stackHighWaterMark; /**< Smallest observed free stack, bytes.            */
 } SchM_TaskStatsType;
 
 /*==================================================================================================

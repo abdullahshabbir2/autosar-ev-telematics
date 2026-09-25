@@ -69,16 +69,16 @@ extern "C" {
 /** Card and usage information, published in the telemetry health record. */
 typedef struct
 {
-    boolean mounted;             /**< TRUE if the card is present and mounted.      */
-    uint32 capacityMiB;          /**< Total capacity.                               */
-    uint32 usedMiB;              /**< Space in use.                                 */
-    uint32 freeMiB;              /**< Space available.                              */
-    uint32 recordsWritten;       /**< Records appended since Init.                  */
-    uint32 writeFailures;        /**< Appends the card rejected.                    */
-    uint32 recordsRead;          /**< Records handed to the transfer path.          */
-    uint32 corruptRecords;       /**< Records rejected by their CRC.                */
-    uint32 filesDeleted;         /**< Oldest files removed to reclaim space.        */
-    uint32 unsentBytes;          /**< Bytes behind the transfer cursor.             */
+    boolean mounted;       /**< TRUE if the card is present and mounted.      */
+    uint32 capacityMiB;    /**< Total capacity.                               */
+    uint32 usedMiB;        /**< Space in use.                                 */
+    uint32 freeMiB;        /**< Space available.                              */
+    uint32 recordsWritten; /**< Records appended since Init.                  */
+    uint32 writeFailures;  /**< Appends the card rejected.                    */
+    uint32 recordsRead;    /**< Records handed to the transfer path.          */
+    uint32 corruptRecords; /**< Records rejected by their CRC.                */
+    uint32 filesDeleted;   /**< Oldest files removed to reclaim space.        */
+    uint32 unsentBytes;    /**< Bytes behind the transfer cursor.             */
 } FsAbs_StatusType;
 
 /** Where the transfer has reached. */

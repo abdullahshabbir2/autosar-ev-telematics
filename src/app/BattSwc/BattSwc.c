@@ -66,8 +66,7 @@ STATIC void BattSwc_ComputePackHealth(uint8 index, const Rs485If_PackStateType *
      * A pack's terminal voltage barely moves when one cell of twenty-three collapses, so the sum tells
      * you almost nothing -- v1 logged all 23 voltages and computed nothing from them. */
     health->cellImbalance = (uint16)(health->cellVoltageHighest - health->cellVoltageLowest);
-    health->imbalanceWarning =
-        (health->cellImbalance > (uint16)BATTSWC_IMBALANCE_WARN_RAW) ? TRUE : FALSE;
+    health->imbalanceWarning = (health->cellImbalance > (uint16)BATTSWC_IMBALANCE_WARN_RAW) ? TRUE : FALSE;
 
     health->temperatureHighest = state->cells.temperature[0];
     health->temperatureLowest = state->cells.temperature[0];
@@ -126,14 +125,14 @@ STATIC void BattSwc_ComputeAggregate(void)
             BattSwc_Aggregate.lowestStateOfHealth = (uint16)state->pack.stateOfHealth;
         }
 
-        if ((BattSwc_Aggregate.packsResponding == 1u) ||
-            (state->pack.temperatureHigh > BattSwc_Aggregate.highestTemperature))
+        if ((BattSwc_Aggregate.packsResponding == 1u)
+            || (state->pack.temperatureHigh > BattSwc_Aggregate.highestTemperature))
         {
             BattSwc_Aggregate.highestTemperature = state->pack.temperatureHigh;
         }
 
-        if ((BattSwc_Health[index].dataValid != FALSE) &&
-            (BattSwc_Health[index].cellImbalance > BattSwc_Aggregate.worstImbalance))
+        if ((BattSwc_Health[index].dataValid != FALSE)
+            && (BattSwc_Health[index].cellImbalance > BattSwc_Aggregate.worstImbalance))
         {
             BattSwc_Aggregate.worstImbalance = BattSwc_Health[index].cellImbalance;
             BattSwc_Aggregate.worstImbalancePack = (uint8)(index + 1u);
@@ -172,13 +171,11 @@ STATIC void BattSwc_ReportEvents(void)
 
         if (state->consecutiveFailures >= (uint16)BATTSWC_MISSING_LIMIT)
         {
-            STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_PACK_NO_RESPONSE, instance,
-                                           DEM_EVENT_STATUS_FAILED));
+            STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_PACK_NO_RESPONSE, instance, DEM_EVENT_STATUS_FAILED));
         }
         else if (state->packDataValid != FALSE)
         {
-            STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_PACK_NO_RESPONSE, instance,
-                                           DEM_EVENT_STATUS_PASSED));
+            STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_PACK_NO_RESPONSE, instance, DEM_EVENT_STATUS_PASSED));
         }
         else
         {
@@ -191,13 +188,11 @@ STATIC void BattSwc_ReportEvents(void)
      * installation problem and the other is a failure in service. */
     if (Rs485If_GetPresentPackCount() == 0u)
     {
-        STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_PACK_MISSING, INSTANCE_ID_SINGLE,
-                                       DEM_EVENT_STATUS_FAILED));
+        STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_PACK_MISSING, INSTANCE_ID_SINGLE, DEM_EVENT_STATUS_FAILED));
     }
     else
     {
-        STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_PACK_MISSING, INSTANCE_ID_SINGLE,
-                                       DEM_EVENT_STATUS_PASSED));
+        STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_PACK_MISSING, INSTANCE_ID_SINGLE, DEM_EVENT_STATUS_PASSED));
     }
 }
 
@@ -261,9 +256,8 @@ Std_ReturnType BattSwc_GetPackHealth(Rs485If_SlotType slot, BattSwc_PackHealthTy
 {
     DET_CHECK_RETURN(health != NULL_PTR, MODULE_ID_BATTSWC, slot, BATTSWC_API_ID_GET_PACK_HEALTH,
                      BATTSWC_E_PARAM_POINTER, E_NOT_OK);
-    DET_CHECK_RETURN((slot >= 1u) && (slot <= (Rs485If_SlotType)RS485IF_PACK_COUNT),
-                     MODULE_ID_BATTSWC, slot, BATTSWC_API_ID_GET_PACK_HEALTH,
-                     BATTSWC_E_PARAM_SLOT, E_NOT_OK);
+    DET_CHECK_RETURN((slot >= 1u) && (slot <= (Rs485If_SlotType)RS485IF_PACK_COUNT), MODULE_ID_BATTSWC, slot,
+                     BATTSWC_API_ID_GET_PACK_HEALTH, BATTSWC_E_PARAM_SLOT, E_NOT_OK);
 
     *health = BattSwc_Health[slot - 1u];
     return E_OK;

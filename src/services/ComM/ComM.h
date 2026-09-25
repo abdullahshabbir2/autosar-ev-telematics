@@ -68,9 +68,9 @@ extern "C" {
 /** Communication mode requested by the application (SWS_ComM_00669). */
 typedef enum
 {
-    COMM_NO_COMMUNICATION = 0,   /**< Nothing needs a bearer; both radios off.   */
-    COMM_SILENT_COMMUNICATION = 1,/**< Receive only; not used on this ECU.       */
-    COMM_FULL_COMMUNICATION = 2   /**< A bearer is wanted.                       */
+    COMM_NO_COMMUNICATION = 0,     /**< Nothing needs a bearer; both radios off.   */
+    COMM_SILENT_COMMUNICATION = 1, /**< Receive only; not used on this ECU.       */
+    COMM_FULL_COMMUNICATION = 2    /**< A bearer is wanted.                       */
 } ComM_ModeType;
 
 /** Arbitration state, published in the telemetry health record. */

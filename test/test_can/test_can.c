@@ -51,7 +51,9 @@ void setUp(void)
     Can_DeInit();
 }
 
-void tearDown(void) {}
+void tearDown(void)
+{
+}
 
 /*==================================================================================================
  *  Helpers
@@ -89,16 +91,16 @@ static void queueWritePadding(uint16 bytes)
 /** Script a complete, successful Can_Init() exchange. */
 static void scriptSuccessfulInit(void)
 {
-    queueWritePadding(1u);                 /* RESET                                  */
-    queueWritePadding(4u);                 /* BIT MODIFY CANCTRL -> config           */
-    queueRegisterRead(MCP_MODE_CONFIG);    /* CANSTAT poll: config reached           */
-    queueWritePadding(3u * 3u);            /* CNF1, CNF2, CNF3                       */
-    queueWritePadding(6u * 2u);            /* RXM0, RXM1 (6 bytes each)              */
-    queueWritePadding(6u * 6u);            /* RXF0..RXF5 (6 bytes each)              */
-    queueWritePadding(3u * 2u);            /* RXB0CTRL, RXB1CTRL                     */
-    queueWritePadding(3u * 2u);            /* CANINTE, CANINTF                       */
-    queueWritePadding(4u);                 /* BIT MODIFY CANCTRL -> normal           */
-    queueRegisterRead(MCP_MODE_NORMAL);    /* CANSTAT poll: normal reached           */
+    queueWritePadding(1u);              /* RESET                                  */
+    queueWritePadding(4u);              /* BIT MODIFY CANCTRL -> config           */
+    queueRegisterRead(MCP_MODE_CONFIG); /* CANSTAT poll: config reached           */
+    queueWritePadding(3u * 3u);         /* CNF1, CNF2, CNF3                       */
+    queueWritePadding(6u * 2u);         /* RXM0, RXM1 (6 bytes each)              */
+    queueWritePadding(6u * 6u);         /* RXF0..RXF5 (6 bytes each)              */
+    queueWritePadding(3u * 2u);         /* RXB0CTRL, RXB1CTRL                     */
+    queueWritePadding(3u * 2u);         /* CANINTE, CANINTF                       */
+    queueWritePadding(4u);              /* BIT MODIFY CANCTRL -> normal           */
+    queueRegisterRead(MCP_MODE_NORMAL); /* CANSTAT poll: normal reached           */
 }
 
 /*==================================================================================================
@@ -176,8 +178,7 @@ static void test_Identifier_MatchesDatasheetEncoding(void)
     TEST_ASSERT_EQUAL_HEX8(0xC8u, regs[1]);
     TEST_ASSERT_EQUAL_HEX8(0x10u, regs[2]);
     TEST_ASSERT_EQUAL_HEX8(0x9Au, regs[3]);
-    TEST_ASSERT_EQUAL_HEX32(CAN_ID_MCU_DRIVE_STATE | CAN_ID_EXTENDED_FLAG,
-                            Can_DecodeIdentifier(regs));
+    TEST_ASSERT_EQUAL_HEX32(CAN_ID_MCU_DRIVE_STATE | CAN_ID_EXTENDED_FLAG, Can_DecodeIdentifier(regs));
 
     /* 0x10F8108D shares its SID and its upper EID bits, differing only in EID0. Two
      * identifiers this close are exactly the case a transposed shift would merge. */
@@ -186,8 +187,7 @@ static void test_Identifier_MatchesDatasheetEncoding(void)
     TEST_ASSERT_EQUAL_HEX8(0xC8u, regs[1]);
     TEST_ASSERT_EQUAL_HEX8(0x10u, regs[2]);
     TEST_ASSERT_EQUAL_HEX8(0x8Du, regs[3]);
-    TEST_ASSERT_EQUAL_HEX32(CAN_ID_MCU_CURRENT_VOLTAGE | CAN_ID_EXTENDED_FLAG,
-                            Can_DecodeIdentifier(regs));
+    TEST_ASSERT_EQUAL_HEX32(CAN_ID_MCU_CURRENT_VOLTAGE | CAN_ID_EXTENDED_FLAG, Can_DecodeIdentifier(regs));
 
     /* Standard 0x7FF: SIDH = 0xFF, SIDL = 0xE0, no EXIDE. */
     Can_EncodeIdentifier(0x7FFuL, regs);

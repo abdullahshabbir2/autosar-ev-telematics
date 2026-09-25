@@ -101,17 +101,17 @@ extern "C" {
  *  Wire-format constants
  *================================================================================================*/
 
-#define RS485IF_START_BYTE 0xFFu      /**< First byte of every frame.            */
-#define RS485IF_DIR_REQUEST 0x00u     /**< Second byte, master to pack.          */
-#define RS485IF_DIR_RESPONSE 0x55u    /**< Second byte, pack to master.          */
+#define RS485IF_START_BYTE 0xFFu   /**< First byte of every frame.            */
+#define RS485IF_DIR_REQUEST 0x00u  /**< Second byte, master to pack.          */
+#define RS485IF_DIR_RESPONSE 0x55u /**< Second byte, pack to master.          */
 
-#define RS485IF_TYPE_ADDRESSED 0x01u  /**< Frame carries a pack serial number.   */
-#define RS485IF_TYPE_BROADCAST 0x03u  /**< Frame addresses the pack controller.  */
+#define RS485IF_TYPE_ADDRESSED 0x01u /**< Frame carries a pack serial number.   */
+#define RS485IF_TYPE_BROADCAST 0x03u /**< Frame addresses the pack controller.  */
 
-#define RS485IF_CMD_SERIAL_NUMBER 0x00u /**< Read the pack serial number.        */
-#define RS485IF_CMD_BATTERY_PARAMS 0x01u/**< Read pack-level measurements.       */
-#define RS485IF_CMD_CELL_PARAMS 0x05u   /**< Read per-cell measurements.         */
-#define RS485IF_CMD_AUTH_SEED 0x08u     /**< Begin the authentication exchange.  */
+#define RS485IF_CMD_SERIAL_NUMBER 0x00u  /**< Read the pack serial number.        */
+#define RS485IF_CMD_BATTERY_PARAMS 0x01u /**< Read pack-level measurements.       */
+#define RS485IF_CMD_CELL_PARAMS 0x05u    /**< Read per-cell measurements.         */
+#define RS485IF_CMD_AUTH_SEED 0x08u      /**< Begin the authentication exchange.  */
 
 /** Bytes before the payload: start, direction, length(2), type, serial(4), command(4). */
 #define RS485IF_PAYLOAD_OFFSET 13u
@@ -173,20 +173,20 @@ typedef uint8 Rs485If_SlotType;
  */
 typedef struct
 {
-    uint16 voltage;          /**< Pack voltage, raw.                           */
-    uint16 voltageHighest;   /**< Highest cell voltage, raw.                    */
-    uint16 voltageLowest;    /**< Lowest cell voltage, raw.                     */
-    sint32 current;          /**< Pack current, raw. Sign convention unconfirmed.*/
-    sint16 temperature;      /**< Pack temperature, raw.                        */
-    sint16 temperatureHigh;  /**< Highest sensor, raw.                          */
-    sint16 temperatureLow;   /**< Lowest sensor, raw.                           */
-    uint8 stateOfCharge;     /**< State of charge, percent (0 .. 100).          */
-    uint8 stateOfHealth;     /**< State of health, percent (0 .. 100).          */
-    uint32 chargeEnergyWh;   /**< Lifetime charge throughput, raw.              */
-    uint32 dischargeEnergyWh;/**< Lifetime discharge throughput, raw.           */
-    uint32 chargeTimeSec;    /**< Lifetime charging time, raw.                  */
-    uint32 dischargeTimeSec; /**< Lifetime discharging time, raw.               */
-    uint32 statusFlags;      /**< BATT0201 status and fault bits.               */
+    uint16 voltage;           /**< Pack voltage, raw.                           */
+    uint16 voltageHighest;    /**< Highest cell voltage, raw.                    */
+    uint16 voltageLowest;     /**< Lowest cell voltage, raw.                     */
+    sint32 current;           /**< Pack current, raw. Sign convention unconfirmed.*/
+    sint16 temperature;       /**< Pack temperature, raw.                        */
+    sint16 temperatureHigh;   /**< Highest sensor, raw.                          */
+    sint16 temperatureLow;    /**< Lowest sensor, raw.                           */
+    uint8 stateOfCharge;      /**< State of charge, percent (0 .. 100).          */
+    uint8 stateOfHealth;      /**< State of health, percent (0 .. 100).          */
+    uint32 chargeEnergyWh;    /**< Lifetime charge throughput, raw.              */
+    uint32 dischargeEnergyWh; /**< Lifetime discharge throughput, raw.           */
+    uint32 chargeTimeSec;     /**< Lifetime charging time, raw.                  */
+    uint32 dischargeTimeSec;  /**< Lifetime discharging time, raw.               */
+    uint32 statusFlags;       /**< BATT0201 status and fault bits.               */
 } Rs485If_PackDataType;
 
 /**
@@ -205,28 +205,28 @@ typedef struct
 /** Everything known about one pack after a polling round. */
 typedef struct
 {
-    uint32 serialNumber;         /**< 0 if the pack has not been discovered.      */
-    Rs485If_PackDataType pack;   /**< Valid only while @c packDataValid is TRUE.   */
-    Rs485If_CellDataType cells;  /**< Valid only while @c cellDataValid is TRUE.   */
-    boolean present;             /**< The pack answered a serial-number request.  */
-    boolean packDataValid;       /**< The last BATT0100 read succeeded.           */
-    boolean cellDataValid;       /**< The last BATT0500 read succeeded.           */
-    uint16 consecutiveFailures;  /**< Reads failed in a row; drives the DTC.      */
-    uint32 totalRequests;        /**< Requests issued to this pack.               */
-    uint32 totalFailures;        /**< Requests that did not yield a valid frame.  */
+    uint32 serialNumber;        /**< 0 if the pack has not been discovered.      */
+    Rs485If_PackDataType pack;  /**< Valid only while @c packDataValid is TRUE.   */
+    Rs485If_CellDataType cells; /**< Valid only while @c cellDataValid is TRUE.   */
+    boolean present;            /**< The pack answered a serial-number request.  */
+    boolean packDataValid;      /**< The last BATT0100 read succeeded.           */
+    boolean cellDataValid;      /**< The last BATT0500 read succeeded.           */
+    uint16 consecutiveFailures; /**< Reads failed in a row; drives the DTC.      */
+    uint32 totalRequests;       /**< Requests issued to this pack.               */
+    uint32 totalFailures;       /**< Requests that did not yield a valid frame.  */
 } Rs485If_PackStateType;
 
 /** Bus-level counters, published as diagnostic data. */
 typedef struct
 {
-    uint32 framesSent;        /**< Requests transmitted.                        */
-    uint32 framesReceived;    /**< Well-formed responses accepted.               */
-    uint32 crcFailures;       /**< Responses rejected by the frame check.        */
-    uint32 timeouts;          /**< Requests that drew no reply at all.           */
-    uint32 shortFrames;       /**< Replies that stopped before the frame ended.  */
-    uint32 headerFailures;    /**< Replies with a wrong start or direction byte. */
-    uint32 serialMismatches;  /**< Replies attributed to the wrong pack.         */
-    uint32 staleRxBytes;      /**< Bytes purged before a request was issued.     */
+    uint32 framesSent;       /**< Requests transmitted.                        */
+    uint32 framesReceived;   /**< Well-formed responses accepted.               */
+    uint32 crcFailures;      /**< Responses rejected by the frame check.        */
+    uint32 timeouts;         /**< Requests that drew no reply at all.           */
+    uint32 shortFrames;      /**< Replies that stopped before the frame ended.  */
+    uint32 headerFailures;   /**< Replies with a wrong start or direction byte. */
+    uint32 serialMismatches; /**< Replies attributed to the wrong pack.         */
+    uint32 staleRxBytes;     /**< Bytes purged before a request was issued.     */
 } Rs485If_StatisticsType;
 
 /*==================================================================================================
@@ -260,8 +260,8 @@ void Rs485If_DeInit(void);
  *         is rejected rather than truncated -- this is the exact hazard that made the v1
  *         frame builders overflow their arrays.
  */
-CHECK_RETURN Std_ReturnType Rs485If_BuildRequest(uint8 *frame, uint8 frameSize,
-                                                 uint32 serialNumber, uint8 command);
+CHECK_RETURN Std_ReturnType Rs485If_BuildRequest(uint8 *frame, uint8 frameSize, uint32 serialNumber,
+                                                 uint8 command);
 
 /**
  * @brief Build a request frame carrying a two-byte payload.
@@ -274,9 +274,8 @@ CHECK_RETURN Std_ReturnType Rs485If_BuildRequest(uint8 *frame, uint8 frameSize,
  * @param[in]  payloadLow  Second payload byte.
  * @return E_OK on success; E_NOT_OK if @p frame is NULL_PTR or too small.
  */
-CHECK_RETURN Std_ReturnType Rs485If_BuildRequestExt(uint8 *frame, uint8 frameSize,
-                                                    uint32 serialNumber, uint8 command,
-                                                    uint8 payloadHigh, uint8 payloadLow);
+CHECK_RETURN Std_ReturnType Rs485If_BuildRequestExt(uint8 *frame, uint8 frameSize, uint32 serialNumber,
+                                                    uint8 command, uint8 payloadHigh, uint8 payloadLow);
 
 /**
  * @brief Validate a received frame's header, declared length and CRC.
@@ -292,8 +291,7 @@ CHECK_RETURN Std_ReturnType Rs485If_BuildRequestExt(uint8 *frame, uint8 frameSiz
  * @return E_OK if the frame is well-formed; ::E_CRC_FAIL, E_NOT_OK or E_INVALID_PARAM
  *         with a Det runtime report identifying which check failed.
  */
-CHECK_RETURN Std_ReturnType Rs485If_ValidateResponse(const uint8 *frame, uint8 frameSize,
-                                                     uint8 expectedSize);
+CHECK_RETURN Std_ReturnType Rs485If_ValidateResponse(const uint8 *frame, uint8 frameSize, uint8 expectedSize);
 
 /**
  * @brief Read the pack serial number echoed in a response frame.
@@ -371,8 +369,7 @@ CHECK_RETURN Std_ReturnType Rs485If_PollAllPacks(void);
  * @param[out] state Destination.
  * @return E_OK on success; E_NOT_OK for an invalid slot or a NULL pointer.
  */
-CHECK_RETURN Std_ReturnType Rs485If_GetPackState(Rs485If_SlotType slot,
-                                                 Rs485If_PackStateType *state);
+CHECK_RETURN Std_ReturnType Rs485If_GetPackState(Rs485If_SlotType slot, Rs485If_PackStateType *state);
 
 /** Number of slots that answered discovery. */
 uint8 Rs485If_GetPresentPackCount(void);

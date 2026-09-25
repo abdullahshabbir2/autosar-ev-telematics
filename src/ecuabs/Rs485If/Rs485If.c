@@ -19,13 +19,13 @@
  *  Frame field offsets
  *================================================================================================*/
 
-#define RS485IF_OFF_START 0u    /* 0xFF                       */
-#define RS485IF_OFF_DIR 1u      /* 0x00 request, 0x55 reply   */
-#define RS485IF_OFF_LEN_HI 2u   /* declared total length, MSB */
+#define RS485IF_OFF_START 0u  /* 0xFF                       */
+#define RS485IF_OFF_DIR 1u    /* 0x00 request, 0x55 reply   */
+#define RS485IF_OFF_LEN_HI 2u /* declared total length, MSB */
 #define RS485IF_OFF_LEN_LO 3u
-#define RS485IF_OFF_TYPE 4u     /* 0x01 addressed, 0x03 broadcast */
-#define RS485IF_OFF_SERIAL 5u   /* 4 bytes, most significant first */
-#define RS485IF_OFF_CMD 9u      /* command, then 3 reserved bytes  */
+#define RS485IF_OFF_TYPE 4u            /* 0x01 addressed, 0x03 broadcast */
+#define RS485IF_OFF_SERIAL 5u          /* 4 bytes, most significant first */
+#define RS485IF_OFF_CMD 9u             /* command, then 3 reserved bytes  */
 #define RS485IF_OFF_PAYLOAD_LEN_HI 11u /* only in extended requests */
 #define RS485IF_OFF_PAYLOAD_LEN_LO 12u
 #define RS485IF_OFF_PAYLOAD 13u
@@ -38,12 +38,10 @@
  *================================================================================================*/
 
 #if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L)
-_Static_assert(RS485IF_REQUEST_FRAME_SIZE > RS485IF_CRC_SIZE,
-               "a request frame must be longer than its CRC");
+_Static_assert(RS485IF_REQUEST_FRAME_SIZE > RS485IF_CRC_SIZE, "a request frame must be longer than its CRC");
 _Static_assert(RS485IF_REQUEST_FRAME_SIZE_EXT >= (RS485IF_OFF_PAYLOAD + 2u + RS485IF_CRC_SIZE),
                "an extended request must hold header, 2-byte payload and CRC");
-_Static_assert(RS485IF_BATTERY_RESPONSE_SIZE ==
-                   (RS485IF_PAYLOAD_OFFSET + 38u + RS485IF_CRC_SIZE),
+_Static_assert(RS485IF_BATTERY_RESPONSE_SIZE == (RS485IF_PAYLOAD_OFFSET + 38u + RS485IF_CRC_SIZE),
                "BATT0100 payload is 38 bytes; response size disagrees");
 _Static_assert(RS485IF_CELL_RESPONSE_SIZE == (RS485IF_PAYLOAD_OFFSET + 66u + RS485IF_CRC_SIZE),
                "BATT0500 payload is 66 bytes; response size disagrees");
@@ -143,15 +141,14 @@ STATIC void Rs485If_AppendCrc(uint8 *frame, uint8 frameSize)
  *  Frame codec
  *================================================================================================*/
 
-Std_ReturnType Rs485If_BuildRequest(uint8 *frame, uint8 frameSize, uint32 serialNumber,
-                                    uint8 command)
+Std_ReturnType Rs485If_BuildRequest(uint8 *frame, uint8 frameSize, uint32 serialNumber, uint8 command)
 {
     uint8 i;
 
-    DET_CHECK_RETURN(frame != NULL_PTR, MODULE_ID_RS485IF, INSTANCE_ID_SINGLE,
-                     RS485IF_API_ID_BUILD_FRAME, RS485IF_E_PARAM_POINTER, E_NOT_OK);
-    DET_CHECK_RETURN(frameSize >= RS485IF_REQUEST_FRAME_SIZE, MODULE_ID_RS485IF,
-                     INSTANCE_ID_SINGLE, RS485IF_API_ID_BUILD_FRAME, E_PARAM_VALUE, E_NOT_OK);
+    DET_CHECK_RETURN(frame != NULL_PTR, MODULE_ID_RS485IF, INSTANCE_ID_SINGLE, RS485IF_API_ID_BUILD_FRAME,
+                     RS485IF_E_PARAM_POINTER, E_NOT_OK);
+    DET_CHECK_RETURN(frameSize >= RS485IF_REQUEST_FRAME_SIZE, MODULE_ID_RS485IF, INSTANCE_ID_SINGLE,
+                     RS485IF_API_ID_BUILD_FRAME, E_PARAM_VALUE, E_NOT_OK);
 
     for (i = 0u; i < RS485IF_REQUEST_FRAME_SIZE; i++)
     {
@@ -169,15 +166,15 @@ Std_ReturnType Rs485If_BuildRequest(uint8 *frame, uint8 frameSize, uint32 serial
     return E_OK;
 }
 
-Std_ReturnType Rs485If_BuildRequestExt(uint8 *frame, uint8 frameSize, uint32 serialNumber,
-                                       uint8 command, uint8 payloadHigh, uint8 payloadLow)
+Std_ReturnType Rs485If_BuildRequestExt(uint8 *frame, uint8 frameSize, uint32 serialNumber, uint8 command,
+                                       uint8 payloadHigh, uint8 payloadLow)
 {
     uint8 i;
 
-    DET_CHECK_RETURN(frame != NULL_PTR, MODULE_ID_RS485IF, INSTANCE_ID_SINGLE,
-                     RS485IF_API_ID_BUILD_FRAME, RS485IF_E_PARAM_POINTER, E_NOT_OK);
-    DET_CHECK_RETURN(frameSize >= RS485IF_REQUEST_FRAME_SIZE_EXT, MODULE_ID_RS485IF,
-                     INSTANCE_ID_SINGLE, RS485IF_API_ID_BUILD_FRAME, E_PARAM_VALUE, E_NOT_OK);
+    DET_CHECK_RETURN(frame != NULL_PTR, MODULE_ID_RS485IF, INSTANCE_ID_SINGLE, RS485IF_API_ID_BUILD_FRAME,
+                     RS485IF_E_PARAM_POINTER, E_NOT_OK);
+    DET_CHECK_RETURN(frameSize >= RS485IF_REQUEST_FRAME_SIZE_EXT, MODULE_ID_RS485IF, INSTANCE_ID_SINGLE,
+                     RS485IF_API_ID_BUILD_FRAME, E_PARAM_VALUE, E_NOT_OK);
 
     for (i = 0u; i < RS485IF_REQUEST_FRAME_SIZE_EXT; i++)
     {
@@ -204,14 +201,14 @@ Std_ReturnType Rs485If_ValidateResponse(const uint8 *frame, uint8 frameSize, uin
     uint16 receivedCrc;
     uint16 computedCrc;
 
-    DET_CHECK_RETURN(frame != NULL_PTR, MODULE_ID_RS485IF, INSTANCE_ID_SINGLE,
-                     RS485IF_API_ID_PARSE_FRAME, RS485IF_E_PARAM_POINTER, E_NOT_OK);
+    DET_CHECK_RETURN(frame != NULL_PTR, MODULE_ID_RS485IF, INSTANCE_ID_SINGLE, RS485IF_API_ID_PARSE_FRAME,
+                     RS485IF_E_PARAM_POINTER, E_NOT_OK);
 
     if (frameSize < expectedSize)
     {
         Rs485If_Stats.shortFrames++;
-        (void)Det_ReportRuntimeError(MODULE_ID_RS485IF, INSTANCE_ID_SINGLE,
-                                     RS485IF_API_ID_PARSE_FRAME, RS485IF_E_SHORT_RESPONSE);
+        (void)Det_ReportRuntimeError(MODULE_ID_RS485IF, INSTANCE_ID_SINGLE, RS485IF_API_ID_PARSE_FRAME,
+                                     RS485IF_E_SHORT_RESPONSE);
         return E_NOT_OK;
     }
 
@@ -219,20 +216,19 @@ Std_ReturnType Rs485If_ValidateResponse(const uint8 *frame, uint8 frameSize, uin
      * frame should register as a header rejection, not as a CRC failure -- the CRC failure
      * rate is the number used to judge whether the harness is degrading, and polluting it
      * with well-formed frames from a different protocol makes that judgement worthless. */
-    if ((frame[RS485IF_OFF_START] != RS485IF_START_BYTE) ||
-        (frame[RS485IF_OFF_DIR] != RS485IF_DIR_RESPONSE))
+    if ((frame[RS485IF_OFF_START] != RS485IF_START_BYTE) || (frame[RS485IF_OFF_DIR] != RS485IF_DIR_RESPONSE))
     {
         Rs485If_Stats.headerFailures++;
-        (void)Det_ReportRuntimeError(MODULE_ID_RS485IF, INSTANCE_ID_SINGLE,
-                                     RS485IF_API_ID_PARSE_FRAME, RS485IF_E_BAD_HEADER);
+        (void)Det_ReportRuntimeError(MODULE_ID_RS485IF, INSTANCE_ID_SINGLE, RS485IF_API_ID_PARSE_FRAME,
+                                     RS485IF_E_BAD_HEADER);
         return E_NOT_OK;
     }
 
     declaredLength = Rs485If_ReadU16(&frame[RS485IF_OFF_LEN_HI]);
     if (declaredLength != (uint16)expectedSize)
     {
-        (void)Det_ReportRuntimeError(MODULE_ID_RS485IF, INSTANCE_ID_SINGLE,
-                                     RS485IF_API_ID_PARSE_FRAME, RS485IF_E_BAD_LENGTH);
+        (void)Det_ReportRuntimeError(MODULE_ID_RS485IF, INSTANCE_ID_SINGLE, RS485IF_API_ID_PARSE_FRAME,
+                                     RS485IF_E_BAD_LENGTH);
         return E_INVALID_PARAM;
     }
 
@@ -242,8 +238,8 @@ Std_ReturnType Rs485If_ValidateResponse(const uint8 *frame, uint8 frameSize, uin
     if (receivedCrc != computedCrc)
     {
         Rs485If_Stats.crcFailures++;
-        (void)Det_ReportRuntimeError(MODULE_ID_RS485IF, INSTANCE_ID_SINGLE,
-                                     RS485IF_API_ID_PARSE_FRAME, RS485IF_E_CRC_MISMATCH);
+        (void)Det_ReportRuntimeError(MODULE_ID_RS485IF, INSTANCE_ID_SINGLE, RS485IF_API_ID_PARSE_FRAME,
+                                     RS485IF_E_CRC_MISMATCH);
         return E_CRC_FAIL;
     }
 
@@ -263,9 +259,8 @@ Std_ReturnType Rs485If_ParsePackData(const uint8 *frame, Rs485If_PackDataType *d
 {
     const uint8 *p;
 
-    DET_CHECK_RETURN((frame != NULL_PTR) && (data != NULL_PTR), MODULE_ID_RS485IF,
-                     INSTANCE_ID_SINGLE, RS485IF_API_ID_PARSE_FRAME, RS485IF_E_PARAM_POINTER,
-                     E_NOT_OK);
+    DET_CHECK_RETURN((frame != NULL_PTR) && (data != NULL_PTR), MODULE_ID_RS485IF, INSTANCE_ID_SINGLE,
+                     RS485IF_API_ID_PARSE_FRAME, RS485IF_E_PARAM_POINTER, E_NOT_OK);
 
     p = &frame[RS485IF_PAYLOAD_OFFSET];
 
@@ -292,9 +287,8 @@ Std_ReturnType Rs485If_ParseCellData(const uint8 *frame, Rs485If_CellDataType *d
     const uint8 *p;
     uint8 i;
 
-    DET_CHECK_RETURN((frame != NULL_PTR) && (data != NULL_PTR), MODULE_ID_RS485IF,
-                     INSTANCE_ID_SINGLE, RS485IF_API_ID_PARSE_FRAME, RS485IF_E_PARAM_POINTER,
-                     E_NOT_OK);
+    DET_CHECK_RETURN((frame != NULL_PTR) && (data != NULL_PTR), MODULE_ID_RS485IF, INSTANCE_ID_SINGLE,
+                     RS485IF_API_ID_PARSE_FRAME, RS485IF_E_PARAM_POINTER, E_NOT_OK);
 
     p = &frame[RS485IF_PAYLOAD_OFFSET];
 
@@ -338,8 +332,8 @@ STATIC Std_ReturnType Rs485If_Exchange(const uint8 *request, uint8 requestSize, 
     if (stale > 0u)
     {
         Rs485If_Stats.staleRxBytes += stale;
-        (void)Det_ReportTransientFault(MODULE_ID_RS485IF, INSTANCE_ID_SINGLE,
-                                       RS485IF_API_ID_READ_BATTERY, RS485IF_E_STALE_RX);
+        (void)Det_ReportTransientFault(MODULE_ID_RS485IF, INSTANCE_ID_SINGLE, RS485IF_API_ID_READ_BATTERY,
+                                       RS485IF_E_STALE_RX);
     }
 
     Dio_WriteChannel(DIO_CHANNEL_RS485_DE, STD_HIGH);
@@ -357,8 +351,8 @@ STATIC Std_ReturnType Rs485If_Exchange(const uint8 *request, uint8 requestSize, 
 
     if (status != E_OK)
     {
-        (void)Det_ReportRuntimeError(MODULE_ID_RS485IF, INSTANCE_ID_SINGLE,
-                                     RS485IF_API_ID_READ_BATTERY, RS485IF_E_TX_FAILED);
+        (void)Det_ReportRuntimeError(MODULE_ID_RS485IF, INSTANCE_ID_SINGLE, RS485IF_API_ID_READ_BATTERY,
+                                     RS485IF_E_TX_FAILED);
         return E_NOT_OK;
     }
 
@@ -375,14 +369,14 @@ STATIC Std_ReturnType Rs485If_Exchange(const uint8 *request, uint8 requestSize, 
         if (received == 0u)
         {
             Rs485If_Stats.timeouts++;
-            (void)Det_ReportRuntimeError(MODULE_ID_RS485IF, INSTANCE_ID_SINGLE,
-                                         RS485IF_API_ID_READ_BATTERY, RS485IF_E_NO_RESPONSE);
+            (void)Det_ReportRuntimeError(MODULE_ID_RS485IF, INSTANCE_ID_SINGLE, RS485IF_API_ID_READ_BATTERY,
+                                         RS485IF_E_NO_RESPONSE);
         }
         else
         {
             Rs485If_Stats.shortFrames++;
-            (void)Det_ReportRuntimeError(MODULE_ID_RS485IF, INSTANCE_ID_SINGLE,
-                                         RS485IF_API_ID_READ_BATTERY, RS485IF_E_SHORT_RESPONSE);
+            (void)Det_ReportRuntimeError(MODULE_ID_RS485IF, INSTANCE_ID_SINGLE, RS485IF_API_ID_READ_BATTERY,
+                                         RS485IF_E_SHORT_RESPONSE);
         }
         return E_TIMEOUT;
     }
@@ -439,8 +433,7 @@ STATIC Std_ReturnType Rs485If_Transact(Rs485If_SlotType slot, uint32 serialNumbe
          * stale or cross-talked reply detectable -- v1 validated only the CRC, so a
          * perfectly formed reply from the wrong pack was accepted and its measurements
          * were logged against another pack's slot. */
-        if ((checkSerial != FALSE) &&
-            (Rs485If_ParseSerialNumber(Rs485If_Frame) != serialNumber))
+        if ((checkSerial != FALSE) && (Rs485If_ParseSerialNumber(Rs485If_Frame) != serialNumber))
         {
             Rs485If_Stats.serialMismatches++;
             (void)Det_ReportRuntimeError(MODULE_ID_RS485IF, slot, RS485IF_API_ID_PARSE_FRAME,
@@ -574,8 +567,9 @@ Std_ReturnType Rs485If_SwitchPacks(uint8 maskHigh, uint8 maskLow)
 
     /* Broadcast: the switch command addresses the pack controller, not an individual pack,
      * so the serial number field is zero. */
-    if (Rs485If_BuildRequestExt(request, (uint8)sizeof(request), 0u, RS485IF_CMD_BATTERY_PARAMS,
-                                maskHigh, maskLow) != E_OK)
+    if (Rs485If_BuildRequestExt(request, (uint8)sizeof(request), 0u, RS485IF_CMD_BATTERY_PARAMS, maskHigh,
+                                maskLow)
+        != E_OK)
     {
         return E_NOT_OK;
     }
@@ -586,8 +580,7 @@ Std_ReturnType Rs485If_SwitchPacks(uint8 maskHigh, uint8 maskLow)
         return status;
     }
 
-    return Rs485If_ValidateResponse(response, (uint8)sizeof(response),
-                                    (uint8)RS485IF_REQUEST_FRAME_SIZE_EXT);
+    return Rs485If_ValidateResponse(response, (uint8)sizeof(response), (uint8)RS485IF_REQUEST_FRAME_SIZE_EXT);
 }
 
 Std_ReturnType Rs485If_DiscoverPacks(void)
@@ -618,7 +611,8 @@ Std_ReturnType Rs485If_DiscoverPacks(void)
          * echoed serial cannot be checked against a value we do not yet know -- so
          * checkSerial is FALSE here and only here. */
         if (Rs485If_Transact((Rs485If_SlotType)(index + 1u), 0u, RS485IF_CMD_SERIAL_NUMBER,
-                             (uint8)RS485IF_SERIAL_RESPONSE_SIZE, FALSE) == E_OK)
+                             (uint8)RS485IF_SERIAL_RESPONSE_SIZE, FALSE)
+            == E_OK)
         {
             const uint32 serial = Rs485If_ParseSerialNumber(Rs485If_Frame);
 
@@ -635,8 +629,8 @@ Std_ReturnType Rs485If_DiscoverPacks(void)
                  * pack's energy and current in every aggregate the vehicle reports. */
                 for (prior = 0u; prior < index; prior++)
                 {
-                    if ((Rs485If_Packs[prior].present != FALSE) &&
-                        (Rs485If_Packs[prior].serialNumber == serial))
+                    if ((Rs485If_Packs[prior].present != FALSE)
+                        && (Rs485If_Packs[prior].serialNumber == serial))
                     {
                         duplicate = TRUE;
                         break;
@@ -645,10 +639,8 @@ Std_ReturnType Rs485If_DiscoverPacks(void)
 
                 if (duplicate != FALSE)
                 {
-                    (void)Det_ReportRuntimeError(MODULE_ID_RS485IF,
-                                                 (uint8)(index + 1u),
-                                                 RS485IF_API_ID_DISCOVER,
-                                                 RS485IF_E_SERIAL_MISMATCH);
+                    (void)Det_ReportRuntimeError(MODULE_ID_RS485IF, (uint8)(index + 1u),
+                                                 RS485IF_API_ID_DISCOVER, RS485IF_E_SERIAL_MISMATCH);
                 }
                 else
                 {
@@ -687,8 +679,8 @@ Std_ReturnType Rs485If_ReadPackData(Rs485If_SlotType slot)
     uint8 index;
     Std_ReturnType status;
 
-    DET_CHECK_RETURN(Rs485If_Initialised != FALSE, MODULE_ID_RS485IF, slot,
-                     RS485IF_API_ID_READ_BATTERY, RS485IF_E_UNINIT, E_NOT_OK);
+    DET_CHECK_RETURN(Rs485If_Initialised != FALSE, MODULE_ID_RS485IF, slot, RS485IF_API_ID_READ_BATTERY,
+                     RS485IF_E_UNINIT, E_NOT_OK);
     DET_CHECK_RETURN(Rs485If_SlotToIndex(slot, &index) != FALSE, MODULE_ID_RS485IF, slot,
                      RS485IF_API_ID_READ_BATTERY, RS485IF_E_PARAM_SLOT, E_NOT_OK);
 
@@ -697,8 +689,7 @@ Std_ReturnType Rs485If_ReadPackData(Rs485If_SlotType slot)
         return E_NOT_FOUND;
     }
 
-    status = Rs485If_Transact(slot, Rs485If_Packs[index].serialNumber,
-                              RS485IF_CMD_BATTERY_PARAMS,
+    status = Rs485If_Transact(slot, Rs485If_Packs[index].serialNumber, RS485IF_CMD_BATTERY_PARAMS,
                               (uint8)RS485IF_BATTERY_RESPONSE_SIZE, TRUE);
 
     if (status == E_OK)
@@ -720,8 +711,8 @@ Std_ReturnType Rs485If_ReadCellData(Rs485If_SlotType slot)
     uint8 index;
     Std_ReturnType status;
 
-    DET_CHECK_RETURN(Rs485If_Initialised != FALSE, MODULE_ID_RS485IF, slot,
-                     RS485IF_API_ID_READ_CELLS, RS485IF_E_UNINIT, E_NOT_OK);
+    DET_CHECK_RETURN(Rs485If_Initialised != FALSE, MODULE_ID_RS485IF, slot, RS485IF_API_ID_READ_CELLS,
+                     RS485IF_E_UNINIT, E_NOT_OK);
     DET_CHECK_RETURN(Rs485If_SlotToIndex(slot, &index) != FALSE, MODULE_ID_RS485IF, slot,
                      RS485IF_API_ID_READ_CELLS, RS485IF_E_PARAM_SLOT, E_NOT_OK);
 
@@ -807,8 +798,8 @@ uint8 Rs485If_GetPresentPackCount(void)
 
 Std_ReturnType Rs485If_GetStatistics(Rs485If_StatisticsType *stats)
 {
-    DET_CHECK_RETURN(stats != NULL_PTR, MODULE_ID_RS485IF, INSTANCE_ID_SINGLE,
-                     RS485IF_API_ID_READ_BATTERY, RS485IF_E_PARAM_POINTER, E_NOT_OK);
+    DET_CHECK_RETURN(stats != NULL_PTR, MODULE_ID_RS485IF, INSTANCE_ID_SINGLE, RS485IF_API_ID_READ_BATTERY,
+                     RS485IF_E_PARAM_POINTER, E_NOT_OK);
 
     *stats = Rs485If_Stats;
     return E_OK;

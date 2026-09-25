@@ -50,16 +50,15 @@ STATIC uint32 Det_PreInitReports;
 /**
  * @brief Find the slot holding @p entry's triple, or ::DET_HISTORY_SIZE if absent.
  */
-STATIC uint16 Det_FindSlot(uint16 moduleId, uint8 instanceId, uint8 apiId, uint8 errorId,
-                           uint8 severity)
+STATIC uint16 Det_FindSlot(uint16 moduleId, uint8 instanceId, uint8 apiId, uint8 errorId, uint8 severity)
 {
     uint16 i;
 
     for (i = 0u; i < Det_EntryCount; i++)
     {
-        if ((Det_History[i].moduleId == moduleId) && (Det_History[i].instanceId == instanceId) &&
-            (Det_History[i].apiId == apiId) && (Det_History[i].errorId == errorId) &&
-            (Det_History[i].severity == severity))
+        if ((Det_History[i].moduleId == moduleId) && (Det_History[i].instanceId == instanceId)
+            && (Det_History[i].apiId == apiId) && (Det_History[i].errorId == errorId)
+            && (Det_History[i].severity == severity))
         {
             return i;
         }
@@ -231,8 +230,7 @@ Std_ReturnType Det_ReportRuntimeError(uint16 moduleId, uint8 instanceId, uint8 a
     return E_OK;
 }
 
-Std_ReturnType Det_ReportTransientFault(uint16 moduleId, uint8 instanceId, uint8 apiId,
-                                        uint8 faultId)
+Std_ReturnType Det_ReportTransientFault(uint16 moduleId, uint8 instanceId, uint8 apiId, uint8 faultId)
 {
     Det_Record(moduleId, instanceId, apiId, faultId, DET_SEVERITY_TRANSIENT);
     return E_OK;

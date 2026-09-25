@@ -197,8 +197,7 @@ STATIC void NetIf_ReapplySubscriptions(void)
     {
         if (NetIf_Subscriptions[i].active != FALSE)
         {
-            STD_DISCARD(
-                NetIf_PlatformMqttSubscribe(NetIf_Subscriptions[i].topic, NETIF_DIAGNOSTIC_QOS));
+            STD_DISCARD(NetIf_PlatformMqttSubscribe(NetIf_Subscriptions[i].topic, NETIF_DIAGNOSTIC_QOS));
         }
     }
 }
@@ -215,9 +214,8 @@ STATIC void NetIf_OnMessage(const char *topic, const uint8 *payload, uint16 payl
 
     for (i = 0u; i < (uint8)NETIF_MAX_SUBSCRIPTIONS; i++)
     {
-        if ((NetIf_Subscriptions[i].active != FALSE) &&
-            (NetIf_Subscriptions[i].handler != NULL_PTR) &&
-            (strcmp(NetIf_Subscriptions[i].topic, topic) == 0))
+        if ((NetIf_Subscriptions[i].active != FALSE) && (NetIf_Subscriptions[i].handler != NULL_PTR)
+            && (strcmp(NetIf_Subscriptions[i].topic, topic) == 0))
         {
             NetIf_Subscriptions[i].handler(topic, payload, payloadLen);
             return;
@@ -264,8 +262,8 @@ Std_ReturnType NetIf_Init(void)
 
 Std_ReturnType NetIf_RequestBearer(NetIf_BearerType bearer)
 {
-    DET_CHECK_RETURN(NetIf_Initialised != FALSE, MODULE_ID_NETIF, (uint8)bearer,
-                     NETIF_API_ID_REQUEST_BEARER, NETIF_E_UNINIT, E_NOT_OK);
+    DET_CHECK_RETURN(NetIf_Initialised != FALSE, MODULE_ID_NETIF, (uint8)bearer, NETIF_API_ID_REQUEST_BEARER,
+                     NETIF_E_UNINIT, E_NOT_OK);
 
 #if (NETIF_WIFI_ENABLED == STD_OFF)
     if (bearer == NETIF_BEARER_WIFI)
@@ -280,8 +278,8 @@ Std_ReturnType NetIf_RequestBearer(NetIf_BearerType bearer)
     }
 #endif
 
-    DET_CHECK_RETURN(bearer <= NETIF_BEARER_GSM, MODULE_ID_NETIF, (uint8)bearer,
-                     NETIF_API_ID_REQUEST_BEARER, NETIF_E_PARAM_BEARER, E_NOT_OK);
+    DET_CHECK_RETURN(bearer <= NETIF_BEARER_GSM, MODULE_ID_NETIF, (uint8)bearer, NETIF_API_ID_REQUEST_BEARER,
+                     NETIF_E_PARAM_BEARER, E_NOT_OK);
 
     if (NetIf_RequestedBearer == bearer)
     {
@@ -355,13 +353,12 @@ NetIf_BearerType NetIf_GetActiveBearer(void)
     return NetIf_Status.activeBearer;
 }
 
-Std_ReturnType NetIf_Publish(const char *topic, const uint8 *payload, uint16 payloadLen,
-                             boolean retain)
+Std_ReturnType NetIf_Publish(const char *topic, const uint8 *payload, uint16 payloadLen, boolean retain)
 {
-    DET_CHECK_RETURN(NetIf_Initialised != FALSE, MODULE_ID_NETIF, INSTANCE_ID_SINGLE,
-                     NETIF_API_ID_PUBLISH, NETIF_E_UNINIT, E_NOT_OK);
-    DET_CHECK_RETURN((topic != NULL_PTR) && (payload != NULL_PTR), MODULE_ID_NETIF,
-                     INSTANCE_ID_SINGLE, NETIF_API_ID_PUBLISH, NETIF_E_PARAM_POINTER, E_NOT_OK);
+    DET_CHECK_RETURN(NetIf_Initialised != FALSE, MODULE_ID_NETIF, INSTANCE_ID_SINGLE, NETIF_API_ID_PUBLISH,
+                     NETIF_E_UNINIT, E_NOT_OK);
+    DET_CHECK_RETURN((topic != NULL_PTR) && (payload != NULL_PTR), MODULE_ID_NETIF, INSTANCE_ID_SINGLE,
+                     NETIF_API_ID_PUBLISH, NETIF_E_PARAM_POINTER, E_NOT_OK);
 
     /* Rejected rather than truncated. A truncated telemetry record is worse than a missing one,
      * because it parses and looks like data. */
@@ -377,12 +374,11 @@ Std_ReturnType NetIf_Publish(const char *topic, const uint8 *payload, uint16 pay
         return E_NOT_OK;
     }
 
-    if (NetIf_PlatformMqttPublish(topic, payload, payloadLen, (uint8)NETIF_TELEMETRY_QOS, retain) !=
-        E_OK)
+    if (NetIf_PlatformMqttPublish(topic, payload, payloadLen, (uint8)NETIF_TELEMETRY_QOS, retain) != E_OK)
     {
         NetIf_Status.publishFailures++;
-        STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_BROKER_UNREACHABLE,
-                                       (uint8)NetIf_Status.activeBearer, DEM_EVENT_STATUS_FAILED));
+        STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_BROKER_UNREACHABLE, (uint8)NetIf_Status.activeBearer,
+                                       DEM_EVENT_STATUS_FAILED));
         return E_NOT_OK;
     }
 
@@ -396,17 +392,16 @@ Std_ReturnType NetIf_Subscribe(const char *topic, NetIf_MessageHandlerType handl
 {
     uint8 i;
 
-    DET_CHECK_RETURN(NetIf_Initialised != FALSE, MODULE_ID_NETIF, INSTANCE_ID_SINGLE,
-                     NETIF_API_ID_SUBSCRIBE, NETIF_E_UNINIT, E_NOT_OK);
-    DET_CHECK_RETURN((topic != NULL_PTR) && (handler != NULL_PTR), MODULE_ID_NETIF,
-                     INSTANCE_ID_SINGLE, NETIF_API_ID_SUBSCRIBE, NETIF_E_PARAM_POINTER, E_NOT_OK);
-    DET_CHECK_RETURN(strlen(topic) < (uint16)NETIF_MAX_TOPIC_SIZE, MODULE_ID_NETIF,
-                     INSTANCE_ID_SINGLE, NETIF_API_ID_SUBSCRIBE, E_PARAM_VALUE, E_NOT_OK);
+    DET_CHECK_RETURN(NetIf_Initialised != FALSE, MODULE_ID_NETIF, INSTANCE_ID_SINGLE, NETIF_API_ID_SUBSCRIBE,
+                     NETIF_E_UNINIT, E_NOT_OK);
+    DET_CHECK_RETURN((topic != NULL_PTR) && (handler != NULL_PTR), MODULE_ID_NETIF, INSTANCE_ID_SINGLE,
+                     NETIF_API_ID_SUBSCRIBE, NETIF_E_PARAM_POINTER, E_NOT_OK);
+    DET_CHECK_RETURN(strlen(topic) < (uint16)NETIF_MAX_TOPIC_SIZE, MODULE_ID_NETIF, INSTANCE_ID_SINGLE,
+                     NETIF_API_ID_SUBSCRIBE, E_PARAM_VALUE, E_NOT_OK);
 
     for (i = 0u; i < (uint8)NETIF_MAX_SUBSCRIPTIONS; i++)
     {
-        if ((NetIf_Subscriptions[i].active == FALSE) ||
-            (strcmp(NetIf_Subscriptions[i].topic, topic) == 0))
+        if ((NetIf_Subscriptions[i].active == FALSE) || (strcmp(NetIf_Subscriptions[i].topic, topic) == 0))
         {
             (void)memset(NetIf_Subscriptions[i].topic, 0, sizeof(NetIf_Subscriptions[i].topic));
             (void)memcpy(NetIf_Subscriptions[i].topic, topic, strlen(topic));
@@ -476,7 +471,8 @@ void NetIf_MainFunction(void)
                                        (uint8)NetIf_RequestedBearer, DEM_EVENT_STATUS_PASSED));
 
         if (NetIf_PlatformMqttConnect(NetIf_BrokerHost, NetIf_BrokerPort, NetIf_ClientId,
-                                      (uint16)NETIF_KEEPALIVE_S) == E_OK)
+                                      (uint16)NETIF_KEEPALIVE_S)
+            == E_OK)
         {
             NetIf_Status.sessionCount++;
             /* A successful session resets the backoff, so a brief outage does not leave the interval
@@ -488,8 +484,8 @@ void NetIf_MainFunction(void)
         }
         else if (Gpt_HasElapsed(NetIf_StateEnteredMs, NETIF_SESSION_TIMEOUT_MS) != FALSE)
         {
-            STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_BROKER_UNREACHABLE,
-                                           (uint8)NetIf_RequestedBearer, DEM_EVENT_STATUS_FAILED));
+            STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_BROKER_UNREACHABLE, (uint8)NetIf_RequestedBearer,
+                                           DEM_EVENT_STATUS_FAILED));
             NetIf_EnterBackoff();
         }
         else
@@ -544,8 +540,8 @@ void NetIf_MainFunction(void)
 
 Std_ReturnType NetIf_GetStatus(NetIf_StatusType *status)
 {
-    DET_CHECK_RETURN(status != NULL_PTR, MODULE_ID_NETIF, INSTANCE_ID_SINGLE,
-                     NETIF_API_ID_MAIN_FUNCTION, NETIF_E_PARAM_POINTER, E_NOT_OK);
+    DET_CHECK_RETURN(status != NULL_PTR, MODULE_ID_NETIF, INSTANCE_ID_SINGLE, NETIF_API_ID_MAIN_FUNCTION,
+                     NETIF_E_PARAM_POINTER, E_NOT_OK);
 
     *status = NetIf_Status;
     return E_OK;

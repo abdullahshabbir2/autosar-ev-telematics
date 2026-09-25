@@ -73,23 +73,23 @@ extern "C" {
  */
 typedef enum
 {
-    MCU_RESET_POWER_ON = 0,   /**< Cold start: supply applied or brown-out release. */
-    MCU_RESET_SOFTWARE = 1,   /**< Deliberate Mcu_PerformReset() or OTA activation. */
-    MCU_RESET_WATCHDOG = 2,   /**< A watchdog expired -- previous run hung.         */
-    MCU_RESET_PANIC = 3,      /**< Unhandled exception or assertion.                */
-    MCU_RESET_BROWNOUT = 4,   /**< Supply dipped below the brown-out threshold.     */
-    MCU_RESET_DEEPSLEEP = 5,  /**< Woken from deep sleep.                           */
-    MCU_RESET_EXTERNAL = 6,   /**< EN pin pulled low.                               */
-    MCU_RESET_UNKNOWN = 7     /**< Cause not reported by the hardware.              */
+    MCU_RESET_POWER_ON = 0,  /**< Cold start: supply applied or brown-out release. */
+    MCU_RESET_SOFTWARE = 1,  /**< Deliberate Mcu_PerformReset() or OTA activation. */
+    MCU_RESET_WATCHDOG = 2,  /**< A watchdog expired -- previous run hung.         */
+    MCU_RESET_PANIC = 3,     /**< Unhandled exception or assertion.                */
+    MCU_RESET_BROWNOUT = 4,  /**< Supply dipped below the brown-out threshold.     */
+    MCU_RESET_DEEPSLEEP = 5, /**< Woken from deep sleep.                           */
+    MCU_RESET_EXTERNAL = 6,  /**< EN pin pulled low.                               */
+    MCU_RESET_UNKNOWN = 7    /**< Cause not reported by the hardware.              */
 } Mcu_ResetReasonType;
 
 /** Heap and stack headroom, sampled for the telemetry health record. */
 typedef struct
 {
-    uint32 heapFreeBytes;        /**< Currently free heap.                        */
-    uint32 heapMinFreeBytes;     /**< Lowest free heap since boot (high-water).   */
-    uint32 heapLargestBlockBytes;/**< Largest contiguous block -- fragmentation.  */
-    uint32 internalFreeBytes;    /**< Free internal (non-PSRAM) heap.             */
+    uint32 heapFreeBytes;         /**< Currently free heap.                        */
+    uint32 heapMinFreeBytes;      /**< Lowest free heap since boot (high-water).   */
+    uint32 heapLargestBlockBytes; /**< Largest contiguous block -- fragmentation.  */
+    uint32 internalFreeBytes;     /**< Free internal (non-PSRAM) heap.             */
 } Mcu_HeapInfoType;
 
 /** Length in bytes of the factory MAC used as the ECU's unique identity. */

@@ -70,21 +70,21 @@ extern "C" {
 /** Classification of a Det report. */
 typedef enum
 {
-    DET_SEVERITY_DEV = 0,       /**< API contract violation by the caller.     */
-    DET_SEVERITY_RUNTIME = 1,   /**< Expected operational failure.             */
-    DET_SEVERITY_TRANSIENT = 2  /**< Fault already recovered; statistics only. */
+    DET_SEVERITY_DEV = 0,      /**< API contract violation by the caller.     */
+    DET_SEVERITY_RUNTIME = 1,  /**< Expected operational failure.             */
+    DET_SEVERITY_TRANSIENT = 2 /**< Fault already recovered; statistics only. */
 } Det_SeverityType;
 
 /** One captured report. Packed to 12 bytes so the ring stays cheap. */
 typedef struct
 {
-    uint32 timestamp;    /**< Milliseconds since boot (Gpt_GetMonotonicMs()). */
-    uint16 moduleId;     /**< Reporting module, see Autosar_ModuleIds.h.      */
-    uint8 instanceId;    /**< Which instance of that module.                  */
-    uint8 apiId;         /**< Which API of that module.                       */
-    uint8 errorId;       /**< Module-specific error code.                     */
-    uint8 severity;      /**< ::Det_SeverityType.                             */
-    uint16 occurrences;  /**< Times this exact triple has been reported.      */
+    uint32 timestamp;   /**< Milliseconds since boot (Gpt_GetMonotonicMs()). */
+    uint16 moduleId;    /**< Reporting module, see Autosar_ModuleIds.h.      */
+    uint8 instanceId;   /**< Which instance of that module.                  */
+    uint8 apiId;        /**< Which API of that module.                       */
+    uint8 errorId;      /**< Module-specific error code.                     */
+    uint8 severity;     /**< ::Det_SeverityType.                             */
+    uint16 occurrences; /**< Times this exact triple has been reported.      */
 } Det_EntryType;
 
 /** Aggregate counters, published in the telemetry health record. */
@@ -143,8 +143,7 @@ Std_ReturnType Det_ReportError(uint16 moduleId, uint8 instanceId, uint8 apiId, u
  * @brief Report an operational failure that is not a caller defect.
  * @copydetails Det_ReportError
  */
-Std_ReturnType Det_ReportRuntimeError(uint16 moduleId, uint8 instanceId, uint8 apiId,
-                                      uint8 errorId);
+Std_ReturnType Det_ReportRuntimeError(uint16 moduleId, uint8 instanceId, uint8 apiId, uint8 errorId);
 
 /**
  * @brief Report a fault from which the caller has already recovered.
@@ -162,8 +161,7 @@ Std_ReturnType Det_ReportRuntimeError(uint16 moduleId, uint8 instanceId, uint8 a
  * @param faultId    Module-specific fault code.
  * @return E_OK if the report was recorded.
  */
-Std_ReturnType Det_ReportTransientFault(uint16 moduleId, uint8 instanceId, uint8 apiId,
-                                        uint8 faultId);
+Std_ReturnType Det_ReportTransientFault(uint16 moduleId, uint8 instanceId, uint8 apiId, uint8 faultId);
 
 /**
  * @brief Read the aggregate counters.
@@ -222,45 +220,45 @@ void Det_GetVersionInfo(Std_VersionInfoType *versioninfo);
  * The @c do/while(0) wrapper keeps the macro usable as a single statement in an
  * unbraced @c if, which MISRA would otherwise flag.
  */
-#define DET_CHECK_RETURN(cond, modId, instId, apiId, errId, retval) \
-    do                                                             \
-    {                                                              \
-        if (!(cond))                                               \
-        {                                                          \
+#define DET_CHECK_RETURN(cond, modId, instId, apiId, errId, retval)     \
+    do                                                                  \
+    {                                                                   \
+        if (!(cond))                                                    \
+        {                                                               \
             (void)Det_ReportError((modId), (instId), (apiId), (errId)); \
-            return (retval);                                       \
-        }                                                          \
+            return (retval);                                            \
+        }                                                               \
     } while (0)
 
 /** As ::DET_CHECK_RETURN but for a @c void function. */
-#define DET_CHECK_RETURN_VOID(cond, modId, instId, apiId, errId)    \
-    do                                                             \
-    {                                                              \
-        if (!(cond))                                               \
-        {                                                          \
+#define DET_CHECK_RETURN_VOID(cond, modId, instId, apiId, errId)        \
+    do                                                                  \
+    {                                                                   \
+        if (!(cond))                                                    \
+        {                                                               \
             (void)Det_ReportError((modId), (instId), (apiId), (errId)); \
-            return;                                                \
-        }                                                          \
+            return;                                                     \
+        }                                                               \
     } while (0)
 
 #else /* development error detection disabled */
 
 #define DET_CHECK_RETURN(cond, modId, instId, apiId, errId, retval) \
-    do                                                             \
-    {                                                              \
-        if (!(cond))                                               \
-        {                                                          \
-            return (retval);                                       \
-        }                                                          \
+    do                                                              \
+    {                                                               \
+        if (!(cond))                                                \
+        {                                                           \
+            return (retval);                                        \
+        }                                                           \
     } while (0)
 
-#define DET_CHECK_RETURN_VOID(cond, modId, instId, apiId, errId)    \
-    do                                                             \
-    {                                                              \
-        if (!(cond))                                               \
-        {                                                          \
-            return;                                                \
-        }                                                          \
+#define DET_CHECK_RETURN_VOID(cond, modId, instId, apiId, errId) \
+    do                                                           \
+    {                                                            \
+        if (!(cond))                                             \
+        {                                                        \
+            return;                                              \
+        }                                                        \
     } while (0)
 
 #endif /* DET_ENABLE_DEV_ERROR_DETECT */

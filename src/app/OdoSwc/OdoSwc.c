@@ -60,9 +60,8 @@ uint32 OdoSwc_ComputeConversionFactorQ32(uint16 tyreDiameterMilliInch, uint16 ge
     uint64 numerator;
     uint64 denominator;
 
-    if ((tyreDiameterMilliInch < ODO_MIN_TYRE_MILLI_INCH) ||
-        (tyreDiameterMilliInch > ODO_MAX_TYRE_MILLI_INCH) ||
-        (gearRatioMilli < ODO_MIN_GEAR_RATIO_MILLI) || (gearRatioMilli > ODO_MAX_GEAR_RATIO_MILLI))
+    if ((tyreDiameterMilliInch < ODO_MIN_TYRE_MILLI_INCH) || (tyreDiameterMilliInch > ODO_MAX_TYRE_MILLI_INCH)
+        || (gearRatioMilli < ODO_MIN_GEAR_RATIO_MILLI) || (gearRatioMilli > ODO_MAX_GEAR_RATIO_MILLI))
     {
         return 0u;
     }
@@ -87,8 +86,8 @@ uint32 OdoSwc_ComputeConversionFactorQ32(uint16 tyreDiameterMilliInch, uint16 ge
      *
      * Worst-case numerator, at the largest accepted tyre, is 1.03e17 against a uint64 limit of
      * 1.8e19 -- two orders of margin. */
-    numerator = (uint64)ODO_PI_Q24 * (uint64)tyreDiameterMilliInch * ODO_MM_PER_INCH_X10 *
-                (uint64)(1uL << (ODO_FIXED_SHIFT - ODO_PI_SHIFT));
+    numerator = (uint64)ODO_PI_Q24 * (uint64)tyreDiameterMilliInch * ODO_MM_PER_INCH_X10
+                * (uint64)(1uL << (ODO_FIXED_SHIFT - ODO_PI_SHIFT));
     denominator = 600000uLL * (uint64)gearRatioMilli;
 
     return (uint32)(numerator / denominator);
@@ -121,8 +120,8 @@ STATIC Std_ReturnType OdoSwc_Commit(void)
 
     if (NvM_WriteBlock(NVM_BLOCK_ODOMETER, &block) != E_OK)
     {
-        (void)Det_ReportRuntimeError(MODULE_ID_ODOSWC, INSTANCE_ID_SINGLE,
-                                     ODOSWC_API_ID_MAIN_FUNCTION, ODOSWC_E_PERSIST_FAILED);
+        (void)Det_ReportRuntimeError(MODULE_ID_ODOSWC, INSTANCE_ID_SINGLE, ODOSWC_API_ID_MAIN_FUNCTION,
+                                     ODOSWC_E_PERSIST_FAILED);
         return E_NOT_OK;
     }
 
@@ -152,8 +151,8 @@ Std_ReturnType OdoSwc_Init(void)
     OdoSwc_PersistCount = 0u;
     OdoSwc_Initialised = FALSE;
 
-    if ((NvM_ReadBlock(NVM_BLOCK_ODOMETER, &odometer) != E_OK) ||
-        (NvM_ReadBlock(NVM_BLOCK_CALIBRATION, &calibration) != E_OK))
+    if ((NvM_ReadBlock(NVM_BLOCK_ODOMETER, &odometer) != E_OK)
+        || (NvM_ReadBlock(NVM_BLOCK_CALIBRATION, &calibration) != E_OK))
     {
         return E_NOT_OK;
     }
@@ -163,8 +162,8 @@ Std_ReturnType OdoSwc_Init(void)
     OdoSwc_LastPersistedMm = OdoSwc_TotalMm;
     OdoSwc_LastPersistTime = Gpt_GetMonotonicMs();
 
-    OdoSwc_FactorQ32 = OdoSwc_ComputeConversionFactorQ32(calibration.tyreDiameterMilliInch,
-                                                         calibration.gearRatioMilli);
+    OdoSwc_FactorQ32 =
+        OdoSwc_ComputeConversionFactorQ32(calibration.tyreDiameterMilliInch, calibration.gearRatioMilli);
     OdoSwc_MaxPlausibleRpm = calibration.maxPlausibleRpm;
 
     if (OdoSwc_FactorQ32 == 0u)
@@ -210,8 +209,8 @@ Std_ReturnType OdoSwc_ProcessSpeedSample(uint16 motorRpm, Gpt_TimestampType samp
         OdoSwc_RejectedRpmSamples++;
         OdoSwc_LastSampleTime = sampleTime;
         OdoSwc_HaveLastSample = FALSE;
-        (void)Det_ReportRuntimeError(MODULE_ID_ODOSWC, INSTANCE_ID_SINGLE,
-                                     ODOSWC_API_ID_PROCESS_SAMPLE, ODOSWC_E_IMPLAUSIBLE_RPM);
+        (void)Det_ReportRuntimeError(MODULE_ID_ODOSWC, INSTANCE_ID_SINGLE, ODOSWC_API_ID_PROCESS_SAMPLE,
+                                     ODOSWC_E_IMPLAUSIBLE_RPM);
         outcome = ODO_SAMPLE_REJECTED_RPM;
     }
     else if (OdoSwc_HaveLastSample == FALSE)
@@ -243,8 +242,8 @@ Std_ReturnType OdoSwc_ProcessSpeedSample(uint16 motorRpm, Gpt_TimestampType samp
             OdoSwc_GapCount++;
             OdoSwc_LastRpm = motorRpm;
             OdoSwc_LastSampleTime = sampleTime;
-            (void)Det_ReportRuntimeError(MODULE_ID_ODOSWC, INSTANCE_ID_SINGLE,
-                                         ODOSWC_API_ID_PROCESS_SAMPLE, ODOSWC_E_SAMPLE_GAP);
+            (void)Det_ReportRuntimeError(MODULE_ID_ODOSWC, INSTANCE_ID_SINGLE, ODOSWC_API_ID_PROCESS_SAMPLE,
+                                         ODOSWC_E_SAMPLE_GAP);
             outcome = ODO_SAMPLE_REJECTED_GAP;
         }
         else
@@ -256,8 +255,7 @@ Std_ReturnType OdoSwc_ProcessSpeedSample(uint16 motorRpm, Gpt_TimestampType samp
              * The sum of two rpm values is at most 24 000 and the interval at most 10 000 ms, so
              * the product with the factor stays below 7e15 against a uint64 limit of 1.8e19. */
             const uint64 rpmSum = (uint64)OdoSwc_LastRpm + (uint64)motorRpm;
-            const uint64 increment =
-                (rpmSum * (uint64)deltaMs * (uint64)OdoSwc_FactorQ32) / 2uLL;
+            const uint64 increment = (rpmSum * (uint64)deltaMs * (uint64)OdoSwc_FactorQ32) / 2uLL;
 
             OdoSwc_FractionAcc += increment;
 
@@ -298,8 +296,7 @@ void OdoSwc_MainFunction(void)
     {
         (void)OdoSwc_Commit();
     }
-    else if ((advanced > 0uLL) &&
-             (Gpt_HasElapsed(OdoSwc_LastPersistTime, ODO_PERSIST_INTERVAL_MS) != FALSE))
+    else if ((advanced > 0uLL) && (Gpt_HasElapsed(OdoSwc_LastPersistTime, ODO_PERSIST_INTERVAL_MS) != FALSE))
     {
         (void)OdoSwc_Commit();
     }
@@ -320,8 +317,8 @@ Std_ReturnType OdoSwc_Persist(void)
 
 Std_ReturnType OdoSwc_GetState(OdoSwc_StateType *state)
 {
-    DET_CHECK_RETURN(state != NULL_PTR, MODULE_ID_ODOSWC, INSTANCE_ID_SINGLE,
-                     ODOSWC_API_ID_GET_STATE, ODOSWC_E_PARAM_POINTER, E_NOT_OK);
+    DET_CHECK_RETURN(state != NULL_PTR, MODULE_ID_ODOSWC, INSTANCE_ID_SINGLE, ODOSWC_API_ID_GET_STATE,
+                     ODOSWC_E_PARAM_POINTER, E_NOT_OK);
 
     state->totalDistanceMm = OdoSwc_TotalMm;
     state->tripDistanceMm = OdoSwc_TripMm;
@@ -351,11 +348,10 @@ Std_ReturnType OdoSwc_ResetTrip(void)
 Std_ReturnType OdoSwc_SetCalibration(uint16 tyreDiameterMilliInch, uint16 gearRatioMilli)
 {
     NvM_CalibrationType calibration;
-    const uint32 factor =
-        OdoSwc_ComputeConversionFactorQ32(tyreDiameterMilliInch, gearRatioMilli);
+    const uint32 factor = OdoSwc_ComputeConversionFactorQ32(tyreDiameterMilliInch, gearRatioMilli);
 
-    DET_CHECK_RETURN(factor != 0u, MODULE_ID_ODOSWC, INSTANCE_ID_SINGLE,
-                     ODOSWC_API_ID_SET_CALIBRATION, ODOSWC_E_BAD_CALIBRATION, E_NOT_OK);
+    DET_CHECK_RETURN(factor != 0u, MODULE_ID_ODOSWC, INSTANCE_ID_SINGLE, ODOSWC_API_ID_SET_CALIBRATION,
+                     ODOSWC_E_BAD_CALIBRATION, E_NOT_OK);
 
     if (NvM_ReadBlock(NVM_BLOCK_CALIBRATION, &calibration) != E_OK)
     {

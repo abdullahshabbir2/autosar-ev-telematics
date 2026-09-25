@@ -47,8 +47,8 @@ extern "C" {
 /** Pin direction. */
 typedef enum
 {
-    PORT_PIN_IN = 0,  /**< Input.  */
-    PORT_PIN_OUT = 1  /**< Output. */
+    PORT_PIN_IN = 0, /**< Input.  */
+    PORT_PIN_OUT = 1 /**< Output. */
 } Port_PinDirectionType;
 
 /** Internal pull resistor selection. */

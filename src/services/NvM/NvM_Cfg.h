@@ -60,21 +60,21 @@
  */
 typedef struct
 {
-    uint16 structVersion;          /**< Layout version; 1 for this definition.        */
-    uint16 reserved0;              /**< Explicit padding, written as zero.            */
-    uint64 totalDistanceMm;        /**< Lifetime distance in millimetres.             */
-    uint64 tripDistanceMm;         /**< Distance since the trip was last reset.        */
-    uint32 updateCount;            /**< Times this block has been committed.           */
-    uint32 lastUpdateUnixTime;     /**< Wall-clock time of the last commit, 0 if unset.*/
+    uint16 structVersion;      /**< Layout version; 1 for this definition.        */
+    uint16 reserved0;          /**< Explicit padding, written as zero.            */
+    uint64 totalDistanceMm;    /**< Lifetime distance in millimetres.             */
+    uint64 tripDistanceMm;     /**< Distance since the trip was last reset.        */
+    uint32 updateCount;        /**< Times this block has been committed.           */
+    uint32 lastUpdateUnixTime; /**< Wall-clock time of the last commit, 0 if unset.*/
 } NvM_OdometerType;
 
 /** Device identity and cloud endpoint, learned during provisioning. */
 typedef struct
 {
-    uint16 structVersion;   /**< Layout version; 1 for this definition.     */
-    uint16 brokerPort;      /**< MQTT broker port.                          */
-    char deviceId[24];      /**< NUL-terminated logical device identifier.   */
-    char brokerHost[32];    /**< NUL-terminated broker address.              */
+    uint16 structVersion; /**< Layout version; 1 for this definition.     */
+    uint16 brokerPort;    /**< MQTT broker port.                          */
+    char deviceId[24];    /**< NUL-terminated logical device identifier.   */
+    char brokerHost[32];  /**< NUL-terminated broker address.              */
 } NvM_DeviceConfigType;
 
 /**

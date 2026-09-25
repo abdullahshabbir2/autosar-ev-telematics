@@ -60,15 +60,15 @@ extern "C" {
 /** Derived health of one pack. */
 typedef struct
 {
-    uint16 cellVoltageHighest;   /**< Highest cell, raw protocol units.            */
-    uint16 cellVoltageLowest;    /**< Lowest cell, raw protocol units.             */
-    uint16 cellImbalance;        /**< Highest minus lowest. The key indicator.      */
-    uint8 weakestCellIndex;      /**< Which cell is lowest, 0-based.                */
-    sint16 temperatureHighest;   /**< Highest sensor, raw protocol units.           */
-    sint16 temperatureLowest;    /**< Lowest sensor, raw protocol units.            */
-    uint16 temperatureSpread;    /**< Highest minus lowest.                         */
-    boolean imbalanceWarning;    /**< Imbalance above ::BATTSWC_IMBALANCE_WARN_RAW. */
-    boolean dataValid;           /**< FALSE if the pack did not answer this cycle.  */
+    uint16 cellVoltageHighest; /**< Highest cell, raw protocol units.            */
+    uint16 cellVoltageLowest;  /**< Lowest cell, raw protocol units.             */
+    uint16 cellImbalance;      /**< Highest minus lowest. The key indicator.      */
+    uint8 weakestCellIndex;    /**< Which cell is lowest, 0-based.                */
+    sint16 temperatureHighest; /**< Highest sensor, raw protocol units.           */
+    sint16 temperatureLowest;  /**< Lowest sensor, raw protocol units.            */
+    uint16 temperatureSpread;  /**< Highest minus lowest.                         */
+    boolean imbalanceWarning;  /**< Imbalance above ::BATTSWC_IMBALANCE_WARN_RAW. */
+    boolean dataValid;         /**< FALSE if the pack did not answer this cycle.  */
 } BattSwc_PackHealthType;
 
 /** Vehicle-level aggregate, computed only over packs that answered this cycle. */
@@ -118,8 +118,7 @@ CHECK_RETURN Std_ReturnType BattSwc_GetAggregate(BattSwc_AggregateType *aggregat
  * @param[in]  slot   Pack slot, 1 .. ::RS485IF_PACK_COUNT.
  * @param[out] health Destination.
  */
-CHECK_RETURN Std_ReturnType BattSwc_GetPackHealth(Rs485If_SlotType slot,
-                                                  BattSwc_PackHealthType *health);
+CHECK_RETURN Std_ReturnType BattSwc_GetPackHealth(Rs485If_SlotType slot, BattSwc_PackHealthType *health);
 
 /**
  * @brief Pointer to the cached pack states, for record serialisation.

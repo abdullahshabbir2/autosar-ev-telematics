@@ -41,8 +41,7 @@ boolean FsAbs_PlatformExists(const char *path);
  * @brief Append @p length bytes to @p path, creating it if absent.
  * @return E_OK once the data is committed to the card.
  */
-CHECK_RETURN Std_ReturnType FsAbs_PlatformAppend(const char *path, const uint8 *data,
-                                                 uint32 length);
+CHECK_RETURN Std_ReturnType FsAbs_PlatformAppend(const char *path, const uint8 *data, uint32 length);
 
 /**
  * @brief Read up to @p size bytes from @p path at @p offset.
@@ -52,8 +51,8 @@ CHECK_RETURN Std_ReturnType FsAbs_PlatformAppend(const char *path, const uint8 *
  * @param[in]  size   Capacity of @p buffer.
  * @param[out] read   Bytes actually read; 0 at end of file.
  */
-CHECK_RETURN Std_ReturnType FsAbs_PlatformRead(const char *path, uint32 offset, uint8 *buffer,
-                                               uint32 size, uint32 *read);
+CHECK_RETURN Std_ReturnType FsAbs_PlatformRead(const char *path, uint32 offset, uint8 *buffer, uint32 size,
+                                               uint32 *read);
 
 /** Size of @p path in bytes. E_NOT_FOUND if it does not exist. */
 CHECK_RETURN Std_ReturnType FsAbs_PlatformSize(const char *path, uint32 *size);

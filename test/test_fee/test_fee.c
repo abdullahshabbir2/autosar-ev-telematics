@@ -71,8 +71,7 @@ static uint32 corruptOneBitAt(uint32 address)
         {
             /* value & (value - 1) clears exactly the lowest set bit. */
             Stub_Fls_Corrupt(addr, (uint8)(original & (uint8)(original - 1u)));
-            TEST_ASSERT_NOT_EQUAL_MESSAGE(original, Stub_Fls_Peek(addr),
-                                          "corruption helper changed nothing");
+            TEST_ASSERT_NOT_EQUAL_MESSAGE(original, Stub_Fls_Peek(addr), "corruption helper changed nothing");
             return addr;
         }
         addr++;
@@ -99,7 +98,9 @@ void setUp(void)
     TEST_ASSERT_EQUAL(E_OK, Fls_Init());
 }
 
-void tearDown(void) {}
+void tearDown(void)
+{
+}
 
 /*==================================================================================================
  *  TS-FEE-001 .. 004 : formatting and basic persistence
@@ -122,8 +123,7 @@ static void test_Init_FormatsVirginPartition(void)
      * whatever an erased sector happens to contain. */
     {
         uint8 buffer[FEE_LENGTH_ODOMETER];
-        TEST_ASSERT_EQUAL(E_NOT_FOUND,
-                          Fee_ReadBlock(FEE_BLOCK_ODOMETER, buffer, 0u, sizeof(buffer)));
+        TEST_ASSERT_EQUAL(E_NOT_FOUND, Fee_ReadBlock(FEE_BLOCK_ODOMETER, buffer, 0u, sizeof(buffer)));
     }
 }
 
@@ -253,8 +253,7 @@ static void test_PowerLoss_MidPayload_PreservesPreviousValue(void)
     TEST_ASSERT_EQUAL(E_OK, Fee_WriteBlock(FEE_BLOCK_ODOMETER, original));
 
     /* Let half the payload through, then fail. */
-    Stub_Fls_FailWriteAtAddress(payloadAddressOfRecord(1u, FEE_LENGTH_ODOMETER),
-                                      FEE_LENGTH_ODOMETER / 2u);
+    Stub_Fls_FailWriteAtAddress(payloadAddressOfRecord(1u, FEE_LENGTH_ODOMETER), FEE_LENGTH_ODOMETER / 2u);
     TEST_ASSERT_NOT_EQUAL(E_OK, Fee_WriteBlock(FEE_BLOCK_ODOMETER, replacement));
 
     Stub_Fls_ClearFaults();
@@ -454,8 +453,7 @@ static void test_PowerLoss_DuringGcBeforeCommit_KeepsSourceSector(void)
     TEST_ASSERT_EQUAL(E_OK, Fee_GetStatus(&status));
 
     /* Sector 0 is still active, because sector 1 never became a valid Fee sector. */
-    TEST_ASSERT_EQUAL_UINT16_MESSAGE(0u, status.activeSector,
-                                     "an uncommitted collection target was adopted");
+    TEST_ASSERT_EQUAL_UINT16_MESSAGE(0u, status.activeSector, "an uncommitted collection target was adopted");
 
     TEST_ASSERT_EQUAL(E_OK, Fee_ReadBlock(FEE_BLOCK_CALIBRATION, read, 0u, sizeof(cal)));
     TEST_ASSERT_EQUAL_HEX8_ARRAY(cal, read, sizeof(cal));
@@ -583,16 +581,14 @@ static void test_ParameterChecking(void)
 
     TEST_ASSERT_EQUAL(E_OK, Fee_Init());
 
-    TEST_ASSERT_EQUAL(E_NOT_OK, Fee_ReadBlock((Fee_BlockIdType)0x9999u, buffer, 0u,
-                                              sizeof(buffer)));
+    TEST_ASSERT_EQUAL(E_NOT_OK, Fee_ReadBlock((Fee_BlockIdType)0x9999u, buffer, 0u, sizeof(buffer)));
     TEST_ASSERT_EQUAL(E_NOT_OK, Fee_WriteBlock((Fee_BlockIdType)0x9999u, buffer));
     TEST_ASSERT_EQUAL(E_NOT_OK, Fee_ReadBlock(FEE_BLOCK_ODOMETER, NULL_PTR, 0u, sizeof(buffer)));
     TEST_ASSERT_EQUAL(E_NOT_OK, Fee_WriteBlock(FEE_BLOCK_ODOMETER, NULL_PTR));
 
     /* Reading past the block's configured length must be refused, not clamped: a clamped read
      * returns a short buffer the caller believes is full. */
-    TEST_ASSERT_EQUAL(E_NOT_OK,
-                      Fee_ReadBlock(FEE_BLOCK_ODOMETER, buffer, FEE_LENGTH_ODOMETER - 4u, 8u));
+    TEST_ASSERT_EQUAL(E_NOT_OK, Fee_ReadBlock(FEE_BLOCK_ODOMETER, buffer, FEE_LENGTH_ODOMETER - 4u, 8u));
 
     TEST_ASSERT_EQUAL(E_OK, Fee_GetStatus(NULL_PTR) == E_OK ? E_NOT_OK : E_OK);
 

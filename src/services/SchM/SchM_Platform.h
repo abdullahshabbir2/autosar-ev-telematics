@@ -37,9 +37,8 @@ extern "C" {
  * @param periodMs   Activation period.
  * @return E_OK if the task was created.
  */
-CHECK_RETURN Std_ReturnType SchM_PlatformCreateTask(SchM_TaskType task, const char *name,
-                                                    uint32 stackBytes, uint8 priority, uint8 core,
-                                                    uint32 periodMs);
+CHECK_RETURN Std_ReturnType SchM_PlatformCreateTask(SchM_TaskType task, const char *name, uint32 stackBytes,
+                                                    uint8 priority, uint8 core, uint32 periodMs);
 
 /**
  * @brief Smallest free stack observed on the calling task, in bytes.

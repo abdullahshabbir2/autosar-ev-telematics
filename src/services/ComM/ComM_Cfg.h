@@ -24,7 +24,6 @@
  */
 #define COMM_FAILURE_LIMIT 3u
 
-
 /**
  * @brief Interval between arbitration decisions, in milliseconds.
  *

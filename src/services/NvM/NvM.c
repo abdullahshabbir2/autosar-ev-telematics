@@ -21,11 +21,11 @@
 
 typedef struct
 {
-    Fee_BlockIdType feeBlock;  /**< Where Fee stores this block.                      */
-    uint16 length;             /**< Payload length, excluding NvM's CRC.              */
-    void *mirror;              /**< RAM mirror.                                       */
-    const void *defaults;      /**< Compiled-in default image.                        */
-    boolean immediate;         /**< TRUE to write through on every change.            */
+    Fee_BlockIdType feeBlock; /**< Where Fee stores this block.                      */
+    uint16 length;            /**< Payload length, excluding NvM's CRC.              */
+    void *mirror;             /**< RAM mirror.                                       */
+    const void *defaults;     /**< Compiled-in default image.                        */
+    boolean immediate;        /**< TRUE to write through on every change.            */
 } NvM_BlockDescriptorType;
 
 /*------------------------------- RAM mirrors --------------------------------*/
@@ -43,7 +43,10 @@ STATIC const NvM_OdometerType NvM_DefaultOdometer = {
 };
 
 STATIC const NvM_DeviceConfigType NvM_DefaultDeviceConfig = {
-    NVM_STRUCT_VERSION, NVM_DEFAULT_BROKER_PORT, {0}, {0},
+    NVM_STRUCT_VERSION,
+    NVM_DEFAULT_BROKER_PORT,
+    {0},
+    {0},
 };
 
 STATIC const NvM_CalibrationType NvM_DefaultCalibration = {
@@ -70,14 +73,12 @@ STATIC const NvM_BlockDescriptorType NvM_Blocks[NVM_BLOCK_COUNT] = {
     /* The odometer writes through immediately. A deferred write is precisely the window in
      * which the power cut that loses the value happens, and the whole product is that value. */
     {FEE_BLOCK_ODOMETER, NVM_LENGTH_ODOMETER, &NvM_MirrorOdometer, &NvM_DefaultOdometer, TRUE},
-    {FEE_BLOCK_DEVICE_CONFIG, NVM_LENGTH_DEVICE_CONFIG, &NvM_MirrorDeviceConfig,
-     &NvM_DefaultDeviceConfig, FALSE},
-    {FEE_BLOCK_CALIBRATION, NVM_LENGTH_CALIBRATION, &NvM_MirrorCalibration,
-     &NvM_DefaultCalibration, FALSE},
+    {FEE_BLOCK_DEVICE_CONFIG, NVM_LENGTH_DEVICE_CONFIG, &NvM_MirrorDeviceConfig, &NvM_DefaultDeviceConfig,
+     FALSE},
+    {FEE_BLOCK_CALIBRATION, NVM_LENGTH_CALIBRATION, &NvM_MirrorCalibration, &NvM_DefaultCalibration, FALSE},
     /* Restart info must also be durable at once: its entire purpose is to be readable after
      * the reset that incremented it. */
-    {FEE_BLOCK_RESTART_INFO, NVM_LENGTH_RESTART_INFO, &NvM_MirrorRestartInfo,
-     &NvM_DefaultRestartInfo, TRUE},
+    {FEE_BLOCK_RESTART_INFO, NVM_LENGTH_RESTART_INFO, &NvM_MirrorRestartInfo, &NvM_DefaultRestartInfo, TRUE},
     {FEE_BLOCK_ENERGY_COUNTERS, NVM_LENGTH_ENERGY_COUNTERS, &NvM_MirrorEnergyCounters,
      &NvM_DefaultEnergyCounters, FALSE},
 };
@@ -198,8 +199,7 @@ STATIC Std_ReturnType NvM_Commit(uint8 index)
         NvM_Result[index] = NVM_REQ_NOT_OK;
         NvM_Stats.writeFailures++;
         NvM_Stats.dirtyBlockCount = NvM_CountDirty();
-        (void)Det_ReportRuntimeError(MODULE_ID_NVM, index, NVM_API_ID_WRITE_BLOCK,
-                                     NVM_E_WRITE_FAILED);
+        (void)Det_ReportRuntimeError(MODULE_ID_NVM, index, NVM_API_ID_WRITE_BLOCK, NVM_E_WRITE_FAILED);
         return E_NOT_OK;
     }
 
@@ -232,8 +232,7 @@ STATIC void NvM_Load(uint8 index)
         if (status == E_CRC_FAIL)
         {
             NvM_Stats.integrityFailures++;
-            (void)Det_ReportRuntimeError(MODULE_ID_NVM, index, NVM_API_ID_READ_BLOCK,
-                                         NVM_E_INTEGRITY_FAILED);
+            (void)Det_ReportRuntimeError(MODULE_ID_NVM, index, NVM_API_ID_READ_BLOCK, NVM_E_INTEGRITY_FAILED);
         }
         NvM_ApplyDefaults(index);
         return;
@@ -242,12 +241,10 @@ STATIC void NvM_Load(uint8 index)
     /* NvM's own CRC is checked even though Fee already verified its record. Fee's check proves
      * the media is intact; this one covers the whole path, including a RAM bit flip in the
      * staging buffer and any mismatch between what was intended and what was stored. */
-    if (NvM_GetU32(&NvM_Staging[length]) !=
-        Crc_CalculateCRC32(NvM_Staging, (uint32)length, 0u, TRUE))
+    if (NvM_GetU32(&NvM_Staging[length]) != Crc_CalculateCRC32(NvM_Staging, (uint32)length, 0u, TRUE))
     {
         NvM_Stats.integrityFailures++;
-        (void)Det_ReportRuntimeError(MODULE_ID_NVM, index, NVM_API_ID_READ_BLOCK,
-                                     NVM_E_INTEGRITY_FAILED);
+        (void)Det_ReportRuntimeError(MODULE_ID_NVM, index, NVM_API_ID_READ_BLOCK, NVM_E_INTEGRITY_FAILED);
         NvM_ApplyDefaults(index);
         return;
     }
@@ -311,10 +308,10 @@ Std_ReturnType NvM_Init(void)
 
 Std_ReturnType NvM_ReadBlock(NvM_BlockIdType blockId, void *destination)
 {
-    DET_CHECK_RETURN(NvM_Initialised != FALSE, MODULE_ID_NVM, blockId, NVM_API_ID_READ_BLOCK,
-                     NVM_E_UNINIT, E_NOT_OK);
-    DET_CHECK_RETURN(NvM_BlockValid(blockId) != FALSE, MODULE_ID_NVM, blockId,
-                     NVM_API_ID_READ_BLOCK, NVM_E_PARAM_BLOCK_ID, E_NOT_OK);
+    DET_CHECK_RETURN(NvM_Initialised != FALSE, MODULE_ID_NVM, blockId, NVM_API_ID_READ_BLOCK, NVM_E_UNINIT,
+                     E_NOT_OK);
+    DET_CHECK_RETURN(NvM_BlockValid(blockId) != FALSE, MODULE_ID_NVM, blockId, NVM_API_ID_READ_BLOCK,
+                     NVM_E_PARAM_BLOCK_ID, E_NOT_OK);
     DET_CHECK_RETURN(destination != NULL_PTR, MODULE_ID_NVM, blockId, NVM_API_ID_READ_BLOCK,
                      NVM_E_PARAM_POINTER, E_NOT_OK);
 
@@ -327,12 +324,12 @@ Std_ReturnType NvM_WriteBlock(NvM_BlockIdType blockId, const void *source)
     const uint8 index = (uint8)blockId;
     uint16 length;
 
-    DET_CHECK_RETURN(NvM_Initialised != FALSE, MODULE_ID_NVM, blockId, NVM_API_ID_WRITE_BLOCK,
-                     NVM_E_UNINIT, E_NOT_OK);
-    DET_CHECK_RETURN(NvM_BlockValid(blockId) != FALSE, MODULE_ID_NVM, blockId,
-                     NVM_API_ID_WRITE_BLOCK, NVM_E_PARAM_BLOCK_ID, E_NOT_OK);
-    DET_CHECK_RETURN(source != NULL_PTR, MODULE_ID_NVM, blockId, NVM_API_ID_WRITE_BLOCK,
-                     NVM_E_PARAM_POINTER, E_NOT_OK);
+    DET_CHECK_RETURN(NvM_Initialised != FALSE, MODULE_ID_NVM, blockId, NVM_API_ID_WRITE_BLOCK, NVM_E_UNINIT,
+                     E_NOT_OK);
+    DET_CHECK_RETURN(NvM_BlockValid(blockId) != FALSE, MODULE_ID_NVM, blockId, NVM_API_ID_WRITE_BLOCK,
+                     NVM_E_PARAM_BLOCK_ID, E_NOT_OK);
+    DET_CHECK_RETURN(source != NULL_PTR, MODULE_ID_NVM, blockId, NVM_API_ID_WRITE_BLOCK, NVM_E_PARAM_POINTER,
+                     E_NOT_OK);
 
     length = NvM_Blocks[index].length;
     (void)memcpy(NvM_Blocks[index].mirror, source, length);
@@ -340,8 +337,8 @@ Std_ReturnType NvM_WriteBlock(NvM_BlockIdType blockId, const void *source)
     /* Write-on-change. The odometer runnable calls this every cycle; only the cycles where the
      * vehicle actually moved should reach the flash, or the endurance budget is spent on a
      * parked vehicle. */
-    if ((NvM_LastWrittenValid[index] != FALSE) &&
-        (memcmp(NvM_LastWritten[index], NvM_Blocks[index].mirror, length) == 0))
+    if ((NvM_LastWrittenValid[index] != FALSE)
+        && (memcmp(NvM_LastWritten[index], NvM_Blocks[index].mirror, length) == 0))
     {
         NvM_Dirty[index] = FALSE;
         NvM_Result[index] = NVM_REQ_BLOCK_SKIPPED;
@@ -362,10 +359,10 @@ Std_ReturnType NvM_WriteBlock(NvM_BlockIdType blockId, const void *source)
 
 Std_ReturnType NvM_WriteImmediate(NvM_BlockIdType blockId)
 {
-    DET_CHECK_RETURN(NvM_Initialised != FALSE, MODULE_ID_NVM, blockId, NVM_API_ID_WRITE_BLOCK,
-                     NVM_E_UNINIT, E_NOT_OK);
-    DET_CHECK_RETURN(NvM_BlockValid(blockId) != FALSE, MODULE_ID_NVM, blockId,
-                     NVM_API_ID_WRITE_BLOCK, NVM_E_PARAM_BLOCK_ID, E_NOT_OK);
+    DET_CHECK_RETURN(NvM_Initialised != FALSE, MODULE_ID_NVM, blockId, NVM_API_ID_WRITE_BLOCK, NVM_E_UNINIT,
+                     E_NOT_OK);
+    DET_CHECK_RETURN(NvM_BlockValid(blockId) != FALSE, MODULE_ID_NVM, blockId, NVM_API_ID_WRITE_BLOCK,
+                     NVM_E_PARAM_BLOCK_ID, E_NOT_OK);
 
     if (NvM_Dirty[blockId] == FALSE)
     {
@@ -379,8 +376,8 @@ Std_ReturnType NvM_WriteAll(void)
     uint8 i;
     boolean allOk = TRUE;
 
-    DET_CHECK_RETURN(NvM_Initialised != FALSE, MODULE_ID_NVM, INSTANCE_ID_SINGLE,
-                     NVM_API_ID_WRITE_ALL, NVM_E_UNINIT, E_NOT_OK);
+    DET_CHECK_RETURN(NvM_Initialised != FALSE, MODULE_ID_NVM, INSTANCE_ID_SINGLE, NVM_API_ID_WRITE_ALL,
+                     NVM_E_UNINIT, E_NOT_OK);
 
     for (i = 0u; i < (uint8)NVM_BLOCK_COUNT; i++)
     {
@@ -401,13 +398,12 @@ Std_ReturnType NvM_WriteAll(void)
 
 Std_ReturnType NvM_RestoreBlockDefaults(NvM_BlockIdType blockId)
 {
-    DET_CHECK_RETURN(NvM_Initialised != FALSE, MODULE_ID_NVM, blockId,
-                     NVM_API_ID_RESTORE_DEFAULTS, NVM_E_UNINIT, E_NOT_OK);
-    DET_CHECK_RETURN(NvM_BlockValid(blockId) != FALSE, MODULE_ID_NVM, blockId,
-                     NVM_API_ID_RESTORE_DEFAULTS, NVM_E_PARAM_BLOCK_ID, E_NOT_OK);
+    DET_CHECK_RETURN(NvM_Initialised != FALSE, MODULE_ID_NVM, blockId, NVM_API_ID_RESTORE_DEFAULTS,
+                     NVM_E_UNINIT, E_NOT_OK);
+    DET_CHECK_RETURN(NvM_BlockValid(blockId) != FALSE, MODULE_ID_NVM, blockId, NVM_API_ID_RESTORE_DEFAULTS,
+                     NVM_E_PARAM_BLOCK_ID, E_NOT_OK);
 
-    (void)memcpy(NvM_Blocks[blockId].mirror, NvM_Blocks[blockId].defaults,
-                 NvM_Blocks[blockId].length);
+    (void)memcpy(NvM_Blocks[blockId].mirror, NvM_Blocks[blockId].defaults, NvM_Blocks[blockId].length);
     NvM_Dirty[blockId] = TRUE;
     NvM_Result[blockId] = NVM_REQ_PENDING;
     NvM_Stats.dirtyBlockCount = NvM_CountDirty();
@@ -454,8 +450,8 @@ void NvM_MainFunction(void)
 
 Std_ReturnType NvM_GetStatistics(NvM_StatisticsType *stats)
 {
-    DET_CHECK_RETURN(stats != NULL_PTR, MODULE_ID_NVM, INSTANCE_ID_SINGLE,
-                     NVM_API_ID_MAIN_FUNCTION, NVM_E_PARAM_POINTER, E_NOT_OK);
+    DET_CHECK_RETURN(stats != NULL_PTR, MODULE_ID_NVM, INSTANCE_ID_SINGLE, NVM_API_ID_MAIN_FUNCTION,
+                     NVM_E_PARAM_POINTER, E_NOT_OK);
 
     NvM_Stats.dirtyBlockCount = NvM_CountDirty();
     *stats = NvM_Stats;

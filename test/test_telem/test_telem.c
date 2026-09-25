@@ -178,8 +178,7 @@ static void test_Sto_RecordIsFramedWithCrc(void)
     buffer[length] = 0u;
 
     (void)snprintf(expected, sizeof(expected), "%s%c%08lX\n", body, (char)FSABS_CRC_SEPARATOR,
-                   (unsigned long)Crc_CalculateCRC32((const uint8 *)body, (uint32)strlen(body), 0u,
-                                                     TRUE));
+                   (unsigned long)Crc_CalculateCRC32((const uint8 *)body, (uint32)strlen(body), 0u, TRUE));
 
     /* Past the CSV header, which the file opens with. */
     TEST_ASSERT_EQUAL_STRING(expected, (const char *)&buffer[TtFirstRecordOffset(TT_PATH)]);
@@ -538,8 +537,7 @@ static void test_Tel_CursorCrossesFileBoundary(void)
     /* The first file is drained, so the read reports E_PENDING once while the cursor moves to the next
      * day's file. Before this crossing existed, everything written after midnight was unreachable for
      * the life of the unit. */
-    TEST_ASSERT_EQUAL(E_PENDING,
-                      FsAbs_ReadRecordAtCursor(record, (uint16)sizeof(record), &length));
+    TEST_ASSERT_EQUAL(E_PENDING, FsAbs_ReadRecordAtCursor(record, (uint16)sizeof(record), &length));
     TEST_ASSERT_EQUAL(E_OK, FsAbs_ReadRecordAtCursor(record, (uint16)sizeof(record), &length));
     TEST_ASSERT_EQUAL_STRING("after,midnight,0", record);
 }

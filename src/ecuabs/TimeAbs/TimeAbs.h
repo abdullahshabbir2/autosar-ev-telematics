@@ -85,13 +85,13 @@ typedef struct
 /** Clock status, published in the telemetry health record. */
 typedef struct
 {
-    TimeAbs_SourceType source;  /**< Current authority for the time.              */
-    boolean valid;              /**< TRUE if the time may be used in a record.     */
-    uint32 lastSyncUptimeMs;    /**< Monotonic time of the last NTP sync.          */
-    sint32 lastCorrectionSec;   /**< Size of the last NTP correction, signed.      */
-    uint32 syncCount;           /**< Successful NTP syncs since boot.              */
-    uint32 syncFailureCount;    /**< NTP attempts that failed.                     */
-    boolean rtcPresent;         /**< TRUE if the DS3231 answered at startup.       */
+    TimeAbs_SourceType source; /**< Current authority for the time.              */
+    boolean valid;             /**< TRUE if the time may be used in a record.     */
+    uint32 lastSyncUptimeMs;   /**< Monotonic time of the last NTP sync.          */
+    sint32 lastCorrectionSec;  /**< Size of the last NTP correction, signed.      */
+    uint32 syncCount;          /**< Successful NTP syncs since boot.              */
+    uint32 syncFailureCount;   /**< NTP attempts that failed.                     */
+    boolean rtcPresent;        /**< TRUE if the DS3231 answered at startup.       */
 } TimeAbs_StatusType;
 
 /*==================================================================================================
@@ -141,8 +141,7 @@ CHECK_RETURN Std_ReturnType TimeAbs_Synchronise(void);
 CHECK_RETURN Std_ReturnType TimeAbs_ToDateTime(uint32 unixTime, TimeAbs_DateTimeType *dateTime);
 
 /** Convert broken-down UTC to a Unix timestamp. Pure function; the inverse of ::TimeAbs_ToDateTime. */
-CHECK_RETURN Std_ReturnType TimeAbs_FromDateTime(const TimeAbs_DateTimeType *dateTime,
-                                                 uint32 *unixTime);
+CHECK_RETURN Std_ReturnType TimeAbs_FromDateTime(const TimeAbs_DateTimeType *dateTime, uint32 *unixTime);
 
 /**
  * @brief Format the current date as "YYYYMMDD", for a log file name.

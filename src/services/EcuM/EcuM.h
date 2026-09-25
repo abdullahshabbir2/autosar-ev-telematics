@@ -78,34 +78,34 @@ extern "C" {
 /** ECU state (SWS_EcuM_00532, reduced to the states this ECU actually has). */
 typedef enum
 {
-    ECUM_STATE_STARTUP = 0,   /**< Bringing the stack up.                        */
-    ECUM_STATE_RUN = 1,       /**< Normal operation; all tasks running.          */
-    ECUM_STATE_RUN_DEGRADED = 2,/**< Running with one or more subsystems skipped. */
-    ECUM_STATE_SHUTDOWN = 3   /**< Flushing state before a reset.                */
+    ECUM_STATE_STARTUP = 0,      /**< Bringing the stack up.                        */
+    ECUM_STATE_RUN = 1,          /**< Normal operation; all tasks running.          */
+    ECUM_STATE_RUN_DEGRADED = 2, /**< Running with one or more subsystems skipped. */
+    ECUM_STATE_SHUTDOWN = 3      /**< Flushing state before a reset.                */
 } EcuM_StateType;
 
 /** Which subsystems came up, and which did not. */
 typedef struct
 {
-    boolean canAvailable;    /**< The CAN controller initialised.                */
-    boolean packsAvailable;  /**< At least one battery pack answered discovery.   */
-    boolean gnssAvailable;   /**< The GNSS receiver's link opened.               */
-    boolean storageAvailable;/**< The card mounted.                              */
-    boolean clockValid;      /**< A plausible wall-clock time was established.    */
-    boolean nvmValid;        /**< Every NvM block loaded without falling back.    */
+    boolean canAvailable;     /**< The CAN controller initialised.                */
+    boolean packsAvailable;   /**< At least one battery pack answered discovery.   */
+    boolean gnssAvailable;    /**< The GNSS receiver's link opened.               */
+    boolean storageAvailable; /**< The card mounted.                              */
+    boolean clockValid;       /**< A plausible wall-clock time was established.    */
+    boolean nvmValid;         /**< Every NvM block loaded without falling back.    */
 } EcuM_SubsystemStatusType;
 
 /** Startup and reset history, published in the health record. */
 typedef struct
 {
-    EcuM_StateType state;            /**< Current state.                          */
+    EcuM_StateType state;                /**< Current state.                          */
     EcuM_SubsystemStatusType subsystems; /**< What is available.                  */
-    uint8 lastResetReason;           /**< ::Mcu_ResetReasonType of this start.     */
-    uint16 restartCount;             /**< Resets inside the current window.        */
-    uint32 totalRestarts;            /**< Lifetime resets.                        */
-    boolean crashLoopDetected;       /**< TRUE if the threshold was exceeded.      */
-    uint32 startupDurationMs;        /**< How long startup took.                   */
-    uint8 degradedSubsystemMask;     /**< Bit set per subsystem skipped this run.  */
+    uint8 lastResetReason;               /**< ::Mcu_ResetReasonType of this start.     */
+    uint16 restartCount;                 /**< Resets inside the current window.        */
+    uint32 totalRestarts;                /**< Lifetime resets.                        */
+    boolean crashLoopDetected;           /**< TRUE if the threshold was exceeded.      */
+    uint32 startupDurationMs;            /**< How long startup took.                   */
+    uint8 degradedSubsystemMask;         /**< Bit set per subsystem skipped this run.  */
 } EcuM_StatusType;
 
 /** Bits in ::EcuM_StatusType::degradedSubsystemMask. */

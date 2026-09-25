@@ -152,8 +152,8 @@ Std_ReturnType WdgM_ActivateSupervision(void)
 {
     uint16 i;
 
-    DET_CHECK_RETURN(WdgM_Initialised != FALSE, MODULE_ID_WDGM, INSTANCE_ID_SINGLE,
-                     WDGM_API_ID_SET_MODE, WDGM_E_UNINIT, E_NOT_OK);
+    DET_CHECK_RETURN(WdgM_Initialised != FALSE, MODULE_ID_WDGM, INSTANCE_ID_SINGLE, WDGM_API_ID_SET_MODE,
+                     WDGM_E_UNINIT, E_NOT_OK);
 
     for (i = 0u; i < (uint16)WDGM_SE_COUNT; i++)
     {
@@ -172,7 +172,7 @@ Std_ReturnType WdgM_ActivateSupervision(void)
 }
 
 Std_ReturnType WdgM_CheckpointReached(WdgM_SupervisedEntityIdType entityId,
-                                     WdgM_CheckpointIdType checkpointId)
+                                      WdgM_CheckpointIdType checkpointId)
 {
     uint16 index;
     uint32 interval;
@@ -271,7 +271,8 @@ void WdgM_MainFunction(void)
                 /* A deactivation left in place indefinitely silently removes the protection. It is
                  * reported, not corrected -- forcing reactivation would reset a unit whose task is
                  * legitimately idle. */
-                STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_WDGM_ALIVE, (uint8)index, DEM_EVENT_STATUS_PREFAILED));
+                STD_DISCARD(
+                    Dem_SetEventStatus(DEM_EVENT_WDGM_ALIVE, (uint8)index, DEM_EVENT_STATUS_PREFAILED));
                 WdgM_DeactivatedAt[index] = Gpt_GetMonotonicMs();
             }
 #endif
@@ -304,7 +305,8 @@ void WdgM_MainFunction(void)
                 WdgM_Entities[index].localStatus = WDGM_LOCAL_STATUS_OK;
                 WdgM_Entities[index].lastViolation = WDGM_VIOLATION_NONE;
                 STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_WDGM_ALIVE, (uint8)index, DEM_EVENT_STATUS_PASSED));
-                STD_DISCARD(Dem_SetEventStatus(DEM_EVENT_WDGM_DEADLINE, (uint8)index, DEM_EVENT_STATUS_PASSED));
+                STD_DISCARD(
+                    Dem_SetEventStatus(DEM_EVENT_WDGM_DEADLINE, (uint8)index, DEM_EVENT_STATUS_PASSED));
             }
         }
 
@@ -360,13 +362,12 @@ void WdgM_MainFunction(void)
     WdgM_Stats.triggerCount++;
 }
 
-Std_ReturnType WdgM_GetLocalStatus(WdgM_SupervisedEntityIdType entityId,
-                                   WdgM_EntityStatusType *status)
+Std_ReturnType WdgM_GetLocalStatus(WdgM_SupervisedEntityIdType entityId, WdgM_EntityStatusType *status)
 {
     DET_CHECK_RETURN(WdgM_EntityValid(entityId) != FALSE, MODULE_ID_WDGM, (uint8)entityId,
                      WDGM_API_ID_GET_LOCAL_STATUS, WDGM_E_PARAM_SEID, E_NOT_OK);
-    DET_CHECK_RETURN(status != NULL_PTR, MODULE_ID_WDGM, (uint8)entityId,
-                     WDGM_API_ID_GET_LOCAL_STATUS, WDGM_E_PARAM_POINTER, E_NOT_OK);
+    DET_CHECK_RETURN(status != NULL_PTR, MODULE_ID_WDGM, (uint8)entityId, WDGM_API_ID_GET_LOCAL_STATUS,
+                     WDGM_E_PARAM_POINTER, E_NOT_OK);
 
     *status = WdgM_Entities[entityId];
     return E_OK;
@@ -406,8 +407,8 @@ Std_ReturnType WdgM_ActivateEntity(WdgM_SupervisedEntityIdType entityId)
 
 Std_ReturnType WdgM_GetStatistics(WdgM_StatisticsType *stats)
 {
-    DET_CHECK_RETURN(stats != NULL_PTR, MODULE_ID_WDGM, INSTANCE_ID_SINGLE,
-                     WDGM_API_ID_MAIN_FUNCTION, WDGM_E_PARAM_POINTER, E_NOT_OK);
+    DET_CHECK_RETURN(stats != NULL_PTR, MODULE_ID_WDGM, INSTANCE_ID_SINGLE, WDGM_API_ID_MAIN_FUNCTION,
+                     WDGM_E_PARAM_POINTER, E_NOT_OK);
 
     WdgM_Stats.globalStatus = WdgM_Global;
     *stats = WdgM_Stats;
