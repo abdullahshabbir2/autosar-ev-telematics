@@ -82,7 +82,7 @@
   <rect class="budget" x="200" y="188" width="736" height="38"/>
   <text x="940" y="204" class="small" fill="#b3261e">budget ends 2400 ms</text>
   <text x="940" y="219" class="small">v1 took 13 s here</text>
-  <text x="212" y="242" class="small">then: Adc oversample · GnssIf parse · IoHwAb · OdoSwc · BattSwc — a few ms in total</text>
+  <text x="212" y="242" class="small">then Adc oversample, GnssIf parse, IoHwAb, OdoSwc, BattSwc — a few ms</text>
   <text x="212" y="256" class="small">idle for the remaining ~1.2 s, waiting out the period</text>
 
   <!-- ===================== lane 3: storage ===================== -->
@@ -93,11 +93,10 @@
   <rect class="lane" x="200" y="286" width="920" height="84"/>
   <!-- runs after acquisition; typical 120 ms -> 37 px -->
   <rect x="601" y="302" width="37" height="30" fill="#e4f0e8" stroke="#1e5c33" stroke-width="1.5" rx="2" stroke-dasharray="3 3"/>
-  <text x="648" y="316" class="small">one record append + fsync — typical duration not yet measured on hardware</text>
+  <text x="648" y="314" class="small">one record append + fsync — typical duration not yet measured on hardware</text>
   <!-- worst case 2000 -> 613 px -->
   <rect class="budget" x="200" y="298" width="613" height="38"/>
-  <text x="820" y="313" class="small" fill="#b3261e">budget 2000 ms of its own 3000 ms period</text>
-  <text x="648" y="331" class="small">the 2 s budget comes from an SD write reaching 2 s behind wear levelling</text>
+  <text x="648" y="330" class="small">2000 ms budget, taken from an SD write reaching 2 s behind wear levelling</text>
   <text x="212" y="356" class="small">Lower priority than acquisition on purpose: a 2-second card write must never hold off a timed RS485 exchange.</text>
   <path stroke="#2b2b33" stroke-width="1.4" fill="none" marker-end="url(#t)" d="M599 222 C 599 260, 601 268, 601 298"/>
   <text x="612" y="272" class="small">record handed over, store before send</text>
@@ -114,7 +113,7 @@
     <rect x="813" y="412" width="18" height="30" rx="2"/>
   </g>
   <rect class="budget" x="200" y="408" width="245" height="38"/>
-  <text x="452" y="426" class="small" fill="#b3261e">800 ms budget</text>
+  <text x="452" y="426" class="small" fill="#b3261e">800 ms</text>
   <text x="200" y="460" class="small" fill="#4a2d7a">3 activations per acquisition period — ComM arbitration, NetIf pump, one backlog record published each time</text>
   <text x="200" y="474" class="small">On core 0 with the WiFi and lwIP stacks: cross-core lock contention stays away from the RS485 timing on core 1.</text>
 

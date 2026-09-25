@@ -210,6 +210,19 @@ python -c "import xml.dom.minidom, glob; [xml.dom.minidom.parse(f) for f in glob
 An unclosed tag or an undefined `url(#id)` reference is easy to introduce and renders as a silently
 missing element rather than an error.
 
+**Then look at it.** Well-formed XML says nothing about whether the drawing is readable, and the
+failures that matter here are all layout: text wider than the box it is centred in, two labels written
+over each other, a connector routed through a box, a run of spaces used as column separators (SVG
+collapses them), or a note panel that runs out of room mid-sentence. None of those are detectable
+without rendering. Every one of them occurred in the first draft of this set:
+
+```bash
+chrome --headless --disable-gpu --hide-scrollbars   --screenshot=out.png --window-size=1180,1100   file:///absolute/path/to/docs/diagrams/01-layer-architecture.svg
+```
+
+Give `--window-size` at least 100 px more height than the `viewBox`; at exactly the viewBox height the
+capture loses the bottom of the image, which looks exactly like a diagram whose last panel is missing.
+
 **Numbers in these diagrams come from the code, not from memory.** Every period, budget, timeout and
 threshold drawn here is in a `*_Cfg.h`. If you change one, the diagram is now wrong; grep the diagram
 set for the old value.

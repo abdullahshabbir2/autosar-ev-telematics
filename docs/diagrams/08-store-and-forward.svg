@@ -145,7 +145,7 @@
   <text x="146" y="616" class="step" text-anchor="middle">publish, then advance</text>
   <text x="146" y="632" class="small" text-anchor="middle">offset += lineLength; persist the cursor</text>
 
-  <path class="f" d="M266 619 H 330"/>
+  <path class="f" d="M266 619 H 312"/>
   <path class="gate" d="M470 577 L 630 619 L 470 661 L 310 619 Z"/>
   <text x="470" y="614" class="step" text-anchor="middle">end of file?</text>
   <text x="470" y="630" class="small" text-anchor="middle">offset at or past the size</text>
@@ -156,8 +156,8 @@
   <text x="937" y="613" class="step" text-anchor="middle" fill="#8a1e1e">FsAbs_AdvanceToNextFile → E_PENDING</text>
   <text x="937" y="631" class="small" text-anchor="middle">cursor moves to the next day's file at offset 0; the caller retries next activation</text>
 
-  <path class="f" d="M470 661 C 470 700, 146 700, 146 660 V 646"/>
-  <text x="300" y="694" class="small" text-anchor="middle">no — more in this file, next activation continues here</text>
+  <path class="f" d="M470 661 C 470 688, 146 688, 146 660 V 646"/>
+  <text x="300" y="706" class="small" text-anchor="middle">no — more in this file, so the next activation continues here</text>
 
   <!-- ============ the defect ============ -->
   <rect class="nbox" x="26" y="716" width="558" height="208"/>

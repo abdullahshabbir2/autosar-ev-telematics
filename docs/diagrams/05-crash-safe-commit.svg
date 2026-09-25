@@ -6,7 +6,7 @@
   The property being shown is that there is no instant at which neither value is readable. The record
   becomes authoritative on a single byte write, and a byte write either happens or does not.
 -->
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 860" width="1180" height="860"
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 872" width="1180" height="872"
      font-family="DejaVu Sans, Helvetica, Arial, sans-serif">
   <style>
     .title { font-size:21px; font-weight:bold; fill:#12121a; }
@@ -30,7 +30,7 @@
     <marker id="t" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#2b2b33"/></marker>
   </defs>
 
-  <rect width="1180" height="860" fill="#ffffff"/>
+  <rect width="1180" height="872" fill="#ffffff"/>
   <text x="26" y="32" class="title">Crash-safe commit — what a power loss at each instant leaves</text>
   <text x="26" y="50" class="sub">Append-only records. The commit marker is one aligned byte written last, so validity flips atomically.</text>
 
@@ -55,10 +55,11 @@
   <text x="150" y="212" class="small" text-anchor="middle">left at 0xFF</text>
   <g>
     <rect class="old" x="300" y="176" width="120" height="30"/><text x="360" y="196" class="small" text-anchor="middle">record N (valid)</text>
-    <rect class="new" x="426" y="176" width="120" height="30"/><text x="486" y="196" class="small" text-anchor="middle">header N+1</text>
-    <rect x="490" y="176" width="20" height="30" fill="#f4f4f7" stroke="#8a5a14" stroke-width="1.6"/>
-    <text x="500" y="220" class="cut" text-anchor="middle">state</text>
-    <text x="500" y="232" class="small" text-anchor="middle">0xFF</text>
+    <rect class="new" x="426" y="176" width="120" height="30"/><text x="470" y="196" class="small" text-anchor="middle">header N+1</text>
+    <rect x="516" y="176" width="16" height="30" fill="#f4f4f7" stroke="#8a5a14" stroke-width="1.6"/>
+    <text x="524" y="220" class="cut" text-anchor="middle">state</text>
+    <text x="524" y="232" class="small" text-anchor="middle">0xFF</text>
+  <text x="524" y="244" class="small" text-anchor="middle">offset 12</text>
     <rect class="blank" x="552" y="176" width="174" height="30"/><text x="639" y="196" class="small" text-anchor="middle">erased</text>
   </g>
   <text x="930" y="190" class="out" text-anchor="middle">record N — the new slot is uncommitted,</text>
@@ -72,8 +73,8 @@
   <text x="150" y="314" class="small" text-anchor="middle">alignment</text>
   <g>
     <rect class="old" x="300" y="278" width="120" height="30"/><text x="360" y="298" class="small" text-anchor="middle">record N (valid)</text>
-    <rect class="new" x="426" y="278" width="120" height="30"/><text x="486" y="298" class="small" text-anchor="middle">header N+1</text>
-    <rect x="490" y="278" width="20" height="30" fill="#f4f4f7" stroke="#8a5a14" stroke-width="1.6"/>
+    <rect class="new" x="426" y="278" width="120" height="30"/><text x="470" y="298" class="small" text-anchor="middle">header N+1</text>
+    <rect x="516" y="278" width="16" height="30" fill="#f4f4f7" stroke="#8a5a14" stroke-width="1.6"/>
     <rect class="new" x="552" y="278" width="174" height="30"/><text x="639" y="298" class="small" text-anchor="middle">payload N+1 + CRC-32</text>
   </g>
   <text x="930" y="292" class="out" text-anchor="middle">record N — still uncommitted, and the</text>
@@ -87,9 +88,9 @@
   <text x="150" y="416" class="small" text-anchor="middle">first byte = 0xFC</text>
   <g>
     <rect class="old" x="300" y="380" width="120" height="30"/><text x="360" y="400" class="small" text-anchor="middle">record N (valid)</text>
-    <rect class="new" x="426" y="380" width="120" height="30"/><text x="486" y="400" class="small" text-anchor="middle">header N+1</text>
-    <rect x="490" y="380" width="20" height="30" fill="#c8e0cc" stroke="#1e5c33" stroke-width="2"/>
-    <text x="500" y="424" class="out" text-anchor="middle">0xFC</text>
+    <rect class="new" x="426" y="380" width="120" height="30"/><text x="470" y="400" class="small" text-anchor="middle">header N+1</text>
+    <rect x="516" y="380" width="16" height="30" fill="#c8e0cc" stroke="#1e5c33" stroke-width="2"/>
+    <text x="524" y="424" class="out" text-anchor="middle">0xFC</text>
     <rect class="new" x="552" y="380" width="174" height="30"/><text x="639" y="400" class="small" text-anchor="middle">payload N+1 + CRC-32</text>
   </g>
   <text x="930" y="394" class="out" text-anchor="middle">record N+1 — the newest valid record wins</text>
@@ -123,8 +124,8 @@
   <text x="930" y="679" class="out" text-anchor="middle">every valid record, in a clean sector</text>
 
   <!-- notes -->
-  <rect class="nbox" x="26" y="726" width="1128" height="116"/>
-  <text x="40" y="748" class="step" fill="#8a1e1e">Two things this diagram exists to make unmissable</text>
+  <rect class="nbox" x="26" y="726" width="1128" height="126"/>
+  <text x="40" y="748" class="step" fill="#8a1e1e">Why the poisoned-slot flag exists</text>
   <text x="40" y="772" class="note">The cursor deliberately does not advance on a failed write, so a naive retry programs the same slot again. Writing a second</text>
   <text x="40" y="788" class="note">header over a partially programmed one ANDs the two together and can never produce a valid CRC — so the retry can never</text>
   <text x="40" y="804" class="note">succeed, and every scan stops at the damage, hiding every record written after it. The poisoned-slot flag and the collection</text>

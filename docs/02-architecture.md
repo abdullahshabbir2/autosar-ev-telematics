@@ -8,6 +8,10 @@ AUTOSAR or of this vehicle.
 
 ## 1. What this ECU does
 
+> The eight standalone diagrams in [diagrams/](diagrams/) cover this document visually and render
+> anywhere. [Layer architecture](diagrams/01-layer-architecture.svg) and
+> [Task timing](diagrams/07-task-timing.svg) are the two worth opening beside this page.
+
 A telematics and odometry control unit for a light electric vehicle. Every three seconds it:
 
 - reads motor speed, DC-link voltage and current from the motor controller over CAN
@@ -56,6 +60,9 @@ Three decisions do most of the work:
 ---
 
 ## 3. Layer structure
+
+Drawn in full, with every module named and both layering exceptions called out:
+[diagrams/01-layer-architecture.svg](diagrams/01-layer-architecture.svg).
 
 ```mermaid
 flowchart TB
@@ -183,6 +190,9 @@ confidence in a register sequence without a logic analyser permanently attached.
 
 ## 5. Task and scheduling model
 
+Drawn to scale over one 3-second period, with the budgets and core split:
+[diagrams/07-task-timing.svg](diagrams/07-task-timing.svg).
+
 Four FreeRTOS tasks, all created once at startup, none created afterwards. No task is ever deleted.
 
 ```mermaid
@@ -234,6 +244,9 @@ long.
 ---
 
 ## 6. Startup sequence
+
+As a decision flow, showing which failures rejoin the main path and which two do not:
+[diagrams/02-startup-flow.svg](diagrams/02-startup-flow.svg).
 
 ```mermaid
 sequenceDiagram
@@ -289,6 +302,11 @@ The ordering constraints that are not obvious:
 
 ## 7. Data flow for one acquisition cycle
 
+Drawn across all five layers, including the store-before-send ordering:
+[diagrams/03-acquisition-dataflow.svg](diagrams/03-acquisition-dataflow.svg). The odometry branch is
+expanded in [diagrams/04-odometry-flow.svg](diagrams/04-odometry-flow.svg), and the publish side in
+[diagrams/08-store-and-forward.svg](diagrams/08-store-and-forward.svg).
+
 ```mermaid
 flowchart LR
     MCU[("Motor<br/>controller")] -->|CAN 500k| CAN[Can] --> CANIF[CanIf]
@@ -316,6 +334,9 @@ to durable storage goes through two layers that each add an independent integrit
 ---
 
 ## 8. The persistence stack
+
+Where a power loss lands at each step of a write:
+[diagrams/05-crash-safe-commit.svg](diagrams/05-crash-safe-commit.svg).
 
 This is where v1 lost data, so it gets three layers rather than one.
 
@@ -504,18 +525,20 @@ does not invalidate data already collected.
 
 ## 13. Reading order for a new engineer
 
-1. [`config/Ecu_PinMap.h`](../config/Ecu_PinMap.h) — the hardware contract, and the three v1 pin
+1. [diagrams/](diagrams/) — diagrams 1, 2 and 7, which give the shape before any of the detail
+2. [`config/Ecu_PinMap.h`](../config/Ecu_PinMap.h) — the hardware contract, and the three v1 pin
    conflicts it resolves
-2. [`src/base/Std_Types.h`](../src/base/Std_Types.h) — the vocabulary every module uses
-3. [`src/services/Fee/Fee.h`](../src/services/Fee/Fee.h) — the crash-safety argument, written out
-4. [`src/app/OdoSwc/OdoSwc.h`](../src/app/OdoSwc/OdoSwc.h) — the product's core function
-5. [`test/test_fee/test_fee.c`](../test/test_fee/test_fee.c) — what a power-fail test looks like
-6. [docs/01-requirements.md](01-requirements.md) → [docs/04-safety-analysis.md](04-safety-analysis.md)
+3. [`src/base/Std_Types.h`](../src/base/Std_Types.h) — the vocabulary every module uses
+4. [`src/services/Fee/Fee.h`](../src/services/Fee/Fee.h) — the crash-safety argument, written out
+5. [`src/app/OdoSwc/OdoSwc.h`](../src/app/OdoSwc/OdoSwc.h) — the product's core function
+6. [`test/test_fee/test_fee.c`](../test/test_fee/test_fee.c) — what a power-fail test looks like
+7. [docs/01-requirements.md](01-requirements.md) → [docs/04-safety-analysis.md](04-safety-analysis.md)
 
 ---
 
 ## See also
 
+- [Diagrams](diagrams/) — the eight standalone SVGs
 - [01 — Requirements](01-requirements.md)
 - [03 — Module interfaces](03-interfaces.md)
 - [04 — Safety analysis](04-safety-analysis.md)

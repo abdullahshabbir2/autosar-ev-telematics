@@ -7,7 +7,7 @@
   transmit it. v1 had it the other way round, so a record could be successfully sent and then lost, and
   separately could be successfully stored and then discarded because the send failed.
 -->
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 760" width="1180" height="760"
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 784" width="1180" height="784"
      font-family="DejaVu Sans, Helvetica, Arial, sans-serif">
   <style>
     .title  { font-size:21px; font-weight:bold; fill:#12121a; }
@@ -31,7 +31,7 @@
     <marker id="tr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#b3261e"/></marker>
   </defs>
 
-  <rect width="1180" height="760" fill="#ffffff"/>
+  <rect width="1180" height="784" fill="#ffffff"/>
   <text x="26" y="32" class="title">One acquisition cycle — every 3000 ms</text>
   <text x="26" y="50" class="sub">Units are converted once, at the ECU abstraction boundary. Nothing above it handles a raw count.</text>
 
@@ -79,7 +79,7 @@
 
   <rect class="app" x="608" y="172" width="196" height="50"/>
   <text x="706" y="192" class="stage" text-anchor="middle">BattSwc</text>
-  <text x="706" y="208" class="detail" text-anchor="middle">responders only · cell imbalance</text>
+  <text x="706" y="208" class="detail" text-anchor="middle">responders · cell imbalance</text>
   <path class="flow" d="M574 186 H 608"/>
 
   <rect class="app" x="608" y="236" width="196" height="96"/>
@@ -132,7 +132,7 @@
   <!-- ============ indication side-branch ============ -->
   <rect class="app" x="608" y="480" width="196" height="44"/>
   <text x="706" y="500" class="stage" text-anchor="middle">HmiSwc → 5 LEDs</text>
-  <text x="706" y="516" class="detail" text-anchor="middle">acq · storage · link · cloud · heartbeat</text>
+  <text x="706" y="516" class="detail" text-anchor="middle">acq · store · link · cloud · beat</text>
   <path class="flow" d="M852 300 C 830 300, 826 502, 804 502"/>
 
   <!-- ============ diagnostics spine ============ -->
@@ -140,14 +140,14 @@
   <text x="500" y="580" class="stage" text-anchor="middle">Dem — every stage above reports pass or fail here</text>
   <text x="500" y="598" class="detail" text-anchor="middle">debounced confirmation · freeze frames · healing · survives a power cycle in NvM</text>
   <path class="flow" d="M476 332 V 356 M476 356 H 300 V 560" stroke-dasharray="5 4"/>
-  <path class="flow" d="M706 332 V 540 M706 540 H 600 V 560" stroke-dasharray="5 4"/>
+  <path class="flow" d="M660 332 V 346 H 598 V 548 H 640 V 560" stroke-dasharray="5 4"/>
   <path class="flow" d="M852 412 C 820 412, 780 546, 700 560" stroke-dasharray="5 4"/>
 
   <!-- ============ timing footer ============ -->
-  <rect x="26" y="636" width="1128" height="98" fill="#f7f7fa" stroke="#8a8a96" stroke-width="1" rx="4"/>
-  <text x="38" y="656" class="stage">Which task runs which stage</text>
-  <text x="38" y="678" class="detail">Scheduler tick, 10 ms, prio 5, core 1 — supervision, CAN reception, GNSS byte assembly</text>
-  <text x="38" y="696" class="detail">Acquisition,   3000 ms, prio 4, core 1 — RS485 round, ADC, OdoSwc, BattSwc            budget 2400 ms</text>
-  <text x="38" y="714" class="detail">Storage,       3000 ms, prio 3, core 1 — Com serialise, FsAbs append                  budget 2000 ms</text>
-  <text x="640" y="714" class="detail">Connectivity, 1000 ms, prio 2, core 0 — NetIf, ComM, backlog drain    budget 800 ms</text>
+  <rect x="26" y="636" width="1128" height="122" fill="#f7f7fa" stroke="#8a8a96" stroke-width="1" rx="4"/>
+  <text x="38" y="658" class="stage">Which task runs which stage</text>
+  <text x="38" y="682" class="detail">Scheduler tick</text><text x="160" y="682" class="detail">10 ms · prio 5 · core 1</text><text x="330" y="682" class="detail">supervision, CAN reception, GNSS byte assembly</text><text x="700" y="682" class="detail">budget 5 ms</text>
+  <text x="38" y="700" class="detail">Acquisition</text><text x="160" y="700" class="detail">3000 ms · prio 4 · core 1</text><text x="330" y="700" class="detail">RS485 round, ADC, OdoSwc, BattSwc</text><text x="700" y="700" class="detail">budget 2400 ms</text>
+  <text x="38" y="718" class="detail">Storage</text><text x="160" y="718" class="detail">3000 ms · prio 3 · core 1</text><text x="330" y="718" class="detail">Com serialise, FsAbs append</text><text x="700" y="718" class="detail">budget 2000 ms</text>
+  <text x="38" y="736" class="detail">Connectivity</text><text x="160" y="736" class="detail">1000 ms · prio 2 · core 0</text><text x="330" y="736" class="detail">NetIf, ComM, backlog drain</text><text x="700" y="736" class="detail">budget 800 ms</text>
 </svg>

@@ -49,9 +49,14 @@ was decided, what was rejected, and what would make the decision wrong.
 
 ### Diagrams
 
-[diagrams/](diagrams/) holds the source and rendered form of every diagram referenced above. They
-are Mermaid where the content is structural (layers, state machines, sequences) and SVG where it is
-spatial (the schematic, the board layout).
+[diagrams/](diagrams/) holds eight standalone SVGs covering the layer architecture, startup, task
+timing, the acquisition data flow, odometry, the crash-safe commit, bearer arbitration and store and
+forward — plus the module dependency graph and the degraded-mode state machine. Hand-written, so they
+render in any browser with no plugin and diff as text.
+
+Diagrams that belong beside a specific paragraph stay inline in that document as Mermaid or ASCII; the
+index in [diagrams/README.md](diagrams/README.md) lists where each one lives and why it is in the format
+it is in.
 
 ### Hardware
 

@@ -89,17 +89,18 @@
   <path class="flow" d="M415 508 V 538"/>
   <rect class="box" x="290" y="538" width="250" height="46"/>
   <text x="415" y="557" class="step" text-anchor="middle">Wdg_Init — slow mode</text>
-  <text x="415" y="574" class="small" text-anchor="middle">mounting and attaching legitimately take tens of seconds</text>
+  <text x="415" y="574" class="small" text-anchor="middle">mounting and attaching can take tens of seconds</text>
 
   <!-- subsystems -->
   <path class="flow" d="M415 584 V 604"/>
-  <rect class="box" x="180" y="604" width="470" height="118"/>
-  <text x="415" y="624" class="step" text-anchor="middle">Bring up each subsystem in turn</text>
-  <text x="196" y="646" class="small">Can → CanIf      motor controller       failure costs odometry</text>
-  <text x="196" y="664" class="small">Rs485If          battery packs          failure costs pack data</text>
-  <text x="196" y="682" class="small">GnssIf           position               failure costs position</text>
-  <text x="196" y="700" class="small">FsAbs            the card               failure costs the backlog buffer</text>
-  <text x="196" y="716" class="small">TimeAbs, NetIf   clock and bearer       failure costs timestamps / live publishing</text>
+  <rect class="box" x="180" y="604" width="470" height="132"/>
+  <text x="415" y="622" class="step" text-anchor="middle">Bring up each subsystem in turn</text>
+  <text x="424" y="642" class="small" font-style="italic">what a failure costs</text>
+  <text x="196" y="662" class="small">Can → CanIf</text><text x="300" y="662" class="small">motor controller</text><text x="424" y="662" class="small">no odometry</text>
+  <text x="196" y="678" class="small">Rs485If</text><text x="300" y="678" class="small">battery packs</text><text x="424" y="678" class="small">no pack data</text>
+  <text x="196" y="694" class="small">GnssIf</text><text x="300" y="694" class="small">position</text><text x="424" y="694" class="small">no position</text>
+  <text x="196" y="710" class="small">FsAbs</text><text x="300" y="710" class="small">the card</text><text x="424" y="710" class="small">no backlog buffer</text>
+  <text x="196" y="726" class="small">TimeAbs, NetIf</text><text x="300" y="726" class="small">clock and bearer</text><text x="424" y="726" class="small">no timestamps / no live publishing</text>
 
   <!-- per-subsystem gate -->
   <path class="flow" d="M650 663 H 700"/>
@@ -113,7 +114,7 @@
   <path class="flowno" d="M680 764 C 600 764, 600 800, 545 800"/>
 
   <!-- SchM -->
-  <path class="flow" d="M415 722 V 800"/>
+  <path class="flow" d="M415 736 V 800"/>
   <rect class="box" x="290" y="800" width="250" height="46"/>
   <text x="415" y="819" class="step" text-anchor="middle">SchM_Init → SchM_StartTasks</text>
   <text x="415" y="836" class="small" text-anchor="middle">create the four cyclic tasks</text>

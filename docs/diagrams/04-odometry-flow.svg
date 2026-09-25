@@ -112,11 +112,13 @@
   <text x="830" y="782" class="step" text-anchor="middle">100 m OR 60 s</text>
   <text x="830" y="798" class="small" text-anchor="middle">since the last write?</text>
   <text x="830" y="814" class="small" text-anchor="middle">60 s catches a slow vehicle</text>
-  <path class="flow" d="M1000 792 H 1036 V 872 H 640"/>
+  <text x="830" y="858" class="small" text-anchor="middle">no — keep accumulating; the write waits</text>
+  <path class="flow" d="M1000 792 H 1036 V 876 H 640"/>
   <text x="1008" y="784" class="yes">yes</text>
-  <rect class="store" x="340" y="850" width="300" height="44"/>
-  <text x="490" y="869" class="step" text-anchor="middle">NvM write-through to flash</text>
-  <text x="490" y="885" class="small" text-anchor="middle">immediate block; NvM write-on-change suppresses it entirely when parked</text>
+  <rect class="store" x="340" y="846" width="300" height="60"/>
+  <text x="490" y="866" class="step" text-anchor="middle">NvM write-through to flash</text>
+  <text x="490" y="882" class="small" text-anchor="middle">immediate block — no deferred window</text>
+  <text x="490" y="897" class="small" text-anchor="middle">write-on-change suppresses it when parked</text>
 
   <!-- notes -->
   <rect class="nbox" x="700" y="440" width="360" height="290"/>
@@ -140,7 +142,7 @@
   <text x="714" y="684" class="note">100 m threshold. Writing every cycle is 28 800</text>
   <text x="714" y="698" class="note">writes a day against ~100 000 erase cycles — under</text>
   <text x="714" y="712" class="note">four days. Writing only at shutdown loses</text>
-  <text x="714" y="726" class="note">everything on a power cut, which is how a vehicle</text>
+  <text x="714" y="726" class="note">everything on a power cut.</text>
 
   <!-- measured accuracy -->
   <rect x="26" y="838" width="300" height="88" fill="#e4f0e8" stroke="#1e5c33" stroke-width="1.4" rx="4"/>

@@ -71,7 +71,7 @@
 
   <!-- below limit: retry same bearer, no re-request -->
   <path class="f" d="M60 323 C 20 323, 20 125, 60 125"/>
-  <text x="30" y="224" class="edge" text-anchor="middle" transform="rotate(-90 30 224)">still &lt; 3 — NetIf's own backoff retries</text>
+  <text x="46" y="224" class="edge" text-anchor="middle" transform="rotate(-90 46 224)">still &lt; 3 — NetIf's own backoff retries</text>
 
   <!-- at limit: switch -->
   <path class="fr" d="M190 354 V 396"/>
