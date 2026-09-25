@@ -1,0 +1,35 @@
+Copyright (c) 2024-2026 Abdullah Shabbir. All rights reserved.
+
+SPDX-License-Identifier: Proprietary
+
+This repository is source-available, not open source. The source is published so that
+it can be read, reviewed and discussed — as a portfolio of engineering work. Publishing
+it grants no licence to use it.
+
+You may:
+
+  - read the source, the documentation and the diagrams;
+  - quote short excerpts with attribution, for review, discussion, teaching or
+    commentary;
+  - clone the repository and build it locally in order to evaluate it.
+
+You may not, without prior written permission from the copyright holder:
+
+  - use this software, in whole or in part, in any product, service or vehicle;
+  - redistribute it, or distribute modified versions of it;
+  - incorporate any part of it into another work, including another codebase;
+  - use it to train or fine-tune a machine learning model.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+This is control software for a vehicle. It has not been certified to any functional
+safety standard, and its hardware-dependent layer is validated only on the specific
+board described in docs/07-hardware.md. It must not be relied upon where a failure
+could cause injury or loss.
+
+For permission to use this software, contact abdullahshabbir2@gmail.com.
