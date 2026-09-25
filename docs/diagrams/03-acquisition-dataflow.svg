@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Data flow for one 3-second acquisition cycle.
+  Copyright (c) 2024-2026 Abdullah Shabbir. All rights reserved.
+
+  The ordering that matters is at the right-hand end: the record reaches the card before anything tries to
+  transmit it. v1 had it the other way round, so a record could be successfully sent and then lost, and
+  separately could be successfully stored and then discarded because the send failed.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 760" width="1180" height="760"
+     font-family="DejaVu Sans, Helvetica, Arial, sans-serif">
+  <style>
+    .title  { font-size:21px; font-weight:bold; fill:#12121a; }
+    .sub    { font-size:12px; fill:#54546a; }
+    .stage  { font-size:12.5px; fill:#12121a; font-weight:bold; }
+    .detail { font-size:10.5px; fill:#54546a; }
+    .units  { font-size:10.5px; fill:#1e3a6e; font-style:italic; }
+    .hw     { fill:#f2e8e2; stroke:#8a4b1e; stroke-width:1.4; rx:4; }
+    .mcal   { fill:#fbe8e6; stroke:#8a1e1e; stroke-width:1.3; rx:4; }
+    .abs    { fill:#fdf2e4; stroke:#8a5a14; stroke-width:1.3; rx:4; }
+    .app    { fill:#e8f0fb; stroke:#1e3a6e; stroke-width:1.3; rx:4; }
+    .svc    { fill:#e4f0e8; stroke:#1e5c33; stroke-width:1.3; rx:4; }
+    .flow   { stroke:#2b2b33; stroke-width:1.6; fill:none; marker-end:url(#t); }
+    .order  { stroke:#b3261e; stroke-width:2.4; fill:none; marker-end:url(#tr); }
+    .gate   { font-size:10.5px; fill:#6a1b14; }
+    .legend { font-size:11px; fill:#54546a; }
+    .seq    { font-size:13px; font-weight:bold; fill:#b3261e; }
+  </style>
+  <defs>
+    <marker id="t"  viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#2b2b33"/></marker>
+    <marker id="tr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#b3261e"/></marker>
+  </defs>
+
+  <rect width="1180" height="760" fill="#ffffff"/>
+  <text x="26" y="32" class="title">One acquisition cycle — every 3000 ms</text>
+  <text x="26" y="50" class="sub">Units are converted once, at the ECU abstraction boundary. Nothing above it handles a raw count.</text>
+
+  <!-- ============ column headers ============ -->
+  <text x="96"  y="82" class="legend" text-anchor="middle">hardware</text>
+  <text x="268" y="82" class="legend" text-anchor="middle">MCAL</text>
+  <text x="470" y="82" class="legend" text-anchor="middle">ECU abstraction</text>
+  <text x="700" y="82" class="legend" text-anchor="middle">application</text>
+  <text x="940" y="82" class="legend" text-anchor="middle">services → out</text>
+  <path d="M182 92 V 700 M362 92 V 700 M590 92 V 700 M818 92 V 700" stroke="#d4d4dc" stroke-width="1" stroke-dasharray="4 4"/>
+
+  <!-- ============ CAN chain ============ -->
+  <rect class="hw"   x="26"  y="102" width="140" height="44"/><text x="96"  y="122" class="stage" text-anchor="middle">Motor ctrl</text><text x="96" y="138" class="detail" text-anchor="middle">CAN 500 kbit/s</text>
+  <rect class="mcal" x="196" y="102" width="152" height="44"/><text x="272" y="122" class="stage" text-anchor="middle">Can (MCP2515)</text><text x="272" y="138" class="detail" text-anchor="middle">over Spi · platform-free</text>
+  <rect class="abs"  x="378" y="102" width="196" height="44"/><text x="476" y="122" class="stage" text-anchor="middle">CanIf</text><text x="476" y="138" class="detail" text-anchor="middle">decode · freshness ≤ 500 ms</text>
+  <path class="flow" d="M166 124 H 196"/><path class="flow" d="M348 124 H 378"/>
+
+  <!-- ============ RS485 chain ============ -->
+  <rect class="hw"   x="26"  y="164" width="140" height="44"/><text x="96"  y="184" class="stage" text-anchor="middle">4 packs</text><text x="96" y="200" class="detail" text-anchor="middle">RS485 4800 8E1</text>
+  <rect class="mcal" x="196" y="164" width="152" height="44"/><text x="272" y="184" class="stage" text-anchor="middle">Uart · Dio</text><text x="272" y="200" class="detail" text-anchor="middle">DE turnaround</text>
+  <rect class="abs"  x="378" y="164" width="196" height="44"/><text x="476" y="184" class="stage" text-anchor="middle">Rs485If</text><text x="476" y="200" class="detail" text-anchor="middle">CRC-16 · length · address</text>
+  <path class="flow" d="M166 186 H 196"/><path class="flow" d="M348 186 H 378"/>
+
+  <!-- ============ GNSS chain ============ -->
+  <rect class="hw"   x="26"  y="226" width="140" height="44"/><text x="96"  y="246" class="stage" text-anchor="middle">NEO-6M</text><text x="96" y="262" class="detail" text-anchor="middle">NMEA 9600</text>
+  <rect class="mcal" x="196" y="226" width="152" height="44"/><text x="272" y="246" class="stage" text-anchor="middle">Uart (soft)</text><text x="272" y="262" class="detail" text-anchor="middle">receive only</text>
+  <rect class="abs"  x="378" y="226" width="196" height="44"/><text x="476" y="246" class="stage" text-anchor="middle">GnssIf</text><text x="476" y="262" class="detail" text-anchor="middle">checksum · deg ×10⁷ integers</text>
+  <path class="flow" d="M166 248 H 196"/><path class="flow" d="M348 248 H 378"/>
+
+  <!-- ============ ADC chain ============ -->
+  <rect class="hw"   x="26"  y="288" width="140" height="44"/><text x="96"  y="308" class="stage" text-anchor="middle">Divider</text><text x="96" y="324" class="detail" text-anchor="middle">pack → ADC1</text>
+  <rect class="mcal" x="196" y="288" width="152" height="44"/><text x="272" y="308" class="stage" text-anchor="middle">Adc</text><text x="272" y="324" class="detail" text-anchor="middle">7 samples, trim 1 each end</text>
+  <rect class="abs"  x="378" y="288" width="196" height="44"/><text x="476" y="308" class="stage" text-anchor="middle">IoHwAb</text><text x="476" y="324" class="detail" text-anchor="middle">per-unit calibration → mV</text>
+  <path class="flow" d="M166 310 H 196"/><path class="flow" d="M348 310 H 378"/>
+
+  <!-- units note -->
+  <text x="476" y="352" class="units" text-anchor="middle">↑ raw counts and wire formats stop here ↑</text>
+
+  <!-- ============ application ============ -->
+  <rect class="app" x="608" y="102" width="196" height="56"/>
+  <text x="706" y="122" class="stage" text-anchor="middle">OdoSwc</text>
+  <text x="706" y="138" class="detail" text-anchor="middle">plausibility gates · trapezoidal</text>
+  <text x="706" y="152" class="detail" text-anchor="middle">integer mm · remainder carried</text>
+  <path class="flow" d="M574 124 H 608"/>
+
+  <rect class="app" x="608" y="172" width="196" height="50"/>
+  <text x="706" y="192" class="stage" text-anchor="middle">BattSwc</text>
+  <text x="706" y="208" class="detail" text-anchor="middle">responders only · cell imbalance</text>
+  <path class="flow" d="M574 186 H 608"/>
+
+  <rect class="app" x="608" y="236" width="196" height="96"/>
+  <text x="706" y="256" class="stage" text-anchor="middle">TelemSwc</text>
+  <text x="706" y="272" class="detail" text-anchor="middle">assemble one record</text>
+  <text x="706" y="288" class="detail" text-anchor="middle">23 vehicle + 44 × 4 pack</text>
+  <text x="706" y="304" class="detail" text-anchor="middle">= 199 fields</text>
+  <text x="706" y="322" class="detail" text-anchor="middle">bounded buffer, no allocation</text>
+  <path class="flow" d="M574 248 H 600 V 268 H 608"/>
+  <path class="flow" d="M574 310 H 600 V 292 H 608"/>
+  <path class="flow" d="M706 158 V 172"/>
+  <path class="flow" d="M706 222 V 236"/>
+
+  <!-- ============ the ordering that matters ============ -->
+  <rect class="svc" x="852" y="180" width="200" height="56"/>
+  <text x="952" y="200" class="stage" text-anchor="middle">Com</text>
+  <text x="952" y="216" class="detail" text-anchor="middle">CSV serialise · CRC-32</text>
+  <text x="952" y="230" class="detail" text-anchor="middle">bounded writer</text>
+  <path class="order" d="M804 284 H 830 V 208 H 852"/>
+  <text x="836" y="252" class="seq">1</text>
+
+  <rect class="abs" x="852" y="268" width="200" height="66"/>
+  <text x="952" y="288" class="stage" text-anchor="middle">FsAbs → microSD</text>
+  <text x="952" y="304" class="detail" text-anchor="middle">/YYYYMMDD.csv</text>
+  <text x="952" y="318" class="detail" text-anchor="middle">&lt;body&gt;|&lt;crc32&gt;\n</text>
+  <text x="952" y="332" class="detail" text-anchor="middle">flushed before reported</text>
+  <path class="order" d="M952 236 V 268"/>
+  <text x="966" y="256" class="seq">2</text>
+
+  <rect class="abs" x="852" y="380" width="200" height="66"/>
+  <text x="952" y="400" class="stage" text-anchor="middle">NetIf → MQTT</text>
+  <text x="952" y="416" class="detail" text-anchor="middle">WiFi or GPRS, whichever is up</text>
+  <text x="952" y="430" class="detail" text-anchor="middle">odo/&lt;device&gt;/record</text>
+  <text x="952" y="444" class="detail" text-anchor="middle">cursor advances on ack only</text>
+  <path class="order" d="M952 334 V 380"/>
+  <text x="966" y="362" class="seq">3</text>
+
+  <rect x="852" y="470" width="200" height="40" fill="#fff8f7" stroke="#b3261e" stroke-width="1.2" rx="4"/>
+  <text x="952" y="486" class="gate" text-anchor="middle">Store before send, always.</text>
+  <text x="952" y="500" class="gate" text-anchor="middle">SWREQ-TEL-0030</text>
+
+  <!-- ============ persistence side-branch ============ -->
+  <rect class="svc" x="608" y="380" width="196" height="66"/>
+  <text x="706" y="400" class="stage" text-anchor="middle">NvM → Fee → Fls</text>
+  <text x="706" y="416" class="detail" text-anchor="middle">odometer, every 100 m</text>
+  <text x="706" y="430" class="detail" text-anchor="middle">CRC-32 · crash-safe commit</text>
+  <text x="706" y="444" class="detail" text-anchor="middle">write-on-change only</text>
+  <path class="flow" d="M706 158 C 590 158, 590 400, 608 400"/>
+
+  <!-- ============ indication side-branch ============ -->
+  <rect class="app" x="608" y="480" width="196" height="44"/>
+  <text x="706" y="500" class="stage" text-anchor="middle">HmiSwc → 5 LEDs</text>
+  <text x="706" y="516" class="detail" text-anchor="middle">acq · storage · link · cloud · heartbeat</text>
+  <path class="flow" d="M852 300 C 830 300, 826 502, 804 502"/>
+
+  <!-- ============ diagnostics spine ============ -->
+  <rect class="svc" x="196" y="560" width="608" height="52"/>
+  <text x="500" y="580" class="stage" text-anchor="middle">Dem — every stage above reports pass or fail here</text>
+  <text x="500" y="598" class="detail" text-anchor="middle">debounced confirmation · freeze frames · healing · survives a power cycle in NvM</text>
+  <path class="flow" d="M476 332 V 356 M476 356 H 300 V 560" stroke-dasharray="5 4"/>
+  <path class="flow" d="M706 332 V 540 M706 540 H 600 V 560" stroke-dasharray="5 4"/>
+  <path class="flow" d="M852 412 C 820 412, 780 546, 700 560" stroke-dasharray="5 4"/>
+
+  <!-- ============ timing footer ============ -->
+  <rect x="26" y="636" width="1128" height="98" fill="#f7f7fa" stroke="#8a8a96" stroke-width="1" rx="4"/>
+  <text x="38" y="656" class="stage">Which task runs which stage</text>
+  <text x="38" y="678" class="detail">Scheduler tick, 10 ms, prio 5, core 1 — supervision, CAN reception, GNSS byte assembly</text>
+  <text x="38" y="696" class="detail">Acquisition,   3000 ms, prio 4, core 1 — RS485 round, ADC, OdoSwc, BattSwc            budget 2400 ms</text>
+  <text x="38" y="714" class="detail">Storage,       3000 ms, prio 3, core 1 — Com serialise, FsAbs append                  budget 2000 ms</text>
+  <text x="640" y="714" class="detail">Connectivity, 1000 ms, prio 2, core 0 — NetIf, ComM, backlog drain    budget 800 ms</text>
+</svg>

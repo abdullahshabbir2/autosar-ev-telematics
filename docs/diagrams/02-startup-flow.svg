@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Startup flow: EcuM_Init from reset to RUN.
+  Copyright (c) 2024-2026 Abdullah Shabbir. All rights reserved.
+
+  The shape worth reading is that almost every branch rejoins. Only two paths leave: a failed MCAL and a
+  failed task creation. v1 exited on any subsystem failure, which is why a vehicle with a disconnected
+  CAN harness rebooted forever and logged nothing at all.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 1080" width="1180" height="1080"
+     font-family="DejaVu Sans, Helvetica, Arial, sans-serif">
+  <style>
+    .title   { font-size:21px; font-weight:bold; fill:#12121a; }
+    .sub     { font-size:12px; fill:#54546a; }
+    .step    { font-size:12.5px; fill:#12121a; }
+    .small   { font-size:10.5px; fill:#54546a; }
+    .yes     { font-size:11px; fill:#1e5c33; font-weight:bold; }
+    .no      { font-size:11px; fill:#b3261e; font-weight:bold; }
+    .box     { fill:#ffffff; stroke:#2b2b33; stroke-width:1.5; rx:4; }
+    .gate    { fill:#fdf6e4; stroke:#8a5a14; stroke-width:1.5; }
+    .fatal   { fill:#fbe8e6; stroke:#8a1e1e; stroke-width:2; rx:4; }
+    .okend   { fill:#e4f0e8; stroke:#1e5c33; stroke-width:2; rx:4; }
+    .degr    { fill:#fdf2e4; stroke:#8a5a14; stroke-width:1.8; rx:4; }
+    .flow    { stroke:#2b2b33; stroke-width:1.6; fill:none; marker-end:url(#t); }
+    .flowok  { stroke:#1e5c33; stroke-width:1.6; fill:none; marker-end:url(#tg); }
+    .flowno  { stroke:#b3261e; stroke-width:1.6; fill:none; marker-end:url(#tr); }
+    .note    { font-size:11px; fill:#6a1b14; }
+    .notebox { fill:#fff8f7; stroke:#b3261e; stroke-width:1.1; rx:4; }
+  </style>
+  <defs>
+    <marker id="t"  viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#2b2b33"/></marker>
+    <marker id="tg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1e5c33"/></marker>
+    <marker id="tr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#b3261e"/></marker>
+  </defs>
+
+  <rect width="1180" height="1080" fill="#ffffff"/>
+  <text x="26" y="32" class="title">Startup flow — EcuM_Init</text>
+  <text x="26" y="50" class="sub">Order is constrained, not arbitrary. Almost every failure rejoins the main path; exactly two leave it.</text>
+
+  <!-- reset -->
+  <rect class="box" x="300" y="70" width="230" height="36"/>
+  <text x="415" y="93" class="step" text-anchor="middle">Reset</text>
+
+  <!-- Mcu -->
+  <path class="flow" d="M415 106 V 126"/>
+  <rect class="box" x="290" y="126" width="250" height="46"/>
+  <text x="415" y="145" class="step" text-anchor="middle">Mcu_Init</text>
+  <text x="415" y="162" class="small" text-anchor="middle">latch the reset cause — first, so nothing overwrites it</text>
+
+  <!-- MCAL gate -->
+  <path class="flow" d="M415 172 V 192"/>
+  <path class="gate" d="M415 192 L 560 232 L 415 272 L 270 232 Z"/>
+  <text x="415" y="228" class="step" text-anchor="middle">MCAL up?</text>
+  <text x="415" y="244" class="small" text-anchor="middle">Port · Dio · Gpt · Spi · Uart</text>
+
+  <path class="flowno" d="M560 232 H 700"/>
+  <text x="600" y="224" class="no">no</text>
+  <rect class="fatal" x="700" y="210" width="230" height="46"/>
+  <text x="815" y="229" class="step" text-anchor="middle" fill="#8a1e1e">Det_Panic → reset</text>
+  <text x="815" y="246" class="small" text-anchor="middle">no time base, so nothing can be persisted</text>
+
+  <!-- Det -->
+  <path class="flowok" d="M415 272 V 292"/>
+  <text x="428" y="288" class="yes">yes</text>
+  <rect class="box" x="290" y="292" width="250" height="46"/>
+  <text x="415" y="311" class="step" text-anchor="middle">Det_Init</text>
+  <text x="415" y="328" class="small" text-anchor="middle">second — a later module's Init may report a violation</text>
+
+  <!-- storage -->
+  <path class="flow" d="M415 338 V 358"/>
+  <rect class="box" x="290" y="358" width="250" height="46"/>
+  <text x="415" y="377" class="step" text-anchor="middle">Fls → Fee → NvM</text>
+  <text x="415" y="394" class="small" text-anchor="middle">blocks load, or fall back to configured defaults</text>
+
+  <!-- crash loop -->
+  <path class="flow" d="M415 404 V 424"/>
+  <path class="gate" d="M415 424 L 575 466 L 415 508 L 255 466 Z"/>
+  <text x="415" y="461" class="step" text-anchor="middle">crash loop?</text>
+  <text x="415" y="477" class="small" text-anchor="middle">restart count ≥ threshold</text>
+
+  <path class="flowno" d="M575 466 H 700"/>
+  <text x="608" y="458" class="no">yes</text>
+  <rect class="degr" x="700" y="444" width="250" height="46"/>
+  <text x="825" y="463" class="step" text-anchor="middle" fill="#8a5a14">skip the implicated subsystem</text>
+  <text x="825" y="480" class="small" text-anchor="middle">degradedSubsystemMask set; startup continues</text>
+  <path class="flowno" d="M950 467 C 990 467, 990 560, 545 560"/>
+
+  <!-- watchdog slow -->
+  <path class="flow" d="M415 508 V 538"/>
+  <rect class="box" x="290" y="538" width="250" height="46"/>
+  <text x="415" y="557" class="step" text-anchor="middle">Wdg_Init — slow mode</text>
+  <text x="415" y="574" class="small" text-anchor="middle">mounting and attaching legitimately take tens of seconds</text>
+
+  <!-- subsystems -->
+  <path class="flow" d="M415 584 V 604"/>
+  <rect class="box" x="180" y="604" width="470" height="118"/>
+  <text x="415" y="624" class="step" text-anchor="middle">Bring up each subsystem in turn</text>
+  <text x="196" y="646" class="small">Can → CanIf      motor controller       failure costs odometry</text>
+  <text x="196" y="664" class="small">Rs485If          battery packs          failure costs pack data</text>
+  <text x="196" y="682" class="small">GnssIf           position               failure costs position</text>
+  <text x="196" y="700" class="small">FsAbs            the card               failure costs the backlog buffer</text>
+  <text x="196" y="716" class="small">TimeAbs, NetIf   clock and bearer       failure costs timestamps / live publishing</text>
+
+  <!-- per-subsystem gate -->
+  <path class="flow" d="M650 663 H 700"/>
+  <path class="gate" d="M810 620 L 940 663 L 810 706 L 680 663 Z"/>
+  <text x="810" y="658" class="step" text-anchor="middle">came up?</text>
+  <path class="flowno" d="M810 706 V 742"/>
+  <text x="822" y="730" class="no">no</text>
+  <rect class="degr" x="680" y="742" width="260" height="44"/>
+  <text x="810" y="762" class="step" text-anchor="middle" fill="#8a5a14">raise a Dem event, continue</text>
+  <text x="810" y="778" class="small" text-anchor="middle">subsystems.xAvailable = FALSE</text>
+  <path class="flowno" d="M680 764 C 600 764, 600 800, 545 800"/>
+
+  <!-- SchM -->
+  <path class="flow" d="M415 722 V 800"/>
+  <rect class="box" x="290" y="800" width="250" height="46"/>
+  <text x="415" y="819" class="step" text-anchor="middle">SchM_Init → SchM_StartTasks</text>
+  <text x="415" y="836" class="small" text-anchor="middle">create the four cyclic tasks</text>
+
+  <path class="flow" d="M415 846 V 866"/>
+  <path class="gate" d="M415 866 L 560 906 L 415 946 L 270 906 Z"/>
+  <text x="415" y="902" class="step" text-anchor="middle">tasks created?</text>
+  <text x="415" y="918" class="small" text-anchor="middle">the one fatal outcome</text>
+
+  <path class="flowno" d="M560 906 H 700"/>
+  <text x="600" y="898" class="no">no</text>
+  <rect class="fatal" x="700" y="884" width="250" height="46"/>
+  <text x="825" y="903" class="step" text-anchor="middle" fill="#8a1e1e">return E_NOT_OK → main resets</text>
+  <text x="825" y="920" class="small" text-anchor="middle">nothing to degrade to; restart count already persisted</text>
+
+  <!-- supervision + run -->
+  <path class="flowok" d="M415 946 V 970"/>
+  <text x="428" y="964" class="yes">yes</text>
+  <rect class="box" x="230" y="970" width="370" height="40"/>
+  <text x="415" y="995" class="step" text-anchor="middle">WdgM_ActivateSupervision — last, now the tasks exist</text>
+
+  <path class="flowok" d="M600 990 H 660"/>
+  <rect class="okend" x="660" y="968" width="300" height="44"/>
+  <text x="810" y="988" class="step" text-anchor="middle" fill="#1e5c33">RUN, or RUN_DEGRADED</text>
+  <text x="810" y="1004" class="small" text-anchor="middle">degraded only when a subsystem was deliberately skipped</text>
+
+  <!-- notes -->
+  <rect class="notebox" x="990" y="70" width="164" height="330"/>
+  <text x="1002" y="90" class="step" fill="#8a1e1e" font-size="12.5">Why this order</text>
+  <text x="1002" y="112" class="note">Mcu first: it latches</text>
+  <text x="1002" y="126" class="note">the reset cause, which</text>
+  <text x="1002" y="140" class="note">crash-loop detection</text>
+  <text x="1002" y="154" class="note">needs.</text>
+  <text x="1002" y="178" class="note">Det second: any later</text>
+  <text x="1002" y="192" class="note">Init may report a</text>
+  <text x="1002" y="206" class="note">violation, and that is</text>
+  <text x="1002" y="220" class="note">the window a mis-</text>
+  <text x="1002" y="234" class="note">configuration shows in.</text>
+  <text x="1002" y="258" class="note">Watchdog slow before</text>
+  <text x="1002" y="272" class="note">the blocking work, or a</text>
+  <text x="1002" y="286" class="note">unit that starts slowly</text>
+  <text x="1002" y="300" class="note">on cold GPRS resets —</text>
+  <text x="1002" y="314" class="note">then does it again.</text>
+  <text x="1002" y="338" class="note">Supervision last:</text>
+  <text x="1002" y="352" class="note">entities start</text>
+  <text x="1002" y="366" class="note">deactivated, so arming</text>
+  <text x="1002" y="380" class="note">earlier makes all four</text>
+  <text x="1002" y="394" class="note">report a violation.</text>
+</svg>

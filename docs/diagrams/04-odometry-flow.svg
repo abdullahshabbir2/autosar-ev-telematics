@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Odometry: one speed sample to accumulated distance.
+  Copyright (c) 2024-2026 Abdullah Shabbir. All rights reserved.
+
+  Every branch that discards a sample is there because the odometer is monotonic: there is no correction
+  path for a spurious increment, so rejecting costs at most one interval of real distance while accepting a
+  bad reading is permanent.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 940" width="1180" height="940"
+     font-family="DejaVu Sans, Helvetica, Arial, sans-serif">
+  <style>
+    .title  { font-size:21px; font-weight:bold; fill:#12121a; }
+    .sub    { font-size:12px; fill:#54546a; }
+    .step   { font-size:12.5px; fill:#12121a; }
+    .small  { font-size:10.5px; fill:#54546a; }
+    .math   { font-size:12px; fill:#1e3a6e; font-family:"DejaVu Sans Mono", Consolas, monospace; }
+    .yes    { font-size:11px; fill:#1e5c33; font-weight:bold; }
+    .no     { font-size:11px; fill:#b3261e; font-weight:bold; }
+    .box    { fill:#ffffff; stroke:#2b2b33; stroke-width:1.5; rx:4; }
+    .calc   { fill:#e8f0fb; stroke:#1e3a6e; stroke-width:1.6; rx:4; }
+    .gate   { fill:#fdf6e4; stroke:#8a5a14; stroke-width:1.5; }
+    .reject { fill:#fbe8e6; stroke:#8a1e1e; stroke-width:1.6; rx:4; }
+    .store  { fill:#e4f0e8; stroke:#1e5c33; stroke-width:1.8; rx:4; }
+    .flow   { stroke:#2b2b33; stroke-width:1.6; fill:none; marker-end:url(#t); }
+    .flowno { stroke:#b3261e; stroke-width:1.6; fill:none; marker-end:url(#tr); }
+    .note   { font-size:11px; fill:#6a1b14; }
+    .nbox   { fill:#fff8f7; stroke:#b3261e; stroke-width:1.1; rx:4; }
+  </style>
+  <defs>
+    <marker id="t"  viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#2b2b33"/></marker>
+    <marker id="tr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#b3261e"/></marker>
+  </defs>
+
+  <rect width="1180" height="940" fill="#ffffff"/>
+  <text x="26" y="32" class="title">Odometry — one speed sample to accumulated distance</text>
+  <text x="26" y="50" class="sub">Integer millimetres throughout. No floating point anywhere on this path — see ADR-0005.</text>
+
+  <!-- input -->
+  <rect class="box" x="300" y="72" width="280" height="44"/>
+  <text x="440" y="92" class="step" text-anchor="middle">Speed sample from CanIf</text>
+  <text x="440" y="108" class="small" text-anchor="middle">motor rpm, plus the monotonic instant it arrived</text>
+
+  <!-- freshness -->
+  <path class="flow" d="M440 116 V 136"/>
+  <path class="gate" d="M440 136 L 600 176 L 440 216 L 280 176 Z"/>
+  <text x="440" y="172" class="step" text-anchor="middle">signal fresh?</text>
+  <text x="440" y="188" class="small" text-anchor="middle">CanIf, age ≤ 500 ms</text>
+  <path class="flowno" d="M600 176 H 760"/>
+  <text x="648" y="168" class="no">no</text>
+  <rect class="reject" x="760" y="154" width="300" height="44"/>
+  <text x="910" y="173" class="step" text-anchor="middle" fill="#8a1e1e">discard — a held value is not a reading</text>
+  <text x="910" y="189" class="small" text-anchor="middle">integrating a stale speed adds distance not travelled</text>
+
+  <!-- speed plausibility -->
+  <path class="flow" d="M440 216 V 240"/>
+  <text x="452" y="234" class="yes">yes</text>
+  <path class="gate" d="M440 240 L 600 282 L 440 324 L 280 282 Z"/>
+  <text x="440" y="277" class="step" text-anchor="middle">rpm ≤ max?</text>
+  <text x="440" y="293" class="small" text-anchor="middle">calibrated maximum</text>
+  <path class="flowno" d="M600 282 H 760"/>
+  <text x="648" y="274" class="no">no</text>
+  <rect class="reject" x="760" y="260" width="300" height="44"/>
+  <text x="910" y="279" class="step" text-anchor="middle" fill="#8a1e1e">reject, raise DEM_EVENT_ODO_IMPLAUSIBLE</text>
+  <text x="910" y="295" class="small" text-anchor="middle">a corrupted frame can decode to a plausible number</text>
+
+  <!-- acceleration plausibility -->
+  <path class="flow" d="M440 324 V 348"/>
+  <text x="452" y="342" class="yes">yes</text>
+  <path class="gate" d="M440 348 L 618 392 L 440 436 L 262 392 Z"/>
+  <text x="440" y="387" class="step" text-anchor="middle">acceleration plausible?</text>
+  <text x="440" y="403" class="small" text-anchor="middle">against the previous sample</text>
+  <path class="flowno" d="M618 392 H 760"/>
+  <text x="656" y="384" class="no">no</text>
+  <rect class="reject" x="760" y="370" width="300" height="44"/>
+  <text x="910" y="389" class="step" text-anchor="middle" fill="#8a1e1e">reject</text>
+  <text x="910" y="405" class="small" text-anchor="middle">catches a value plausible alone, impossible in sequence</text>
+
+  <!-- interval -->
+  <path class="flow" d="M440 436 V 460"/>
+  <text x="452" y="454" class="yes">yes</text>
+  <rect class="calc" x="262" y="460" width="356" height="52"/>
+  <text x="440" y="479" class="step" text-anchor="middle">Interval since the previous sample</text>
+  <text x="440" y="500" class="math" text-anchor="middle">deltaMs = (uint32)(now − last)   /* wrap-safe */</text>
+
+  <!-- trapezoidal -->
+  <path class="flow" d="M440 512 V 536"/>
+  <rect class="calc" x="200" y="536" width="480" height="86"/>
+  <text x="440" y="556" class="step" text-anchor="middle">Trapezoidal integration</text>
+  <text x="440" y="578" class="math" text-anchor="middle">rpmSum = previousRpm + currentRpm</text>
+  <text x="440" y="596" class="math" text-anchor="middle">scaled = (rpmSum × deltaMs × factorQ32) / 2</text>
+  <text x="440" y="614" class="small" text-anchor="middle">the mean of the endpoints — exact for any linear speed change</text>
+
+  <!-- shift + remainder -->
+  <path class="flow" d="M440 622 V 646"/>
+  <rect class="calc" x="200" y="646" width="480" height="96"/>
+  <text x="440" y="666" class="step" text-anchor="middle">Shift down, and carry what the shift discards</text>
+  <text x="440" y="688" class="math" text-anchor="middle">scaled += remainder</text>
+  <text x="440" y="706" class="math" text-anchor="middle">deltaMm   = scaled &gt;&gt; 32</text>
+  <text x="440" y="724" class="math" text-anchor="middle">remainder = scaled &amp; 0xFFFFFFFF</text>
+  <text x="440" y="738" class="small" text-anchor="middle">a shift, not a divide, so the truncation is exactly predictable</text>
+
+  <!-- accumulate -->
+  <path class="flow" d="M440 742 V 766"/>
+  <rect class="store" x="240" y="766" width="400" height="52"/>
+  <text x="440" y="786" class="step" text-anchor="middle">totalDistanceMm += deltaMm    (uint64)</text>
+  <text x="440" y="804" class="small" text-anchor="middle">monotonic by design — reaches 1.8 × 10¹³ km</text>
+
+  <!-- persist gate -->
+  <path class="flow" d="M640 792 H 700"/>
+  <path class="gate" d="M830 744 L 1000 792 L 830 840 L 660 792 Z"/>
+  <text x="830" y="782" class="step" text-anchor="middle">100 m OR 60 s</text>
+  <text x="830" y="798" class="small" text-anchor="middle">since the last write?</text>
+  <text x="830" y="814" class="small" text-anchor="middle">60 s catches a slow vehicle</text>
+  <path class="flow" d="M1000 792 H 1036 V 872 H 640"/>
+  <text x="1008" y="784" class="yes">yes</text>
+  <rect class="store" x="340" y="850" width="300" height="44"/>
+  <text x="490" y="869" class="step" text-anchor="middle">NvM write-through to flash</text>
+  <text x="490" y="885" class="small" text-anchor="middle">immediate block; NvM write-on-change suppresses it entirely when parked</text>
+
+  <!-- notes -->
+  <rect class="nbox" x="700" y="440" width="360" height="290"/>
+  <text x="714" y="462" class="step" fill="#8a1e1e" font-size="13">Why each piece is there</text>
+
+  <text x="714" y="486" class="note">Integer mm. `float` has a 24-bit mantissa, so past</text>
+  <text x="714" y="500" class="note">16.8 km it cannot represent every millimetre. At</text>
+  <text x="714" y="514" class="note">50 000 km a vehicle must travel about 4 m before</text>
+  <text x="714" y="528" class="note">the reading changes at all.</text>
+
+  <text x="714" y="552" class="note">Trapezoidal, not the endpoint. Rectangular over-</text>
+  <text x="714" y="566" class="note">reads on acceleration and under-reads on braking,</text>
+  <text x="714" y="580" class="note">and the two do not cancel — both errors favour the</text>
+  <text x="714" y="594" class="note">higher speed encountered.</text>
+
+  <text x="714" y="618" class="note">Remainder carried. Discarding it truncates 28 800</text>
+  <text x="714" y="632" class="note">times a day: about 14 m daily, over 5 km a year,</text>
+  <text x="714" y="646" class="note">all in one direction. Carrying it bounds the total</text>
+  <text x="714" y="660" class="note">error at one millimetre however long it runs.</text>
+
+  <text x="714" y="684" class="note">100 m threshold. Writing every cycle is 28 800</text>
+  <text x="714" y="698" class="note">writes a day against ~100 000 erase cycles — under</text>
+  <text x="714" y="712" class="note">four days. Writing only at shutdown loses</text>
+  <text x="714" y="726" class="note">everything on a power cut, which is how a vehicle</text>
+
+  <!-- measured accuracy -->
+  <rect x="26" y="838" width="300" height="88" fill="#e4f0e8" stroke="#1e5c33" stroke-width="1.4" rx="4"/>
+  <text x="40" y="858" class="step" fill="#1e5c33">What the host suite actually asserts</text>
+  <text x="40" y="876" class="small">10 000 steps of ~0.13 mm each — 1263.5 m in total —</text>
+  <text x="40" y="892" class="small">land within 2 mm of the analytic answer, of which the</text>
+  <text x="40" y="908" class="small">Q32/Q24 quantisation is 0.046 mm. A per-step</text>
+  <text x="40" y="922" class="small">truncation would have produced exactly zero.</text>
+</svg>

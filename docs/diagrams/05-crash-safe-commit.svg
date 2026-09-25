@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Crash-safe commit: what a power loss at each instant leaves behind.
+  Copyright (c) 2024-2026 Abdullah Shabbir. All rights reserved.
+
+  The property being shown is that there is no instant at which neither value is readable. The record
+  becomes authoritative on a single byte write, and a byte write either happens or does not.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 860" width="1180" height="860"
+     font-family="DejaVu Sans, Helvetica, Arial, sans-serif">
+  <style>
+    .title { font-size:21px; font-weight:bold; fill:#12121a; }
+    .sub   { font-size:12px; fill:#54546a; }
+    .step  { font-size:12.5px; fill:#12121a; font-weight:bold; }
+    .small { font-size:10.5px; fill:#54546a; }
+    .mono  { font-size:11px; font-family:"DejaVu Sans Mono", Consolas, monospace; fill:#12121a; }
+    .out   { font-size:11px; fill:#1e5c33; }
+    .cut   { font-size:11px; fill:#b3261e; font-weight:bold; }
+    .old   { fill:#e4f0e8; stroke:#1e5c33; stroke-width:1.3; rx:2; }
+    .new   { fill:#e8f0fb; stroke:#1e3a6e; stroke-width:1.3; rx:2; }
+    .blank { fill:#f4f4f7; stroke:#a8a8b4; stroke-width:1; stroke-dasharray:3 3; rx:2; }
+    .partial { fill:#fdf2e4; stroke:#8a5a14; stroke-width:1.3; rx:2; }
+    .arrow { stroke:#2b2b33; stroke-width:1.6; fill:none; marker-end:url(#t); }
+    .bolt  { stroke:#b3261e; stroke-width:2.2; fill:none; }
+    .note  { font-size:11px; fill:#6a1b14; }
+    .nbox  { fill:#fff8f7; stroke:#b3261e; stroke-width:1.1; rx:4; }
+    .okbox { fill:#e4f0e8; stroke:#1e5c33; stroke-width:1.4; rx:4; }
+  </style>
+  <defs>
+    <marker id="t" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#2b2b33"/></marker>
+  </defs>
+
+  <rect width="1180" height="860" fill="#ffffff"/>
+  <text x="26" y="32" class="title">Crash-safe commit — what a power loss at each instant leaves</text>
+  <text x="26" y="50" class="sub">Append-only records. The commit marker is one aligned byte written last, so validity flips atomically.</text>
+
+  <!-- column headings -->
+  <text x="150" y="86" class="step" text-anchor="middle">step</text>
+  <text x="520" y="86" class="step" text-anchor="middle">what is on the media afterwards</text>
+  <text x="930" y="86" class="step" text-anchor="middle">if power is lost here, the next boot reads</text>
+  <path d="M26 94 H 1154" stroke="#8a8a96" stroke-width="1"/>
+
+  <!-- ============== state 0: before ============== -->
+  <text x="150" y="126" class="mono" text-anchor="middle">before</text>
+  <g>
+    <rect class="old"   x="300" y="108" width="120" height="30"/><text x="360" y="128" class="small" text-anchor="middle">record N (valid)</text>
+    <rect class="blank" x="426" y="108" width="300" height="30"/><text x="576" y="128" class="small" text-anchor="middle">erased — 0xFF</text>
+  </g>
+  <text x="930" y="128" class="out" text-anchor="middle">record N — the previous value</text>
+
+  <!-- ============== step 1: header ============== -->
+  <path class="arrow" d="M150 142 V 172"/>
+  <text x="150" y="182" class="mono" text-anchor="middle">1. header</text>
+  <text x="150" y="198" class="small" text-anchor="middle">16 bytes, state</text>
+  <text x="150" y="212" class="small" text-anchor="middle">left at 0xFF</text>
+  <g>
+    <rect class="old" x="300" y="176" width="120" height="30"/><text x="360" y="196" class="small" text-anchor="middle">record N (valid)</text>
+    <rect class="new" x="426" y="176" width="120" height="30"/><text x="486" y="196" class="small" text-anchor="middle">header N+1</text>
+    <rect x="490" y="176" width="20" height="30" fill="#f4f4f7" stroke="#8a5a14" stroke-width="1.6"/>
+    <text x="500" y="220" class="cut" text-anchor="middle">state</text>
+    <text x="500" y="232" class="small" text-anchor="middle">0xFF</text>
+    <rect class="blank" x="552" y="176" width="174" height="30"/><text x="639" y="196" class="small" text-anchor="middle">erased</text>
+  </g>
+  <text x="930" y="190" class="out" text-anchor="middle">record N — the new slot is uncommitted,</text>
+  <text x="930" y="204" class="out" text-anchor="middle">so no reader considers it</text>
+  <path class="bolt" d="M740 191 l 12 -12 l -4 12 l 12 -4 l -16 16 l 4 -12 z" fill="#b3261e"/>
+
+  <!-- ============== step 2: payload ============== -->
+  <path class="arrow" d="M150 244 V 274"/>
+  <text x="150" y="284" class="mono" text-anchor="middle">2. payload</text>
+  <text x="150" y="300" class="small" text-anchor="middle">padded to the write</text>
+  <text x="150" y="314" class="small" text-anchor="middle">alignment</text>
+  <g>
+    <rect class="old" x="300" y="278" width="120" height="30"/><text x="360" y="298" class="small" text-anchor="middle">record N (valid)</text>
+    <rect class="new" x="426" y="278" width="120" height="30"/><text x="486" y="298" class="small" text-anchor="middle">header N+1</text>
+    <rect x="490" y="278" width="20" height="30" fill="#f4f4f7" stroke="#8a5a14" stroke-width="1.6"/>
+    <rect class="new" x="552" y="278" width="174" height="30"/><text x="639" y="298" class="small" text-anchor="middle">payload N+1 + CRC-32</text>
+  </g>
+  <text x="930" y="292" class="out" text-anchor="middle">record N — still uncommitted, and the</text>
+  <text x="930" y="306" class="out" text-anchor="middle">payload is unreachable without the marker</text>
+  <path class="bolt" d="M740 293 l 12 -12 l -4 12 l 12 -4 l -16 16 l 4 -12 z" fill="#b3261e"/>
+
+  <!-- ============== step 3: commit ============== -->
+  <path class="arrow" d="M150 346 V 376"/>
+  <text x="150" y="386" class="mono" text-anchor="middle">3. commit</text>
+  <text x="150" y="402" class="small" text-anchor="middle">one aligned word,</text>
+  <text x="150" y="416" class="small" text-anchor="middle">first byte = 0xFC</text>
+  <g>
+    <rect class="old" x="300" y="380" width="120" height="30"/><text x="360" y="400" class="small" text-anchor="middle">record N (valid)</text>
+    <rect class="new" x="426" y="380" width="120" height="30"/><text x="486" y="400" class="small" text-anchor="middle">header N+1</text>
+    <rect x="490" y="380" width="20" height="30" fill="#c8e0cc" stroke="#1e5c33" stroke-width="2"/>
+    <text x="500" y="424" class="out" text-anchor="middle">0xFC</text>
+    <rect class="new" x="552" y="380" width="174" height="30"/><text x="639" y="400" class="small" text-anchor="middle">payload N+1 + CRC-32</text>
+  </g>
+  <text x="930" y="394" class="out" text-anchor="middle">record N+1 — the newest valid record wins</text>
+  <text x="930" y="408" class="out" text-anchor="middle">the byte write either happened or did not</text>
+
+  <!-- the atomic point -->
+  <rect x="760" y="440" width="394" height="52" class="okbox"/>
+  <text x="957" y="460" class="step" text-anchor="middle" fill="#1e5c33">There is no instant with neither value readable.</text>
+  <text x="957" y="478" class="small" text-anchor="middle">That is the whole guarantee, and it rests on step 3 being a single byte.</text>
+
+  <!-- ============== the partial-write case ============== -->
+  <path d="M26 520 H 1154" stroke="#8a8a96" stroke-width="1"/>
+  <text x="26" y="546" class="title" font-size="15">The case a supply collapse mid-pulse creates</text>
+  <text x="26" y="566" class="sub">A failing write does not mean nothing reached the media: flash cells can be cleared and not un-cleared.</text>
+
+  <text x="150" y="606" class="mono" text-anchor="middle">1. header</text>
+  <text x="150" y="622" class="cut" text-anchor="middle">fails part way</text>
+  <g>
+    <rect class="old"     x="300" y="588" width="120" height="30"/><text x="360" y="608" class="small" text-anchor="middle">record N (valid)</text>
+    <rect class="partial" x="426" y="588" width="120" height="30"/><text x="486" y="608" class="small" text-anchor="middle">header, part written</text>
+    <rect class="blank"   x="552" y="588" width="174" height="30"/><text x="639" y="608" class="small" text-anchor="middle">erased</text>
+  </g>
+  <text x="930" y="602" class="out" text-anchor="middle">record N — the damaged header fails its own</text>
+  <text x="930" y="616" class="out" text-anchor="middle">CRC, so the scan stops before it</text>
+
+  <path class="arrow" d="M150 636 V 664"/>
+  <text x="150" y="678" class="mono" text-anchor="middle">recovery</text>
+  <rect x="300" y="656" width="426" height="46" fill="#fdf2e4" stroke="#8a5a14" stroke-width="1.5" rx="4"/>
+  <text x="513" y="675" class="step" text-anchor="middle" fill="#8a5a14">Slot marked poisoned → garbage collect before the next write</text>
+  <text x="513" y="692" class="small" text-anchor="middle">valid records copy to the other sector; the damage is left behind and erased</text>
+  <text x="930" y="679" class="out" text-anchor="middle">every valid record, in a clean sector</text>
+
+  <!-- notes -->
+  <rect class="nbox" x="26" y="726" width="1128" height="116"/>
+  <text x="40" y="748" class="step" fill="#8a1e1e">Two things this diagram exists to make unmissable</text>
+  <text x="40" y="772" class="note">The cursor deliberately does not advance on a failed write, so a naive retry programs the same slot again. Writing a second</text>
+  <text x="40" y="788" class="note">header over a partially programmed one ANDs the two together and can never produce a valid CRC — so the retry can never</text>
+  <text x="40" y="804" class="note">succeed, and every scan stops at the damage, hiding every record written after it. The poisoned-slot flag and the collection</text>
+  <text x="40" y="820" class="note">above are what close that. This was a real defect, found by injecting a flash failure; it is unreachable by inspection.</text>
+  <text x="40" y="838" class="note">v1 had neither a CRC nor an ordered commit, so a partial write during the brown-out that accompanies cranking was indistinguishable from valid data.</text>
+</svg>

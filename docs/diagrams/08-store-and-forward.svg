@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Store and forward: the card is the queue, and the cursor is what survives a reset.
+  Copyright (c) 2024-2026 Abdullah Shabbir. All rights reserved.
+
+  The ordering is the requirement: a record is durable before it is ever offered to a radio. A duplicate
+  costs the broker one de-duplication; a gap costs a journey that no longer exists anywhere.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 940" width="1180" height="940"
+     font-family="DejaVu Sans, Helvetica, Arial, sans-serif">
+  <style>
+    .title { font-size:21px; font-weight:bold; fill:#12121a; }
+    .sub   { font-size:12px; fill:#54546a; }
+    .step  { font-size:12.5px; fill:#12121a; font-weight:bold; }
+    .small { font-size:10.5px; fill:#54546a; }
+    .mono  { font-size:10.5px; font-family:"DejaVu Sans Mono", Consolas, monospace; fill:#1e3a6e; }
+    .num   { font-size:15px; font-weight:bold; fill:#b3261e; }
+    .box   { fill:#ffffff; stroke:#2b2b33; stroke-width:1.5; rx:4; }
+    .card  { fill:#fdf2e4; stroke:#8a5a14; stroke-width:1.6; rx:3; }
+    .sent  { fill:#e4f0e8; stroke:#1e5c33; stroke-width:1.3; rx:2; }
+    .unsent{ fill:#e8f0fb; stroke:#1e3a6e; stroke-width:1.3; rx:2; }
+    .hdr   { fill:#eae4f5; stroke:#4a2d7a; stroke-width:1.3; rx:2; }
+    .gate  { fill:#fdf6e4; stroke:#8a5a14; stroke-width:1.5; }
+    .f     { stroke:#2b2b33; stroke-width:1.6; fill:none; marker-end:url(#t); }
+    .fo    { stroke:#b3261e; stroke-width:2.2; fill:none; marker-end:url(#tr); }
+    .note  { font-size:11px; fill:#6a1b14; }
+    .nbox  { fill:#fff8f7; stroke:#b3261e; stroke-width:1.1; rx:4; }
+    .cursor{ stroke:#b3261e; stroke-width:2.4; fill:none; }
+  </style>
+  <defs>
+    <marker id="t"  viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#2b2b33"/></marker>
+    <marker id="tr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#b3261e"/></marker>
+  </defs>
+
+  <rect width="1180" height="940" fill="#ffffff"/>
+  <text x="26" y="32" class="title">Store and forward — the card is the queue</text>
+  <text x="26" y="50" class="sub">A record is durable before any radio is asked to carry it. The send cursor is itself persisted, so a reset resumes rather than restarts.</text>
+
+  <!-- ============ the write path ============ -->
+  <text x="26" y="84" class="step">Writing — storage task, every 3 s</text>
+
+  <rect class="box" x="26" y="96" width="210" height="52"/>
+  <text x="131" y="117" class="step" text-anchor="middle">Com_BuildRecord</text>
+  <text x="131" y="134" class="small" text-anchor="middle">199 CSV fields + CRC-32</text>
+
+  <path class="f" d="M236 122 H 300"/>
+  <text x="256" y="114" class="num">1</text>
+  <rect class="box" x="300" y="96" width="210" height="52"/>
+  <text x="405" y="117" class="step" text-anchor="middle">FsAbs_AppendRecord</text>
+  <text x="405" y="134" class="small" text-anchor="middle">one line to today's file, then fsync</text>
+
+  <path class="f" d="M510 122 H 574"/>
+  <text x="530" y="114" class="num">2</text>
+  <rect class="box" x="574" y="96" width="210" height="52"/>
+  <text x="679" y="117" class="step" text-anchor="middle">durable</text>
+  <text x="679" y="134" class="small" text-anchor="middle">survives the reset that follows</text>
+
+  <path class="f" d="M784 122 H 848"/>
+  <text x="804" y="114" class="num">3</text>
+  <rect class="box" x="848" y="96" width="306" height="52"/>
+  <text x="1001" y="117" class="step" text-anchor="middle">only now may it be published</text>
+  <text x="1001" y="134" class="small" text-anchor="middle">a failed send changes nothing about the record</text>
+
+  <!-- ============ the card ============ -->
+  <text x="26" y="196" class="step">On the card — one file per day, oldest first</text>
+
+  <!-- file 1: fully sent -->
+  <rect class="card" x="26" y="210" width="330" height="108"/>
+  <text x="40" y="230" class="mono">/logs/2026-09-23.csv</text>
+  <rect class="hdr"  x="40" y="240" width="302" height="18"/>
+  <text x="191" y="253" class="small" text-anchor="middle">CSV header row — 199 column names</text>
+  <g>
+    <rect class="sent" x="40"  y="264" width="58" height="16"/>
+    <rect class="sent" x="102" y="264" width="58" height="16"/>
+    <rect class="sent" x="164" y="264" width="58" height="16"/>
+    <rect class="sent" x="226" y="264" width="58" height="16"/>
+    <rect class="sent" x="288" y="264" width="54" height="16"/>
+    <rect class="sent" x="40"  y="284" width="58" height="16"/>
+    <rect class="sent" x="102" y="284" width="58" height="16"/>
+    <rect class="sent" x="164" y="284" width="58" height="16"/>
+  </g>
+  <text x="40" y="313" class="small" fill="#1e5c33">every record sent — cursor is at end of file</text>
+
+  <!-- file 2: partially sent, cursor here -->
+  <rect class="card" x="392" y="210" width="330" height="108"/>
+  <text x="406" y="230" class="mono">/logs/2026-09-24.csv</text>
+  <rect class="hdr"  x="406" y="240" width="302" height="18"/>
+  <text x="557" y="253" class="small" text-anchor="middle">CSV header row — must be skipped, not sent</text>
+  <g>
+    <rect class="sent"   x="406" y="264" width="58" height="16"/>
+    <rect class="sent"   x="468" y="264" width="58" height="16"/>
+    <rect class="unsent" x="530" y="264" width="58" height="16"/>
+    <rect class="unsent" x="592" y="264" width="58" height="16"/>
+    <rect class="unsent" x="654" y="264" width="54" height="16"/>
+    <rect class="unsent" x="406" y="284" width="58" height="16"/>
+    <rect class="unsent" x="468" y="284" width="58" height="16"/>
+    <rect class="unsent" x="530" y="284" width="58" height="16"/>
+  </g>
+  <path class="cursor" d="M528 258 V 302"/>
+  <text x="528" y="313" class="small" fill="#b3261e" text-anchor="middle">cursor: {fileName, offset}</text>
+
+  <!-- file 3: today, being appended -->
+  <rect class="card" x="758" y="210" width="330" height="108"/>
+  <text x="772" y="230" class="mono">/logs/2026-09-25.csv   (today)</text>
+  <rect class="hdr"  x="772" y="240" width="302" height="18"/>
+  <text x="923" y="253" class="small" text-anchor="middle">created with the header on the first append of the day</text>
+  <g>
+    <rect class="unsent" x="772" y="264" width="58" height="16"/>
+    <rect class="unsent" x="834" y="264" width="58" height="16"/>
+    <rect class="unsent" x="896" y="264" width="58" height="16"/>
+    <rect class="unsent" x="958" y="264" width="58" height="16"/>
+  </g>
+  <text x="772" y="313" class="small">still being appended by the storage task</text>
+
+  <!-- legend -->
+  <g>
+    <rect class="sent"   x="26" y="332" width="20" height="13"/><text x="54" y="343" class="small">sent</text>
+    <rect class="unsent" x="100" y="332" width="20" height="13"/><text x="128" y="343" class="small">unsent — the backlog</text>
+    <rect class="hdr"    x="266" y="332" width="20" height="13"/><text x="294" y="343" class="small">header row</text>
+  </g>
+
+  <!-- ============ the read path ============ -->
+  <text x="26" y="390" class="step">Draining — connectivity task, one record per activation</text>
+
+  <rect class="box" x="26" y="404" width="240" height="46"/>
+  <text x="146" y="424" class="step" text-anchor="middle">FsAbs_ReadRecordAtCursor</text>
+  <text x="146" y="440" class="small" text-anchor="middle">read the line at {file, offset}</text>
+
+  <path class="f" d="M146 450 V 476"/>
+  <path class="gate" d="M146 476 L 266 516 L 146 556 L 26 516 Z"/>
+  <text x="146" y="512" class="step" text-anchor="middle">offset == 0?</text>
+  <text x="146" y="528" class="small" text-anchor="middle">a header may be here</text>
+
+  <path class="f" d="M266 516 H 372"/>
+  <text x="292" y="508" class="small" fill="#8a5a14">yes</text>
+  <rect class="box" x="372" y="492" width="300" height="48"/>
+  <text x="522" y="512" class="step" text-anchor="middle">FsAbs_SkipCsvHeader</text>
+  <text x="522" y="529" class="small" text-anchor="middle">offset 0 AND no `|` separator in the first line — see the note</text>
+
+  <path class="f" d="M146 556 V 596"/>
+  <text x="158" y="580" class="small">no</text>
+  <path class="f" d="M522 540 C 522 570, 300 576, 268 596"/>
+
+  <rect class="box" x="26" y="596" width="240" height="46"/>
+  <text x="146" y="616" class="step" text-anchor="middle">publish, then advance</text>
+  <text x="146" y="632" class="small" text-anchor="middle">offset += lineLength; persist the cursor</text>
+
+  <path class="f" d="M266 619 H 330"/>
+  <path class="gate" d="M470 577 L 630 619 L 470 661 L 310 619 Z"/>
+  <text x="470" y="614" class="step" text-anchor="middle">end of file?</text>
+  <text x="470" y="630" class="small" text-anchor="middle">offset at or past the size</text>
+
+  <path class="fo" d="M630 619 H 720"/>
+  <text x="654" y="611" class="small" fill="#b3261e">yes</text>
+  <rect x="720" y="592" width="434" height="56" fill="#fbe8e6" stroke="#b3261e" stroke-width="1.8" rx="4"/>
+  <text x="937" y="613" class="step" text-anchor="middle" fill="#8a1e1e">FsAbs_AdvanceToNextFile → E_PENDING</text>
+  <text x="937" y="631" class="small" text-anchor="middle">cursor moves to the next day's file at offset 0; the caller retries next activation</text>
+
+  <path class="f" d="M470 661 C 470 700, 146 700, 146 660 V 646"/>
+  <text x="300" y="694" class="small" text-anchor="middle">no — more in this file, next activation continues here</text>
+
+  <!-- ============ the defect ============ -->
+  <rect class="nbox" x="26" y="716" width="558" height="208"/>
+  <text x="40" y="738" class="step" fill="#8a1e1e">The defect this closed</text>
+  <text x="40" y="762" class="note">Before `FsAbs_AdvanceToNextFile` existed, reaching the end of a file</text>
+  <text x="40" y="778" class="note">returned a plain failure and left the cursor where it was. The backlog</text>
+  <text x="40" y="794" class="note">therefore drained the current file and then stopped forever: every</text>
+  <text x="40" y="810" class="note">subsequent activation re-read past the end of the same file, failed,</text>
+  <text x="40" y="826" class="note">and changed nothing. Records kept accumulating behind a cursor that</text>
+  <text x="40" y="842" class="note">could not move.</text>
+  <text x="40" y="866" class="note">Nothing about this is visible in a single-day test, which is why it</text>
+  <text x="40" y="882" class="note">survived review. It took a test that wrote across a date boundary.</text>
+  <text x="40" y="906" class="note">`E_PENDING` rather than `E_OK`: no record was produced this call, so</text>
+  <text x="40" y="922" class="note">reporting success would have published a stale buffer.</text>
+
+  <rect class="nbox" x="596" y="716" width="558" height="208"/>
+  <text x="610" y="738" class="step" fill="#8a1e1e">Why the header check tests shape as well as position</text>
+  <text x="610" y="762" class="note">Skipping whatever sits at offset 0 would silently discard the first real</text>
+  <text x="610" y="778" class="note">record of any file that turned out not to have a header — which is what</text>
+  <text x="610" y="794" class="note">a file created by an older firmware looks like.</text>
+  <text x="610" y="818" class="note">So the check requires both: offset 0, AND a first line that terminated</text>
+  <text x="610" y="834" class="note">within the peek and carried no `|` CRC separator. Every record has one;</text>
+  <text x="610" y="850" class="note">a header never does. A header is identified, not assumed.</text>
+  <text x="610" y="874" class="note">A first line that did not terminate within the peek is left alone. It is</text>
+  <text x="610" y="890" class="note">either a record longer than the buffer or an interrupted append, and the</text>
+  <text x="610" y="906" class="note">read path reports both as corruption — which is the correct outcome, so</text>
+  <text x="610" y="922" class="note">the header check must not pre-empt it.</text>
+</svg>

@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Bearer arbitration: WiFi and GPRS, and the decay that keeps a fallback temporary.
+  Copyright (c) 2024-2026 Abdullah Shabbir. All rights reserved.
+
+  The transition worth studying is the dashed one. Without it every other transition still works and the
+  unit still sends data, which is exactly why its absence was invisible until a test held WiFi down.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 900" width="1180" height="900"
+     font-family="DejaVu Sans, Helvetica, Arial, sans-serif">
+  <style>
+    .title { font-size:21px; font-weight:bold; fill:#12121a; }
+    .sub   { font-size:12px; fill:#54546a; }
+    .sname { font-size:13px; font-weight:bold; fill:#12121a; }
+    .step  { font-size:12.5px; fill:#12121a; font-weight:bold; }
+    .small { font-size:10.5px; fill:#54546a; }
+    .mono  { font-size:10.5px; font-family:"DejaVu Sans Mono", Consolas, monospace; fill:#1e3a6e; }
+    .edge  { font-size:10.5px; fill:#2b2b33; }
+    .wifi  { fill:#e8f0fb; stroke:#1e3a6e; stroke-width:1.8; rx:5; }
+    .gsm   { fill:#fdf2e4; stroke:#8a5a14; stroke-width:1.8; rx:5; }
+    .none  { fill:#fbe8e6; stroke:#8a1e1e; stroke-width:1.8; rx:5; }
+    .up    { fill:#e4f0e8; stroke:#1e5c33; stroke-width:2; rx:5; }
+    .f     { stroke:#2b2b33; stroke-width:1.6; fill:none; marker-end:url(#t); }
+    .fg    { stroke:#1e5c33; stroke-width:1.8; fill:none; marker-end:url(#tg); }
+    .fr    { stroke:#b3261e; stroke-width:1.6; fill:none; marker-end:url(#tr); }
+    .decay { stroke:#4a2d7a; stroke-width:2.2; fill:none; marker-end:url(#tp); stroke-dasharray:7 4; }
+    .note  { font-size:11px; fill:#6a1b14; }
+    .nbox  { fill:#fff8f7; stroke:#b3261e; stroke-width:1.1; rx:4; }
+    .pbox  { fill:#f4f0fb; stroke:#4a2d7a; stroke-width:1.4; rx:4; }
+    .pnote { font-size:11px; fill:#3a2260; }
+  </style>
+  <defs>
+    <marker id="t"  viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#2b2b33"/></marker>
+    <marker id="tg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1e5c33"/></marker>
+    <marker id="tr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#b3261e"/></marker>
+    <marker id="tp" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#4a2d7a"/></marker>
+  </defs>
+
+  <rect width="1180" height="900" fill="#ffffff"/>
+  <text x="26" y="32" class="title">Bearer arbitration — WiFi preferred, GPRS as fallback</text>
+  <text x="26" y="50" class="sub">ComM decides which bearer to want; NetIf brings it up. Nothing above ComM knows which one is carrying traffic.</text>
+
+  <!-- ============ WiFi side ============ -->
+  <rect class="wifi" x="60" y="92" width="260" height="66"/>
+  <text x="190" y="116" class="sname" text-anchor="middle" fill="#1e3a6e">Want WiFi</text>
+  <text x="190" y="134" class="small" text-anchor="middle">preferredBearer = WIFI</text>
+  <text x="190" y="150" class="mono" text-anchor="middle">wifiFailures &lt; 3</text>
+
+  <path class="f" d="M190 158 V 190"/>
+  <rect class="wifi" x="60" y="190" width="260" height="62"/>
+  <text x="190" y="213" class="sname" text-anchor="middle" fill="#1e3a6e">Attempting</text>
+  <text x="190" y="231" class="small" text-anchor="middle">associate → DHCP → broker</text>
+  <text x="190" y="246" class="mono" text-anchor="middle">allowance 30 + 15 + 5 = 50 s</text>
+
+  <!-- success -->
+  <path class="fg" d="M320 221 H 430"/>
+  <text x="352" y="213" class="edge" fill="#1e5c33">session up</text>
+  <rect class="up" x="430" y="180" width="300" height="82"/>
+  <text x="580" y="204" class="sname" text-anchor="middle" fill="#1e5c33">SESSION_UP on WiFi</text>
+  <text x="580" y="222" class="small" text-anchor="middle">publishing, and draining the card backlog</text>
+  <text x="580" y="240" class="mono" text-anchor="middle">wifiFailures = 0</text>
+  <text x="580" y="256" class="mono" text-anchor="middle">fallbackSince = now</text>
+
+  <!-- failure -->
+  <path class="fr" d="M190 252 V 292"/>
+  <text x="202" y="276" class="edge" fill="#b3261e">allowance expired</text>
+  <rect class="none" x="60" y="292" width="260" height="62"/>
+  <text x="190" y="315" class="sname" text-anchor="middle" fill="#8a1e1e">Failure counted</text>
+  <text x="190" y="333" class="mono" text-anchor="middle">wifiFailures++</text>
+  <text x="190" y="348" class="small" text-anchor="middle">ComM_ChooseBearer runs again</text>
+
+  <!-- below limit: retry same bearer, no re-request -->
+  <path class="f" d="M60 323 C 20 323, 20 125, 60 125"/>
+  <text x="30" y="224" class="edge" text-anchor="middle" transform="rotate(-90 30 224)">still &lt; 3 — NetIf's own backoff retries</text>
+
+  <!-- at limit: switch -->
+  <path class="fr" d="M190 354 V 396"/>
+  <text x="202" y="378" class="edge" fill="#b3261e">wifiFailures = 3</text>
+
+  <!-- ============ GSM side ============ -->
+  <rect class="gsm" x="60" y="396" width="260" height="78"/>
+  <text x="190" y="420" class="sname" text-anchor="middle" fill="#8a5a14">Want GPRS</text>
+  <text x="190" y="438" class="small" text-anchor="middle">bearerSwitchCount++</text>
+  <text x="190" y="454" class="mono" text-anchor="middle">fallbackSince = now</text>
+  <text x="190" y="469" class="small" text-anchor="middle">NetIf_RequestBearer(GSM)</text>
+
+  <path class="f" d="M190 474 V 506"/>
+  <rect class="gsm" x="60" y="506" width="260" height="62"/>
+  <text x="190" y="529" class="sname" text-anchor="middle" fill="#8a5a14">Attempting</text>
+  <text x="190" y="547" class="small" text-anchor="middle">attach → PDP context → broker</text>
+  <text x="190" y="562" class="mono" text-anchor="middle">same 50 s allowance</text>
+
+  <path class="fg" d="M320 537 H 430"/>
+  <text x="352" y="529" class="edge" fill="#1e5c33">session up</text>
+  <rect class="up" x="430" y="496" width="300" height="82"/>
+  <text x="580" y="520" class="sname" text-anchor="middle" fill="#1e5c33">SESSION_UP on GPRS</text>
+  <text x="580" y="538" class="small" text-anchor="middle">publishing — metered, so this costs money</text>
+  <text x="580" y="556" class="mono" text-anchor="middle">gsmFailures = 0</text>
+  <text x="580" y="572" class="mono" text-anchor="middle">fallbackSince NOT reset</text>
+
+  <!-- gsm failure -->
+  <path class="fr" d="M190 568 V 606"/>
+  <text x="202" y="592" class="edge" fill="#b3261e">allowance expired</text>
+  <rect class="none" x="60" y="606" width="260" height="74"/>
+  <text x="190" y="629" class="sname" text-anchor="middle" fill="#8a1e1e">Both exhausted</text>
+  <text x="190" y="647" class="mono" text-anchor="middle">gsmFailures = 3</text>
+  <text x="190" y="663" class="small" text-anchor="middle">both counters cleared, start again</text>
+  <text x="190" y="677" class="small" text-anchor="middle">from the preferred bearer</text>
+  <path class="f" d="M60 660 C 20 660, 20 740, 190 740 V 682"/>
+  <text x="196" y="736" class="edge">never give up — the vehicle moves</text>
+
+  <!-- ============ THE DECAY ============ -->
+  <path class="decay" d="M730 520 C 778 520, 778 300, 762 248 C 742 198, 420 132, 322 124"/>
+  <rect class="pbox" x="790" y="330" width="364" height="112"/>
+  <text x="806" y="352" class="step" fill="#4a2d7a">The decay — what makes the fallback temporary</text>
+  <text x="806" y="374" class="pnote">While on GPRS, once 10 minutes have passed since</text>
+  <text x="806" y="390" class="pnote">`fallbackSince`, the WiFi allowance is restored:</text>
+  <text x="806" y="410" class="mono" font-size="11">wifiFailures = 0; fallbackSince = now;</text>
+  <text x="806" y="430" class="pnote">WiFi is then selected and tried in the ordinary way.</text>
+
+  <!-- no-backhaul -->
+  <rect x="430" y="606" width="300" height="74" fill="#fbe8e6" stroke="#8a1e1e" stroke-width="1.6" rx="5"/>
+  <text x="580" y="630" class="sname" text-anchor="middle" fill="#8a1e1e">DEM_EVENT_NO_BACKHAUL</text>
+  <text x="580" y="648" class="small" text-anchor="middle">10 minutes with neither bearer up</text>
+  <text x="580" y="666" class="small" text-anchor="middle">records now accumulate faster than they leave</text>
+  <path class="fr" d="M320 630 H 430"/>
+  <text x="330" y="622" class="edge" fill="#b3261e">and, independently</text>
+
+  <!-- ============ notes ============ -->
+  <rect class="nbox" x="26" y="782" width="1128" height="102"/>
+  <text x="40" y="804" class="step" fill="#8a1e1e">Why a timed decay and not an availability query</text>
+  <text x="40" y="826" class="note">The first fix attempted here was a `NetIf_BearerAvailable()` check before committing to the fallback. It cannot work: an 802.11 station has</text>
+  <text x="40" y="842" class="note">no usable link until it has been told to associate, so "is WiFi back?" is unanswerable about a radio that is not in use — the honest form of that</text>
+  <text x="40" y="858" class="note">question is an attempt. A query returning FALSE for every unused bearer would have looked like a fix and changed nothing. The function was</text>
+  <text x="40" y="874" class="note">removed. Cost of being wrong is bounded at one 50 s attempt per 10 minutes, which is also why no separate switch-back hysteresis is needed.</text>
+</svg>
