@@ -44,6 +44,7 @@ STATIC boolean OdoSwc_HaveLastSample;
 STATIC uint32 OdoSwc_SpeedMmPerSec;
 STATIC uint32 OdoSwc_AcceptedSamples;
 STATIC uint32 OdoSwc_RejectedRpmSamples;
+STATIC uint32 OdoSwc_RejectedAccelSamples;
 STATIC uint32 OdoSwc_GapCount;
 STATIC uint32 OdoSwc_PersistCount;
 
@@ -98,6 +99,28 @@ uint32 OdoSwc_GetConversionFactorQ32(void)
     return OdoSwc_FactorQ32;
 }
 
+/**
+ * @brief Whether moving from the last accepted speed to @p motorRpm in @p deltaMs is impossible.
+ *
+ * Compared as a speed change against what ::ODO_MAX_ACCEL_MM_PER_S2 allows in the interval,
+ * rather than as an rpm rate, so the limit follows the calibration.
+ *
+ *     change [mm/s] = |delta rpm| x C x 1000 / 2^32
+ *     allowed [mm/s] = A x deltaMs / 1000
+ *
+ * Both sides are multiplied by 1000 to keep the comparison in integers. The change is at most
+ * 65 535 rpm x 6.9e8 (the factor at the largest tyre and smallest gear ratio accepted) x 1000,
+ * which is 4.5e16 before the shift, against a uint64 limit of 1.8e19.
+ */
+STATIC boolean OdoSwc_IsAccelerationImplausible(uint16 motorRpm, uint32 deltaMs)
+{
+    const uint16 rpmChange = (motorRpm > OdoSwc_LastRpm) ? (uint16)(motorRpm - OdoSwc_LastRpm)
+                                                         : (uint16)(OdoSwc_LastRpm - motorRpm);
+    const uint64 changeMmPerSec = ((uint64)rpmChange * (uint64)OdoSwc_FactorQ32 * 1000uLL) >> ODO_FIXED_SHIFT;
+
+    return ((changeMmPerSec * 1000uLL) > ((uint64)ODO_MAX_ACCEL_MM_PER_S2 * (uint64)deltaMs)) ? TRUE : FALSE;
+}
+
 /*==================================================================================================
  *  Persistence helpers
  *================================================================================================*/
@@ -147,6 +170,7 @@ Std_ReturnType OdoSwc_Init(void)
     OdoSwc_SpeedMmPerSec = 0u;
     OdoSwc_AcceptedSamples = 0u;
     OdoSwc_RejectedRpmSamples = 0u;
+    OdoSwc_RejectedAccelSamples = 0u;
     OdoSwc_GapCount = 0u;
     OdoSwc_PersistCount = 0u;
     OdoSwc_Initialised = FALSE;
@@ -193,14 +217,6 @@ Std_ReturnType OdoSwc_ProcessSpeedSample(uint16 motorRpm, Gpt_TimestampType samp
     DET_CHECK_RETURN(OdoSwc_Initialised != FALSE, MODULE_ID_ODOSWC, INSTANCE_ID_SINGLE,
                      ODOSWC_API_ID_PROCESS_SAMPLE, ODOSWC_E_UNINIT, E_NOT_OK);
 
-    /* Instantaneous speed is derived from every sample, even one that is not integrated, so a
-     * display keeps updating while the accumulator is being conservative. mm/s = rpm * C * 1000. */
-    if (motorRpm <= OdoSwc_MaxPlausibleRpm)
-    {
-        OdoSwc_SpeedMmPerSec =
-            (uint32)(((uint64)motorRpm * (uint64)OdoSwc_FactorQ32 * 1000uLL) >> ODO_FIXED_SHIFT);
-    }
-
     if (motorRpm > OdoSwc_MaxPlausibleRpm)
     {
         /* A corrupted frame decoding to an impossible speed would add kilometres in one step.
@@ -246,6 +262,18 @@ Std_ReturnType OdoSwc_ProcessSpeedSample(uint16 motorRpm, Gpt_TimestampType samp
                                          ODOSWC_E_SAMPLE_GAP);
             outcome = ODO_SAMPLE_REJECTED_GAP;
         }
+        else if (OdoSwc_IsAccelerationImplausible(motorRpm, deltaMs) != FALSE)
+        {
+            /* Below the speed limit but impossible given the previous reading: the corrupt frame
+             * the speed gate cannot see. The reference deliberately stays at the last good sample,
+             * so the next plausible one integrates across both intervals and nothing is lost. A
+             * reference that is itself wrong cannot lock the odometer out: the allowance grows
+             * with the interval, and past ::ODO_MAX_SAMPLE_GAP_MS the gap path resynchronises. */
+            OdoSwc_RejectedAccelSamples++;
+            (void)Det_ReportRuntimeError(MODULE_ID_ODOSWC, INSTANCE_ID_SINGLE, ODOSWC_API_ID_PROCESS_SAMPLE,
+                                         ODOSWC_E_IMPLAUSIBLE_ACCEL);
+            outcome = ODO_SAMPLE_REJECTED_ACCEL;
+        }
         else
         {
             /* Trapezoidal rule: the mean of the speeds at both ends of the interval. Exact for
@@ -270,6 +298,15 @@ Std_ReturnType OdoSwc_ProcessSpeedSample(uint16 motorRpm, Gpt_TimestampType samp
             OdoSwc_AcceptedSamples++;
             outcome = ODO_SAMPLE_ACCEPTED;
         }
+    }
+
+    /* Instantaneous speed is derived from every sample that is not itself implausible, even one
+     * that is not integrated, so a display keeps updating while the accumulator is being
+     * conservative. mm/s = rpm * C * 1000. */
+    if ((outcome != ODO_SAMPLE_REJECTED_RPM) && (outcome != ODO_SAMPLE_REJECTED_ACCEL))
+    {
+        OdoSwc_SpeedMmPerSec =
+            (uint32)(((uint64)motorRpm * (uint64)OdoSwc_FactorQ32 * 1000uLL) >> ODO_FIXED_SHIFT);
     }
 
     if (result != NULL_PTR)
@@ -326,6 +363,7 @@ Std_ReturnType OdoSwc_GetState(OdoSwc_StateType *state)
     state->lastRpm = OdoSwc_LastRpm;
     state->acceptedSamples = OdoSwc_AcceptedSamples;
     state->rejectedRpmSamples = OdoSwc_RejectedRpmSamples;
+    state->rejectedAccelSamples = OdoSwc_RejectedAccelSamples;
     state->gapCount = OdoSwc_GapCount;
     state->persistCount = OdoSwc_PersistCount;
     state->unpersistedMm = OdoSwc_TotalMm - OdoSwc_LastPersistedMm;

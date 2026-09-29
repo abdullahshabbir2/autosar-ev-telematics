@@ -7,8 +7,8 @@ behaviour is actually verified. Assumes you have read [02-architecture.md](02-ar
 
 ## 1. The claim, and what backs it
 
-333 tests across 16 suites, all passing, compiled with `-Werror` and eleven warning flags. That
-number on its own is worth very little — it is possible to write 333 tests that verify nothing. What
+335 tests across 16 suites, all passing, compiled with `-Werror` and eleven warning flags. That
+number on its own is worth very little — it is possible to write 335 tests that verify nothing. What
 matters is three properties of *how* they are built:
 
 1. **They test the real implementation, not a reimplementation of it.** Every suite links the actual
@@ -76,7 +76,7 @@ conversion are all on the tested side.
 | `test_rs485` | 28 | Battery frame build and parse, CRC, timeouts, malformed input |
 | `test_fee` | 18 | Crash-safe commit and garbage collection under fault injection |
 | `test_nvm` | 19 | RAM mirrors, defaults, write-on-change, integrity, immediate vs deferred |
-| `test_odo` | 18 | Integer distance accumulation, plausibility gates, persistence |
+| `test_odo` | 20 | Integer distance accumulation, speed and acceleration plausibility gates, persistence |
 | `test_diag` | 21 | Dem debouncing, healing, freeze frames; WdgM supervision |
 | `test_batt` | 14 | Pack aggregation over responders only, cell imbalance, absent-pack handling |
 | `test_sensors` | 21 | CAN signal decode and freshness, NMEA parsing |
@@ -96,7 +96,7 @@ than confirming behaviour. §4 has all four.
 | `test_can` | 15 | MCP2515 identifier encoding, register sequences, frame decode |
 | `test_rs485` | 28 | Battery frame build and parse, CRC, timeouts, malformed input |
 | `test_fee` | 18 | Crash-safe commit and garbage collection under fault injection |
-| `test_odo` | 18 | Integer distance accumulation, plausibility gates, persistence |
+| `test_odo` | 20 | Integer distance accumulation, speed and acceleration plausibility gates, persistence |
 | `test_diag` | 21 | Dem debouncing, healing, freeze frames; WdgM supervision |
 | `test_sensors` | 21 | CAN signal decode and freshness, NMEA parsing |
 | `test_com` | 17 | Record serialisation, chunk planning, backfill parsing |

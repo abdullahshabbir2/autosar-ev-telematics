@@ -5,7 +5,7 @@ ESP32 in an **AUTOSAR Classic** layered architecture — a ground-up rewrite of 
 already shipped, and that lost odometer readings in the field.
 
 [![CI](https://github.com/abdullahshabbir2/autosar-ev-telematics/actions/workflows/ci.yml/badge.svg)](https://github.com/abdullahshabbir2/autosar-ev-telematics/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/host_tests-333_passing-1e5c33)](test/)
+[![Tests](https://img.shields.io/badge/host_tests-335_passing-1e5c33)](test/)
 [![Suites](https://img.shields.io/badge/suites-16-1e3a6e)](test/)
 [![Standard](https://img.shields.io/badge/AUTOSAR-Classic-C8102E)](docs/02-architecture.md)
 [![Requirements](https://img.shields.io/badge/requirements-129_traced-4a2d7a)](docs/06-traceability.md)
@@ -15,7 +15,7 @@ already shipped, and that lost odometer readings in the field.
 
 | | |
 |---|---|
-| **333** host unit tests across **16** suites | every one runs without hardware |
+| **335** host unit tests across **16** suites | every one runs without hardware |
 | **~90 %** of source compiled into the host suite | the rest is isolated in platform leaves |
 | **6** CI gates | tests, build, cppcheck, format, docs, credential hygiene |
 | **129** requirements | each traced to the test that verifies it |
@@ -207,7 +207,7 @@ needed a test that put the system somewhere awkward to reach by hand.
 
 | Gate | What it enforces |
 |---|---|
-| Host tests | 333 tests under `-Werror` with eleven warning flags, including `-Wconversion` and `-Wsign-conversion` |
+| Host tests | 335 tests under `-Werror` with eleven warning flags, including `-Wconversion` and `-Wsign-conversion` |
 | Firmware build | The image links and fits the size budget for one OTA slot |
 | Static analysis | cppcheck at `--check-level=exhaustive`, with every suppression carrying its reason |
 | Formatting | clang-format checked, never applied — a job that commits back makes formatting indistinguishable from real change |
@@ -231,9 +231,9 @@ whose meaning changes with the week is worse than no gate, because it trains you
 | `test_time` | 22 | RTC, monotonic fallback, conversions |
 | `test_diag` | 21 | UDS status bytes, freeze frames, healing |
 | `test_sensors` | 21 | ADC trimming, per-unit calibration |
+| `test_odo` | 20 | Speed and acceleration plausibility gates, integration, persistence |
 | `test_nvm` | 19 | RAM mirror, end-to-end CRC, write-on-change |
 | `test_fee` | 18 | Commit ordering, garbage collection, fault injection |
-| `test_odo` | 18 | Plausibility gates, integration, persistence |
 | `test_com` | 17 | Serialisation bounds, transfer framing |
 | `test_can` | 15 | MCP2515 registers, identifier assembly |
 | `test_batt` | 14 | Pack health, cell imbalance |

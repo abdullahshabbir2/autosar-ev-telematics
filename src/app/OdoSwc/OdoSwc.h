@@ -38,8 +38,11 @@
  *
  * 4. **Implausible samples are rejected, not integrated.** A corrupted CAN frame decoding to
  *    60 000 rpm would have added kilometres in a single step. Samples above the calibrated
- *    limit are counted and discarded, and an interval longer than ::ODO_MAX_SAMPLE_GAP_MS is
- *    treated as a gap in knowledge rather than as time spent at the last known speed.
+ *    limit are counted and discarded; so are samples whose change from the previous reading
+ *    implies an acceleration beyond ::ODO_MAX_ACCEL_MM_PER_S2, which catches a corrupt value
+ *    that is individually plausible but impossible given where the vehicle just was. An
+ *    interval longer than ::ODO_MAX_SAMPLE_GAP_MS is treated as a gap in knowledge rather than
+ *    as time spent at the last known speed.
  *
  * @par Persistence
  * The accumulated value is pushed to NvM when it has advanced by ::ODO_PERSIST_DISTANCE_MM or
@@ -69,7 +72,7 @@ extern "C" {
 
 #define ODOSWC_VENDOR_ID 0xFFFEu
 #define ODOSWC_SW_MAJOR_VERSION 2u
-#define ODOSWC_SW_MINOR_VERSION 0u
+#define ODOSWC_SW_MINOR_VERSION 1u
 #define ODOSWC_SW_PATCH_VERSION 0u
 
 #define ODOSWC_API_ID_INIT 0x00u
@@ -85,6 +88,7 @@ extern "C" {
 #define ODOSWC_E_SAMPLE_GAP 0x21u
 #define ODOSWC_E_BAD_CALIBRATION 0x22u
 #define ODOSWC_E_PERSIST_FAILED 0x23u
+#define ODOSWC_E_IMPLAUSIBLE_ACCEL 0x24u
 
 /*==================================================================================================
  *  Types
@@ -93,25 +97,27 @@ extern "C" {
 /** Why a sample was not integrated. */
 typedef enum
 {
-    ODO_SAMPLE_ACCEPTED = 0,      /**< Integrated normally.                              */
-    ODO_SAMPLE_FIRST = 1,         /**< No previous sample, so no interval to integrate.   */
-    ODO_SAMPLE_REJECTED_RPM = 2,  /**< Motor speed above the calibrated plausible limit.  */
-    ODO_SAMPLE_REJECTED_GAP = 3,  /**< Interval too long to attribute to a known speed.   */
-    ODO_SAMPLE_REJECTED_ORDER = 4 /**< Timestamp did not advance.                         */
+    ODO_SAMPLE_ACCEPTED = 0,       /**< Integrated normally.                              */
+    ODO_SAMPLE_FIRST = 1,          /**< No previous sample, so no interval to integrate.   */
+    ODO_SAMPLE_REJECTED_RPM = 2,   /**< Motor speed above the calibrated plausible limit.  */
+    ODO_SAMPLE_REJECTED_GAP = 3,   /**< Interval too long to attribute to a known speed.   */
+    ODO_SAMPLE_REJECTED_ORDER = 4, /**< Timestamp did not advance.                        */
+    ODO_SAMPLE_REJECTED_ACCEL = 5  /**< Speed change implies an impossible acceleration.  */
 } OdoSwc_SampleResultType;
 
 /** Everything the component knows, published to telemetry and diagnostics. */
 typedef struct
 {
-    uint64 totalDistanceMm;    /**< Lifetime distance, millimetres.                    */
-    uint64 tripDistanceMm;     /**< Distance since the trip was last reset.            */
-    uint32 speedMmPerSec;      /**< Instantaneous speed from the most recent sample.    */
-    uint16 lastRpm;            /**< Most recent accepted motor speed.                   */
-    uint32 acceptedSamples;    /**< Samples integrated.                                 */
-    uint32 rejectedRpmSamples; /**< Samples discarded as implausible.                   */
-    uint32 gapCount;           /**< Intervals discarded as too long.                    */
-    uint32 persistCount;       /**< Times the value has been pushed to NvM.             */
-    uint64 unpersistedMm;      /**< Distance accumulated since the last successful push.*/
+    uint64 totalDistanceMm;      /**< Lifetime distance, millimetres.                    */
+    uint64 tripDistanceMm;       /**< Distance since the trip was last reset.            */
+    uint32 speedMmPerSec;        /**< Instantaneous speed from the most recent sample.    */
+    uint16 lastRpm;              /**< Most recent accepted motor speed.                   */
+    uint32 acceptedSamples;      /**< Samples integrated.                                 */
+    uint32 rejectedRpmSamples;   /**< Samples discarded as implausible.                   */
+    uint32 rejectedAccelSamples; /**< Samples discarded for an impossible acceleration. */
+    uint32 gapCount;             /**< Intervals discarded as too long.                    */
+    uint32 persistCount;         /**< Times the value has been pushed to NvM.             */
+    uint64 unpersistedMm;        /**< Distance accumulated since the last successful push.*/
 } OdoSwc_StateType;
 
 /*==================================================================================================
@@ -136,6 +142,10 @@ CHECK_RETURN Std_ReturnType OdoSwc_Init(void);
  * @param[in]  motorRpm   Motor speed from the drive, in rpm.
  * @param[in]  sampleTime Monotonic timestamp of the sample, from ::Gpt_GetMonotonicMs.
  * @param[out] result     Why the sample was or was not integrated. May be NULL_PTR.
+ * A sample rejected for an impossible acceleration leaves the integration reference at the last
+ * good sample, so the next plausible sample integrates across both intervals and a single
+ * corrupt frame costs no distance at all.
+ *
  * @return E_OK if the call was well formed, whatever the sample's fate; E_NOT_OK only before
  *         ::OdoSwc_Init. A rejected sample is a normal event, not a call failure, so the
  *         outcome is reported through @p result rather than through the return value.

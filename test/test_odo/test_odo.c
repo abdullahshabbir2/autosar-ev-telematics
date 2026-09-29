@@ -7,7 +7,7 @@
  * the long-run behaviour that a few-sample test cannot see.
  *
  * @req SWREQ-ODO-0001 .. SWREQ-ODO-0015
- * @verifies TS-ODO-001 .. TS-ODO-016
+ * @verifies TS-ODO-001 .. TS-ODO-018
  *
  * @copyright
  * Copyright (c) 2024-2026 Abdullah Shabbir. All rights reserved.
@@ -265,7 +265,7 @@ static void test_Accumulator_DoesNotDriftOverManySmallSteps(void)
 }
 
 /*==================================================================================================
- *  TS-ODO-009 .. 011 : plausibility
+ *  TS-ODO-009 .. 011, 017 .. 018 : plausibility
  *================================================================================================*/
 
 /** @test TS-ODO-009 An implausible motor speed is discarded, not integrated. */
@@ -338,6 +338,87 @@ static void test_Plausibility_RejectsDuplicateTimestamp(void)
 
     TEST_ASSERT_EQUAL(E_OK, OdoSwc_GetState(&after));
     TEST_ASSERT_EQUAL_UINT64(before.totalDistanceMm, after.totalDistanceMm);
+}
+
+/**
+ * @test TS-ODO-017 A speed change no vehicle could make is discarded, and costs no distance.
+ *
+ * 9000 rpm is under the 12 000 rpm speed limit, so the speed gate passes it. But one second after
+ * a steady 3000 rpm it is a change of 6000 rpm, which at the default calibration (4.2115 mm/s per
+ * rpm) is 25.3 m/s in one second -- 2.6 g, beyond the 2 g gate. It is the corrupt frame the speed
+ * gate cannot see.
+ *
+ * The reference must stay at the last good sample, so when 3000 rpm arrives a second later the
+ * whole two seconds are integrated at 3000 rpm: 500 wheel rpm x 1516.13 mm x 2/60 min = 25 268.9 mm.
+ */
+static void test_Plausibility_RejectsImpossibleAcceleration(void)
+{
+    OdoSwc_StateType before;
+    OdoSwc_StateType after;
+    OdoSwc_SampleResultType result;
+
+    driveConstant(3000u, 10u, 1000u);
+    TEST_ASSERT_EQUAL(E_OK, OdoSwc_GetState(&before));
+
+    Stub_Gpt_AdvanceMs(1000u);
+    TEST_ASSERT_EQUAL(E_OK, OdoSwc_ProcessSpeedSample(9000u, Gpt_GetMonotonicMs(), &result));
+    TEST_ASSERT_EQUAL(ODO_SAMPLE_REJECTED_ACCEL, result);
+
+    TEST_ASSERT_EQUAL(E_OK, OdoSwc_GetState(&after));
+    TEST_ASSERT_EQUAL_UINT64_MESSAGE(before.totalDistanceMm, after.totalDistanceMm,
+                                     "an impossible acceleration was integrated");
+    TEST_ASSERT_EQUAL_UINT32(1u, after.rejectedAccelSamples);
+    TEST_ASSERT_EQUAL_UINT32(0u, after.rejectedRpmSamples);
+    TEST_ASSERT_EQUAL_UINT32_MESSAGE(before.speedMmPerSec, after.speedMmPerSec,
+                                     "a rejected sample reached the speed display");
+
+    /* The next plausible sample integrates across both intervals: the glitch cost nothing. */
+    Stub_Gpt_AdvanceMs(1000u);
+    TEST_ASSERT_EQUAL(E_OK, OdoSwc_ProcessSpeedSample(3000u, Gpt_GetMonotonicMs(), &result));
+    TEST_ASSERT_EQUAL(ODO_SAMPLE_ACCEPTED, result);
+    TEST_ASSERT_EQUAL(E_OK, OdoSwc_GetState(&after));
+    TEST_ASSERT_UINT64_WITHIN_MESSAGE(2uLL, 25269uLL, after.totalDistanceMm - before.totalDistanceMm,
+                                      "distance was lost across the rejected sample");
+}
+
+/**
+ * @test TS-ODO-018 Hard but real driving passes the acceleration gate, which sits at 2 g.
+ *
+ * At the default calibration 2 g in one second is 19 620 / 4.2115 = 4658.7 rpm. So 0 to 2200 rpm
+ * in a second (0.94 g, a very hard launch) and back to 0 (the same hard stop) must both be
+ * integrated, and the gate must fall between a 4600 rpm step and a 4700 rpm step.
+ */
+static void test_Plausibility_AcceptsHardRealAcceleration(void)
+{
+    OdoSwc_StateType state;
+    OdoSwc_SampleResultType result;
+
+    TEST_ASSERT_EQUAL(E_OK, OdoSwc_ProcessSpeedSample(0u, Gpt_GetMonotonicMs(), NULL_PTR));
+
+    Stub_Gpt_AdvanceMs(1000u);
+    TEST_ASSERT_EQUAL(E_OK, OdoSwc_ProcessSpeedSample(2200u, Gpt_GetMonotonicMs(), &result));
+    TEST_ASSERT_EQUAL_MESSAGE(ODO_SAMPLE_ACCEPTED, result, "a hard launch was rejected");
+
+    Stub_Gpt_AdvanceMs(1000u);
+    TEST_ASSERT_EQUAL(E_OK, OdoSwc_ProcessSpeedSample(0u, Gpt_GetMonotonicMs(), &result));
+    TEST_ASSERT_EQUAL_MESSAGE(ODO_SAMPLE_ACCEPTED, result, "a hard stop was rejected");
+
+    /* Just inside the gate. */
+    Stub_Gpt_AdvanceMs(1000u);
+    TEST_ASSERT_EQUAL(E_OK, OdoSwc_ProcessSpeedSample(4600u, Gpt_GetMonotonicMs(), &result));
+    TEST_ASSERT_EQUAL(ODO_SAMPLE_ACCEPTED, result);
+
+    /* Just outside it, from the same starting point one second later. */
+    Stub_Gpt_AdvanceMs(1000u);
+    TEST_ASSERT_EQUAL(E_OK, OdoSwc_ProcessSpeedSample(0u, Gpt_GetMonotonicMs(), &result));
+    TEST_ASSERT_EQUAL(ODO_SAMPLE_ACCEPTED, result);
+    Stub_Gpt_AdvanceMs(1000u);
+    TEST_ASSERT_EQUAL(E_OK, OdoSwc_ProcessSpeedSample(4700u, Gpt_GetMonotonicMs(), &result));
+    TEST_ASSERT_EQUAL(ODO_SAMPLE_REJECTED_ACCEL, result);
+
+    TEST_ASSERT_EQUAL(E_OK, OdoSwc_GetState(&state));
+    TEST_ASSERT_EQUAL_UINT32(4u, state.acceptedSamples);
+    TEST_ASSERT_EQUAL_UINT32(1u, state.rejectedAccelSamples);
 }
 
 /*==================================================================================================
@@ -555,6 +636,8 @@ int main(void)
     RUN_TEST(test_Plausibility_RejectsImpossibleRpm);
     RUN_TEST(test_Plausibility_RejectsLongGap);
     RUN_TEST(test_Plausibility_RejectsDuplicateTimestamp);
+    RUN_TEST(test_Plausibility_RejectsImpossibleAcceleration);
+    RUN_TEST(test_Plausibility_AcceptsHardRealAcceleration);
     RUN_TEST(test_Persistence_SurvivesRestartExactly);
     RUN_TEST(test_Persistence_DoesNotErodeAcrossManyRestarts);
     RUN_TEST(test_Persistence_ParkedVehicleWritesNothing);

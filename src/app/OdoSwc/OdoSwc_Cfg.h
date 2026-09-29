@@ -59,6 +59,22 @@
  */
 #define ODO_MAX_SAMPLE_GAP_MS 10000uL
 
+/**
+ * @brief Largest change in vehicle speed accepted between samples, in mm/s per second.
+ *
+ * 19 620, which is 2 g. Tyre grip limits a road vehicle to roughly 1 g of acceleration or
+ * braking, and even the quickest production EVs peak below 1.5 g, so a genuine sample never
+ * approaches this. A corrupted frame that stays under ::NVM_DEFAULT_MAX_PLAUSIBLE_RPM but jumps
+ * thousands of rpm from the previous reading exceeds it by a wide margin.
+ *
+ * Expressed as a physical acceleration rather than an rpm rate because what an rpm change means
+ * depends on the tyre and gear calibration; the gate converts through the calibrated factor, so
+ * a recalibration cannot silently loosen or tighten it. Set generously on purpose: a rejected
+ * sample loses no distance (see ::OdoSwc_ProcessSpeedSample), but a gate that fired on real
+ * driving would be noise that hides the fault it exists to report.
+ */
+#define ODO_MAX_ACCEL_MM_PER_S2 19620uL
+
 /** Smallest tyre diameter accepted by ::OdoSwc_SetCalibration, in thousandths of an inch. */
 #define ODO_MIN_TYRE_MILLI_INCH 4000u
 
