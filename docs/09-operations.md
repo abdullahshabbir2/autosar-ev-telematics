@@ -163,7 +163,7 @@ identifies the cause without reproducing it.
 |---|---|
 | Records arrive in bursts, not steadily | Bearer coverage. Check `activeBearer` and RSSI history |
 | Odometer advancing too slowly | Calibration. Then `taskOverruns` on the acquisition task |
-| Odometer not advancing at all | CAN. `DEM_EVENT_CAN_SIGNAL_STALE` or a degraded mask bit |
+| Odometer not advancing at all | CAN. `DEM_EVENT_CAN_TIMEOUT` or a degraded mask bit |
 | Battery data missing for one pack | `packsResponding` against `packsPresent`; then that pack's DTC |
 | Intermittent storage failures | SPI contention counts, then the card itself |
 | Unit resets every few minutes | `resetReason`. `BROWNOUT` is power — see the SIM800L note in [07-hardware.md](07-hardware.md) §8 |
