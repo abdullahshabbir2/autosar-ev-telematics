@@ -127,26 +127,43 @@ the packs checked only the first.
 ## 2. CAN — motor controller
 
 **Physical:** ISO 11898-2, 500 kbit/s, 120 Ω at each end.
-**Controller:** MCP2515 at 10 MHz over SPI, TJA1050 transceiver.
-**Frames:** extended (29-bit) identifiers, 8 data bytes.
+**Controller:** MCP2515 (16 MHz crystal) on SPI at 10 MHz, TJA1050 transceiver.
+**Frames:** extended (29-bit) identifiers. Only the bytes each decoder needs are required; a shorter
+frame is rejected with `CANIF_E_INVALID_DLC`.
 
 ### Identifiers
 
-| ID | Contents | Period |
-|---|---|---|
-| `0x0CF11E05` | Motor speed, motor current, DC-link voltage | 100 ms |
-| `0x0CF11F05` | Controller and motor temperature, status, error flags | 100 ms |
-| `0x0CF11G05` | Throttle, brake, drive mode | 100 ms |
+| ID | Contents | Rate | Minimum DLC |
+|---|---|---|---|
+| `0x10F8109A` | Direction, speed mode, motor speed, fault code, low-power mode | ~20 Hz | 5 |
+| `0x10F8108D` | DC-link voltage and current | ~20 Hz | 4 |
 
-### `0x0CF11E05` layout
+The acceptance filters match all 29 identifier bits exactly (`CAN_FILTER_MASK_EXTENDED`), so nothing
+else on the bus reaches the software queue. Source of truth: `CAN_ID_MCU_*` in
+[`Can_Cfg.h`](../src/mcal/Can/Can_Cfg.h) and the signal layouts in
+[`CanIf_Cfg.h`](../src/ecuabs/CanIf/CanIf_Cfg.h).
+
+### `0x10F8109A` — drive state
+
+| Byte | Field | Encoding |
+|---|---|---|
+| 0 | Direction (bits 1..0), speed mode (bit 3) | 0 invalid, 1 forward, 2 reverse · 0 high, 1 low |
+| 1–2 | Motor speed | rpm, unsigned, little endian |
+| 3 | Fault code | controller-defined |
+| 4 | Low-power mode | `0xAA` when active |
+| 5–7 | Reserved | — |
+
+### `0x10F8108D` — current and voltage
 
 | Bytes | Field | Units | Encoding |
 |---|---|---|---|
-| 0–1 | Motor speed | rpm | Unsigned, little endian |
-| 2–3 | Motor current | 0.1 A | Signed, little endian |
-| 4–5 | DC-link voltage | 0.1 V | Unsigned, little endian |
-| 6 | Status | bit field | — |
-| 7 | Error | bit field | — |
+| 0–1 | DC-link voltage | 0.1 V | Unsigned, little endian |
+| 2–3 | DC-link current | 0.1 A | Unsigned, little endian |
+| 4–7 | Reserved | — | — |
+
+Both values stay in the protocol's own 0.1-unit integers all the way to the record. v1 multiplied by
+`0.1f` at decode time, turning an exact integer into a float that then had to be formatted back into
+text — two roundings for no gain.
 
 **Little endian, and this was a real ambiguity.** v1's comment said big endian; v1's code did little
 endian. The code was adopted, because it was the version that demonstrably produced plausible speed
@@ -156,8 +173,10 @@ correction is one configuration change rather than an edit spread across a decod
 ### Signal freshness
 
 Every decoded signal carries the monotonic timestamp of the frame it came from. A signal older than
-`CANIF_MCU_SIGNAL_TIMEOUT_MS` (500 ms, five frame periods) is not used, and
-`DEM_EVENT_CAN_SIGNAL_STALE` is raised.
+`CANIF_MCU_SIGNAL_TIMEOUT_MS` (500 ms, about ten frames at 20 Hz) is not used, and **both** frames must
+be fresh: a controller still sending voltage but no longer sending speed would otherwise look healthy
+to the odometer. After `CANIF_STALE_REPORT_THRESHOLD` (10) consecutive stale reads — 30 s at the 3 s
+acquisition period — `DEM_EVENT_CAN_TIMEOUT` is raised once, and passed again when frames return.
 
 This matters specifically for odometry: a held-over speed value integrated over an interval adds
 distance the vehicle did not travel. A stale reading must be *absent*, not *old*.
@@ -165,17 +184,22 @@ distance the vehicle did not travel. A stale reading must be *absent*, not *old*
 ### MCP2515 identifier encoding
 
 The controller splits a 29-bit identifier across four registers in a layout that is easy to get
-wrong. For `0x0CF11E05`:
+wrong. For `0x10F8109A`:
 
 ```
-  29-bit ID:  0 1100 1111 0001 0001 1110 0000 0101
+  SID  = (id >> 18) & 0x7FF              = 0x43E
+  EID  =  id        & 0x3FFFF            = 0x0109A
 
-  SIDH = bits 28..21                     = 0x67
+  SIDH = bits 28..21                     = 0x87
   SIDL = bits 20..18, EXIDE, bits 17..16 = 0xC8
          └─ 110 ──────┘ 1 ─── └─ 00 ──┘
   EID8 = bits 15..8                      = 0x10
-  EID0 = bits 7..0                       = 0x05
+  EID0 = bits 7..0                       = 0x9A
 ```
+
+`0x10F8108D` encodes to the same `SIDH`, `SIDL` and `EID8` and differs only in `EID0` (`0x8D`) — two
+identifiers this close are exactly the case a transposed shift would silently merge, which is why
+`test_can` checks both.
 
 **`SIDL = 0xC8`, not `0xC9`.** I wrote `0xC9` into the test first and it was wrong — bit 0 of `SIDL`
 is the low bit of the two extended-identifier bits, not part of `EXIDE`. The driver was right and the
