@@ -356,7 +356,7 @@ Stated plainly, because an unstated gap reads as a claim of coverage.
 
 | Not covered by host tests | Why | What covers it |
 |---|---|---|
-| Register access in `*_Esp32.cpp` | Needs the silicon | Hardware bring-up; kept minimal so there is little to get wrong |
+| Register access in `*_Esp32.cpp` | Needs the silicon | Verified on the target during hardware bring-up, manually rather than by an automated rig; kept minimal so there is little to get wrong |
 | FreeRTOS scheduling behaviour | Needs the RTOS | `SchM_GetTaskStats` reports actual periods and overruns in the health record |
 | Real SPI bus contention timing | Needs two live devices | `Spi_GetStatistics` counts contentions and lock timeouts on the target |
 | SD card wear and failure | Needs years, or a worn card | Verify-after-write plus `Fls_GetStatistics` erase counts |

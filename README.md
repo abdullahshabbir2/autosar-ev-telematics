@@ -319,12 +319,14 @@ scripts/           Build-time provenance injection
 
 ## Status and scope
 
-The firmware builds, the host tests pass, and the structural claims above are enforced by the build.
+The firmware builds, the host tests pass, the structural claims above are enforced by the build, and
+it has been brought up and runs on the target hardware.
 What is **not** claimed:
 
-- **Not silicon-verified end to end.** The ~10 % of source in the platform leaves is verified only on
-  hardware, and hardware bring-up is the remaining step.
-  [docs/05-test-strategy.md](docs/05-test-strategy.md) §7 lists each gap and what covers it instead.
+- **Not hardware-in-the-loop tested.** The ~10 % of source in the platform leaves was verified on the
+  target during bring-up, by hand; no automated rig re-checks it on every change the way CI re-checks
+  the other ~90 %. [docs/05-test-strategy.md](docs/05-test-strategy.md) §7 lists each gap and what
+  covers it instead.
 - **Not a conforming AUTOSAR implementation.** It is AUTOSAR *structured*. MemIf and BswM are omitted
   and the RTE is hand-written; [ADR-0002](docs/adr/0002-handwritten-rte.md) and
   [ADR-0003](docs/adr/0003-omit-memif.md) say why.
