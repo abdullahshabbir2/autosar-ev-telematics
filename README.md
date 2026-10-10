@@ -22,10 +22,6 @@ already shipped, and that lost odometer readings in the field.
 | **18.5 %** RAM · **42.6 %** of one OTA slot | room for the second slot and growth |
 | **4** defects found by tests | in code that had already been reviewed |
 
-> **[Open the interactive walkthrough →](https://claude.ai/artifact/5XEUxs1cESrtoFYBGqMDFE)**
-> Drag an odometer to see live IEEE-754 precision loss, and cut the power at any point in a flash
-> write to see what the next boot reads.
-
 ---
 
 ### Contents
